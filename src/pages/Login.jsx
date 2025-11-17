@@ -14,6 +14,7 @@ import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../services/firebase";
 import logo from "../assets/logo1.png";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
 	const [email, setEmail] = useState("");
@@ -22,6 +23,7 @@ export default function Login() {
 	const [loading, setLoading] = useState(false);
 	const [errorMsg, setErrorMsg] = useState("");
 
+	const navigate = useNavigate();
 	const hasError = !!errorMsg;
 
 	const handleLogin = async () => {
@@ -29,7 +31,7 @@ export default function Login() {
 		setLoading(true);
 		try {
 			await signInWithEmailAndPassword(auth, email, password);
-			window.location.href = "/dashboard";
+			navigate("/dashboard");
 		} catch (err) {
 			console.log(err);
 			setErrorMsg("Email ou senha inválidos.");
