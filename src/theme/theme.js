@@ -7,18 +7,19 @@ export const sentinelaTheme = createTheme({
 		// PRINCIPAL
 		primary: {
 			main: "#A1EC2F", // verde Sentinela
-			contrastText: "#20284E", // mesmo do onPrimary
+			contrastText: "#20284E",
 		},
 
 		// FUNDO
 		background: {
-			default: "#20284E", // background igual ao app
-			paper: "#2B335D", // backgroundLight
+			default: "#20284E", // fundo geral
+			paper: "#2B335D", // equivalente ao backgroundLight
+			dark: "#0F1428", // recomendado para AppBar e Sidebar
 		},
 
-		// SUPERFÍCIES / CARDS
+		// SUPERFÍCIES
 		surface: {
-			main: "#20284E", // equivalente
+			main: "#20284E",
 			light: "#2B335D",
 			dark: "#5062b7",
 		},
@@ -33,12 +34,10 @@ export const sentinelaTheme = createTheme({
 		// OUTRAS CORES
 		error: { main: "#d32f2f" },
 		warning: { main: "#FFC107" },
-		divider: "#ffffff33", // lineSeparator
+		divider: "#ffffff33",
 	},
 
-	shape: {
-		borderRadius: 12,
-	},
+	shape: { borderRadius: 4 },
 
 	typography: {
 		fontFamily: "Montserrat, sans-serif",
@@ -49,7 +48,25 @@ export const sentinelaTheme = createTheme({
 	},
 
 	components: {
-		// TEXTFIELD / INPUTS → outline branco igual ao app
+		// 🔹 Removendo overlay automático do modo dark
+		// MuiAppBar: {
+		// 	styleOverrides: {
+		// 		root: {
+		// 			backgroundImage: "none",
+		// 			backgroundColor: "#0F1428",
+		// 		},
+		// 	},
+		// },
+		// MuiDrawer: {
+		// 	styleOverrides: {
+		// 		paper: {
+		// 			backgroundImage: "none",
+		// 			backgroundColor: "#0F1428",
+		// 		},
+		// 	},
+		// },
+
+		// INPUTS
 		MuiOutlinedInput: {
 			styleOverrides: {
 				root: {
@@ -62,25 +79,21 @@ export const sentinelaTheme = createTheme({
 						opacity: 0.8,
 					},
 					"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-						borderColor: "#A1EC2F", // primary
+						borderColor: "#A1EC2F",
 						opacity: 1,
 					},
 				},
-				input: {
-					color: "#FFFFFF",
-				},
+				input: { color: "#FFFFFF" },
 			},
 		},
 
-		// BOTÕES → verde padrão
+		// BOTÕES
 		MuiButton: {
 			styleOverrides: {
 				contained: {
 					backgroundColor: "#A1EC2F",
 					color: "#20284E",
-					"&:hover": {
-						backgroundColor: "#8fd72a",
-					},
+					"&:hover": { backgroundColor: "#8fd72a" },
 				},
 				outlined: {
 					borderColor: "#A1EC2F",
@@ -93,12 +106,23 @@ export const sentinelaTheme = createTheme({
 			},
 		},
 
-		// CARDS → mesmo estilo do app
+		MuiTooltip: {
+			styleOverrides: {
+				tooltip: {
+					backgroundColor: "#2B335D",
+					color: "#fff",
+					fontSize: "0.9rem",
+				},
+			},
+		},
+
+		// CARDS
 		MuiPaper: {
 			styleOverrides: {
 				root: {
 					backgroundColor: "#2B335D",
 					borderRadius: 12,
+					backgroundImage: "none", // remove overlay
 				},
 			},
 		},

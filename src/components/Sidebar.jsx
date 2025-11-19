@@ -1,72 +1,81 @@
 import {
 	Drawer,
-	Box,
 	List,
+	ListItem,
 	ListItemButton,
 	ListItemIcon,
 	ListItemText,
+	IconButton,
+	Divider,
 } from "@mui/material";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import MapIcon from "@mui/icons-material/Map";
+import WarningIcon from "@mui/icons-material/Warning";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import SettingsIcon from "@mui/icons-material/Settings";
-import logo from "../assets/logo1.png";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
-export default function Sidebar() {
+export default function Sidebar({ open, handleDrawerClose, theme }) {
+	const navigate = useNavigate();
+
+	const menuItems = [
+		{ text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
+		{ text: "Ocorrências", icon: <WarningIcon />, path: "/occurrences" },
+		{
+			text: "Notificações",
+			icon: <NotificationsIcon />,
+			path: "/notifications",
+		},
+	];
+
 	return (
 		<Drawer
 			variant="permanent"
 			sx={{
-				width: drawerWidth,
-				flexShrink: 0,
+				width: open ? drawerWidth : 70,
 				"& .MuiDrawer-paper": {
-					width: drawerWidth,
+					width: open ? drawerWidth : 70,
 					boxSizing: "border-box",
-					backgroundColor: "background.paper",
-					borderRight: "1px solid rgba(255,255,255,0.1)",
+					backgroundColor: "background.dark",
 				},
 			}}
 		>
-			<Box
-				sx={{
-					p: 2,
-					textAlign: "center",
-					borderBottom: "1px solid #ffffff22",
-				}}
-			>
-				<img src={logo} style={{ width: 80 }} />
-			</Box>
+			<IconButton onClick={handleDrawerClose} sx={{ mt: "16px" }}>
+				{theme.direction === "rtl" ? (
+					<ChevronRightIcon />
+				) : (
+					<ChevronLeftIcon />
+				)}
+			</IconButton>
+			<Divider />
 
 			<List>
-				<ListItemButton>
-					<ListItemIcon>
-						<DashboardIcon sx={{ color: "primary.main" }} />
-					</ListItemIcon>
-					<ListItemText primary="Dashboard" />
-				</ListItemButton>
-
-				<ListItemButton>
-					<ListItemIcon>
-						<MapIcon sx={{ color: "primary.main" }} />
-					</ListItemIcon>
-					<ListItemText primary="Ocorrências" />
-				</ListItemButton>
-
-				<ListItemButton>
-					<ListItemIcon>
-						<NotificationsIcon sx={{ color: "primary.main" }} />
-					</ListItemIcon>
-					<ListItemText primary="Notificações" />
-				</ListItemButton>
-
-				<ListItemButton>
-					<ListItemIcon>
-						<SettingsIcon sx={{ color: "primary.main" }} />
-					</ListItemIcon>
-					<ListItemText primary="Configurações" />
-				</ListItemButton>
+				{menuItems.map(({ text, icon, path }) => (
+					<ListItem
+						key={text}
+						disablePadding
+						sx={{ display: "block" }}
+					>
+						<ListItemButton
+							onClick={() => navigate(path)}
+							sx={{
+								marginTop: 1,
+								//justifyContent: open ? "start" : "start",
+								px: 2.5,
+							}}
+						>
+							<ListItemIcon sx={{ color: "primary.text" }}>
+								{icon}
+							</ListItemIcon>
+							<ListItemText
+								primary={text}
+								sx={{ opacity: open ? 1 : 0 }}
+							/>
+						</ListItemButton>
+					</ListItem>
+				))}
 			</List>
 		</Drawer>
 	);
