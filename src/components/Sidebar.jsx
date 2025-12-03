@@ -22,7 +22,7 @@ export default function Sidebar({ open, handleDrawerClose, theme }) {
 
 	const menuItems = [
 		{ text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
-		{ text: "Ocorrências", icon: <WarningIcon />, path: "/occurrences" },
+		{ text: "Ocorrências", icon: <WarningIcon />, path: "/ocorrencias" },
 		{
 			text: "Notificações",
 			icon: <NotificationsIcon />,

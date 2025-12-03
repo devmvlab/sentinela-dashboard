@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./layout/Layout";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import Incidents from "./pages/Incidents";
 
 const router = createBrowserRouter([
 	// 🔹 Tela de login (sem Layout)
@@ -13,7 +14,7 @@ const router = createBrowserRouter([
 
 	// 🔒 Rotas protegidas
 	{
-		path: "/dashboard",
+		path: "",
 		element: (
 			<ProtectedRoute>
 				<Layout />
@@ -21,12 +22,12 @@ const router = createBrowserRouter([
 		),
 		children: [
 			{
-				path: "",
+				path: "/dashboard",
 				element: <Dashboard />,
 			},
 			{
-				path: "ocorrencias",
-				element: <div>Ocorrências</div>,
+				path: "/ocorrencias",
+				element: <Incidents />,
 			},
 			{
 				path: "usuarios",
