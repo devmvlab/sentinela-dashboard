@@ -213,7 +213,7 @@ export default function Topbar({ handleDrawerOpen }) {
 					)}
 
 					<Typography variant="caption" sx={{ opacity: 0.6 }}>
-						{t.city} — {t.hora}
+						{t.geoloc.city} — {t.hora}
 					</Typography>
 				</Box>
 			))}
@@ -279,7 +279,7 @@ export default function Topbar({ handleDrawerOpen }) {
 					)}
 
 					<Typography variant="body2">
-						<b>Hora:</b> {t.hora}
+						<b>Hora:</b> {t.geoloc.city} - {t.hora}
 					</Typography>
 
 					<Box

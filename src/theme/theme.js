@@ -35,6 +35,7 @@ export const sentinelaTheme = createTheme({
 		error: { main: "#d32f2f" },
 		warning: { main: "#FFC107" },
 		divider: "#ffffff33",
+		tableHover:"#47595c",
 	},
 
 	shape: { borderRadius: 4 },
