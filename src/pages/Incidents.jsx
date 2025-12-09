@@ -1,7 +1,6 @@
 import { DataGrid } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
@@ -15,12 +14,14 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 
 import { useEffect, useState } from "react";
 
+import Filters from "../components/Filters";
+import useIncidentFilters from "../utils/useIncidentFilters";
+import StatusChip from "../components/StatusChip";
 import { db } from "../services/firebase";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 
@@ -29,12 +30,18 @@ import { useTheme } from "@mui/material/styles";
 export default function Incidents() {
 	const theme = useTheme();
 
+	const [statusFilter, setStatusFilter] = useState("all");
+	const [category, setCategory] = useState("all");
+	const [startDate, setStartDate] = useState("");
+	const [endDate, setEndDate] = useState("");
+	const [search, setSearch] = useState("");
+
 	const [rows, setRows] = useState([]);
 	const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 	const [openModal, setOpenModal] = useState(false);
 	const [currentIncident, setCurrentIncident] = useState(null);
 
-	// 🔥 ADICIONADO — PAGINAÇÃO CONTROLADA
+	// ADICIONADO — PAGINAÇÃO CONTROLADA
 	const [paginationModel, setPaginationModel] = useState({
 		page: 0,
 		pageSize: 10,
@@ -58,24 +65,12 @@ export default function Incidents() {
 		loadData();
 	}, []);
 
-	function getStatusChip(status) {
-		const map = {
-			open: { label: "OPEN", color: "warning" },
-			closed: { label: "CLOSED", color: "error" },
-			resolved: { label: "RESOLVED", color: "success" },
-		};
-
-		const st = map[status] || { label: status, color: "default" };
-
-		return (
-			<Chip
-				label={st.label}
-				color={st.color}
-				size="small"
-				variant="filled"
-				sx={{ fontWeight: "bold" }}
-			/>
-		);
+	function clearFilters() {
+		setStatusFilter("all");
+		setCategory("all");
+		setStartDate("");
+		setEndDate("");
+		setSearch("");
 	}
 
 	async function updateStatusInsideModal(newStatus) {
@@ -131,17 +126,40 @@ export default function Incidents() {
 			field: "status",
 			headerName: "Status",
 			flex: 1,
-			renderCell: (params) => getStatusChip(params.value),
+			renderCell: (params) => <StatusChip status={params.value} />,
 		},
 	];
 
+	const filteredRows = useIncidentFilters(rows, {
+		status: statusFilter,
+		category,
+		startDate,
+		endDate,
+		search,
+	});
+
 	return (
 		<Paper sx={{ height: "100%", width: "100%" }}>
+			{/* FILTROS */}
+			<Filters
+				status={statusFilter}
+				setStatus={setStatusFilter}
+				category={category}
+				setCategory={setCategory}
+				startDate={startDate}
+				setStartDate={setStartDate}
+				endDate={endDate}
+				setEndDate={setEndDate}
+				search={search}
+				setSearch={setSearch}
+				onClear={clearFilters}
+			/>
+
 			<DataGrid
-				rows={rows}
+				rows={filteredRows}
 				columns={columns}
 				getRowId={(row) => row.id}
-				// 🔥 PAGINAÇÃO 100% FUNCIONAL
+				// PAGINAÇÃO 100% FUNCIONAL
 				paginationModel={paginationModel}
 				onPaginationModelChange={setPaginationModel}
 				pageSizeOptions={[5, 10, 15, 20]}
@@ -245,7 +263,7 @@ export default function Incidents() {
 
 							<Typography>
 								<b>Status atual:</b>{" "}
-								{getStatusChip(currentIncident.status)}
+								<StatusChip status={currentIncident.status} />
 							</Typography>
 						</Box>
 					)}

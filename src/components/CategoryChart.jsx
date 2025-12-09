@@ -26,7 +26,7 @@ export default function CategoryChart({ data }) {
 				<ResponsiveContainer width="100%" height={300}>
 					<BarChart
 						data={data}
-						margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
+						margin={{ top: 40, right: 20, left: 0, bottom: 20 }}
 						onMouseMove={(state) =>
 							state?.activeTooltipIndex !== undefined &&
 							setActiveIndex(state.activeTooltipIndex)

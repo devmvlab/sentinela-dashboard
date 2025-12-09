@@ -107,33 +107,49 @@ export default function Dashboard() {
 							sx={{
 								backgroundColor: theme.palette.background.paper,
 								borderRadius: 2,
-								padding: 2,
-								minHeight: 120,
+								padding: 2.5,
+								minHeight: 130,
 								display: "flex",
 								alignItems: "center",
-								justifyContent: "space-between",
+								gap: 2.5,
 								boxShadow: "0 4px 12px rgba(0,0,0,0.35)",
 							}}
 						>
+							{/* ÍCONE */}
 							<Box
 								sx={{
-									fontSize: 42,
-									color: theme.palette.primary.main,
-									width: 60,
-									height: 60,
+									width: 54,
+									height: 54,
+									borderRadius: "12px",
+									backgroundColor:
+										theme.palette.primary.main + "25",
 									display: "flex",
 									alignItems: "center",
 									justifyContent: "center",
+									color: "#7BE26A", // cor do ícone
+									fontSize: "1.9rem",
 								}}
 							>
 								{card.icon}
 							</Box>
 
-							<Box sx={{ textAlign: "right" }}>
-								<Typography variant="body1" fontWeight={600}>
+							{/* TEXTO */}
+							<Box
+								sx={{
+									display: "flex",
+									flexDirection: "column",
+									gap: 0.5,
+								}}
+							>
+								<Typography variant="body2" fontWeight={600}>
 									{card.title}
 								</Typography>
-								<Typography variant="h5" fontWeight={700}>
+
+								<Typography
+									variant="h4"
+									fontWeight={700}
+									lineHeight="1.2"
+								>
 									{card.value}
 								</Typography>
 							</Box>
