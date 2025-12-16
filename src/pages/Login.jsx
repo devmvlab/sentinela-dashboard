@@ -11,8 +11,9 @@ import {
 	CircularProgress,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../services/firebase";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../services/firebase";
 import logo from "../assets/logo1.png";
 import { useNavigate } from "react-router-dom";
 
@@ -29,11 +30,40 @@ export default function Login() {
 	const handleLogin = async () => {
 		setErrorMsg("");
 		setLoading(true);
+
 		try {
-			await signInWithEmailAndPassword(auth, email, password);
+			// 1️⃣ Login Firebase Auth
+			const userCredential = await signInWithEmailAndPassword(
+				auth,
+				email,
+				password
+			);
+
+			const user = userCredential.user;
+
+			// 2️⃣ Busca usuário no Firestore
+			const userRef = doc(db, "users", user.uid);
+			const userSnap = await getDoc(userRef);
+
+			if (!userSnap.exists()) {
+				await signOut(auth);
+				setErrorMsg("Usuário não autorizado.");
+				return;
+			}
+
+			const userData = userSnap.data();
+
+			// 3️⃣ Valida admin
+			if (userData.isAdmin !== true) {
+				await signOut(auth);
+				setErrorMsg("Acesso restrito à administração.");
+				return;
+			}
+
+			// 4️⃣ OK → dashboard
 			navigate("/dashboard");
 		} catch (err) {
-			console.log(err);
+			console.error(err);
 			setErrorMsg("Email ou senha inválidos.");
 		} finally {
 			setLoading(false);
@@ -62,7 +92,6 @@ export default function Login() {
 				}}
 			>
 				<CardContent>
-					{/* LOGO */}
 					<img
 						src={logo}
 						alt="Sentinela"
@@ -83,7 +112,6 @@ export default function Login() {
 						Sentinela
 					</Typography>
 
-					{/* EMAIL */}
 					<TextField
 						label="Email"
 						type="email"
@@ -100,7 +128,6 @@ export default function Login() {
 						}}
 					/>
 
-					{/* PASSWORD */}
 					<TextField
 						label="Senha"
 						type={showPassword ? "text" : "password"}
@@ -134,7 +161,6 @@ export default function Login() {
 						}}
 					/>
 
-					{/* ERROR MESSAGE */}
 					{hasError && (
 						<Typography
 							color="error"
@@ -144,7 +170,6 @@ export default function Login() {
 						</Typography>
 					)}
 
-					{/* BUTTON LOGIN */}
 					<Button
 						variant="contained"
 						fullWidth
@@ -167,7 +192,6 @@ export default function Login() {
 						)}
 					</Button>
 
-					{/* REGISTER */}
 					<Button
 						variant="text"
 						sx={{

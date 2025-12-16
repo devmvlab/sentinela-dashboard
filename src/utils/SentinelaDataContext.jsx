@@ -85,10 +85,16 @@ export function SentinelaDataProvider({ children }) {
 						return;
 					}
 
-					const q = query(
-						collection(db, "incidents"),
-						where("geoloc.city", "==", userData.displayName)
-					);
+					let q;
+
+					if (userData.role === "SUPER_ADMIN") {
+						q = query(collection(db, "incidents"));
+					} else {
+						q = query(
+							collection(db, "incidents"),
+							where("geoloc.city", "==", userData.displayName)
+						);
+					}
 
 					const snapshot = await getDocs(q);
 
