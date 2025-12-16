@@ -36,7 +36,7 @@ export default function Incidents() {
 	const location = useLocation();
 
 	// 🔹 dados globais (já filtrados por cidade)
-	const { incidents, loading } = useSentinelaData();
+	const { incidents, loading, updateIncidentStatus } = useSentinelaData();
 
 	// 🔹 filtros
 	const [statusFilter, setStatusFilter] = useState("all");
@@ -98,6 +98,9 @@ export default function Incidents() {
 		await updateDoc(doc(db, "incidents", currentIncident.id), {
 			status: newStatus,
 		});
+
+		//  ATUALIZA O STATE GLOBAL
+		updateIncidentStatus(currentIncident.id, newStatus);
 
 		setSnackbar({
 			open: true,

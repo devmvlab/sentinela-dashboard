@@ -28,6 +28,14 @@ export function SentinelaDataProvider({ children }) {
 	const [incidents, setIncidents] = useState([]);
 	const [loading, setLoading] = useState(true);
 
+	function updateIncidentStatus(id, newStatus) {
+		setIncidents((prev) =>
+			prev.map((inc) =>
+				inc.id === id ? { ...inc, status: newStatus } : inc
+			)
+		);
+	}
+
 	useEffect(() => {
 		// escuta o estado de autenticação corretamente
 		const unsubscribeAuth = onAuthStateChanged(
@@ -127,6 +135,7 @@ export function SentinelaDataProvider({ children }) {
 				userCenter,
 				incidents,
 				loading,
+				updateIncidentStatus,
 			}}
 		>
 			{children}
