@@ -16,6 +16,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
+const drawerWidthClosed = 70;
 
 export default function Sidebar({ open, handleDrawerClose, theme }) {
 	const navigate = useNavigate();
@@ -34,24 +35,37 @@ export default function Sidebar({ open, handleDrawerClose, theme }) {
 		<Drawer
 			variant="permanent"
 			sx={{
-				width: open ? drawerWidth : 70,
+				width: open ? drawerWidth : drawerWidthClosed,
+				flexShrink: 0,
+				whiteSpace: "nowrap",
 				"& .MuiDrawer-paper": {
-					width: open ? drawerWidth : 70,
+					width: open ? drawerWidth : drawerWidthClosed,
 					boxSizing: "border-box",
 					backgroundColor: "background.dark",
+					overflowX: "hidden",
+					borderRadius: 0,
 				},
 			}}
 		>
-			<IconButton onClick={handleDrawerClose} sx={{ mt: "16px" }}>
+			<IconButton
+				onClick={handleDrawerClose}
+				sx={{
+					mt: 2,
+					ml: "auto",
+					mr: open ? 2 : "auto",
+					alignSelf: open ? "flex-end" : "center",
+				}}
+			>
 				{theme.direction === "rtl" ? (
 					<ChevronRightIcon />
 				) : (
 					<ChevronLeftIcon />
 				)}
 			</IconButton>
+
 			<Divider />
 
-			<List>
+			<List sx={{ mt: 1 }}>
 				{menuItems.map(({ text, icon, path }) => (
 					<ListItem
 						key={text}
@@ -61,18 +75,30 @@ export default function Sidebar({ open, handleDrawerClose, theme }) {
 						<ListItemButton
 							onClick={() => navigate(path)}
 							sx={{
-								marginTop: 1,
-								//justifyContent: open ? "start" : "start",
-								px: 2.5,
+								minHeight: 48,
+								justifyContent: open ? "flex-start" : "center",
+								px: open ? 2.5 : 0,
 							}}
 						>
-							<ListItemIcon sx={{ color: "primary.text" }}>
+							<ListItemIcon
+								sx={{
+									minWidth: 0,
+									width: open ? "auto" : "100%",
+									display: "flex",
+									justifyContent: "center",
+									mr: open ? 3 : 0,
+									color: "primary.text",
+								}}
+							>
 								{icon}
 							</ListItemIcon>
-							<ListItemText
-								primary={text}
-								sx={{ opacity: open ? 1 : 0 }}
-							/>
+
+							{open && (
+								<ListItemText
+									primary={text}
+									sx={{ whiteSpace: "nowrap" }}
+								/>
+							)}
 						</ListItemButton>
 					</ListItem>
 				))}

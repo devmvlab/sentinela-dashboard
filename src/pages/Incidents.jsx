@@ -24,11 +24,13 @@ import useIncidentFilters from "../utils/useIncidentFilters";
 import StatusChip from "../components/StatusChip";
 import { db } from "../services/firebase";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import { useLocation } from "react-router-dom";
 
 import { useTheme } from "@mui/material/styles";
 
 export default function Incidents() {
 	const theme = useTheme();
+	const location = useLocation();
 
 	const [statusFilter, setStatusFilter] = useState("all");
 	const [category, setCategory] = useState("all");
@@ -41,12 +43,14 @@ export default function Incidents() {
 	const [openModal, setOpenModal] = useState(false);
 	const [currentIncident, setCurrentIncident] = useState(null);
 
-	// ADICIONADO — PAGINAÇÃO CONTROLADA
 	const [paginationModel, setPaginationModel] = useState({
 		page: 0,
 		pageSize: 10,
 	});
 
+	// =============================
+	//  CARREGA DADOS
+	// =============================
 	useEffect(() => {
 		async function loadData() {
 			const snapshot = await getDocs(collection(db, "incidents"));
@@ -64,6 +68,32 @@ export default function Incidents() {
 
 		loadData();
 	}, []);
+
+	// =============================
+	//  ABRIR MODAL VIA NOTIFICAÇÃO
+	// =============================
+	useEffect(() => {
+		if (!location.state?.openIncidentId) return;
+		if (rows.length === 0) return;
+
+		const incident = rows.find(
+			(item) => item.id === location.state.openIncidentId
+		);
+
+		if (incident) {
+			setCurrentIncident(incident);
+			setOpenModal(true);
+		}
+	}, [location.state, rows]);
+
+	// =============================
+	//  LIMPA STATE DA ROTA (EVITA REABRIR)
+	// =============================
+	useEffect(() => {
+		if (openModal && location.state?.openIncidentId) {
+			window.history.replaceState({}, document.title);
+		}
+	}, [openModal]);
 
 	function clearFilters() {
 		setStatusFilter("all");
@@ -159,7 +189,6 @@ export default function Incidents() {
 				rows={filteredRows}
 				columns={columns}
 				getRowId={(row) => row.id}
-				// PAGINAÇÃO 100% FUNCIONAL
 				paginationModel={paginationModel}
 				onPaginationModelChange={setPaginationModel}
 				pageSizeOptions={[5, 10, 15, 20]}
@@ -176,7 +205,6 @@ export default function Incidents() {
 						color: theme.palette.primary.main,
 					},
 				}}
-				// CLICA NA LINHA → ABRE MODAL
 				onRowClick={(params) => {
 					setCurrentIncident(params.row);
 					setOpenModal(true);
@@ -276,7 +304,7 @@ export default function Incidents() {
 						startIcon={<CloseIcon />}
 						onClick={() => updateStatusInsideModal("closed")}
 					>
-						Marcar como CLOSED
+						Marcar como FECHADO
 					</Button>
 
 					<Button
@@ -285,7 +313,7 @@ export default function Incidents() {
 						startIcon={<CheckIcon />}
 						onClick={() => updateStatusInsideModal("resolved")}
 					>
-						Marcar como RESOLVED
+						Marcar como RESOLVIDO
 					</Button>
 				</DialogActions>
 			</Dialog>

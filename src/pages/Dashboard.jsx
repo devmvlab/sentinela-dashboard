@@ -5,7 +5,7 @@ import { useTheme } from "@mui/material/styles";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import WarningIcon from "@mui/icons-material/Warning";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 import { db } from "../services/firebase";
 import { collection, getDocs } from "firebase/firestore";
@@ -19,7 +19,7 @@ export default function Dashboard() {
 		ocorrenciasHoje: 0,
 		ocorrenciasAtivas: 0,
 		emergencias: 0,
-		notificacoesHoje: 0,
+		ocorrenciasResolvidas: 0,
 	});
 
 	const [categoryData, setCategoryData] = useState([]);
@@ -46,6 +46,9 @@ export default function Dashboard() {
 			const emergencias = lista.filter(
 				(item) => item.isEmergency === true
 			).length;
+			const ocorrenciasResolvidas = lista.filter(
+				(item) => item.status === "resolved"
+			).length;
 
 			const categorias = {};
 			lista.forEach((item) => {
@@ -61,7 +64,7 @@ export default function Dashboard() {
 				ocorrenciasHoje,
 				ocorrenciasAtivas,
 				emergencias,
-				notificacoesHoje: 0,
+				ocorrenciasResolvidas,
 			});
 
 			setCategoryData(categoriaFormatada);
@@ -87,9 +90,9 @@ export default function Dashboard() {
 			icon: <WarningIcon />,
 		},
 		{
-			title: "Notificações Hoje",
-			value: stats.notificacoesHoje,
-			icon: <NotificationsActiveIcon />,
+			title: "Ocorrências Resolvidas",
+			value: stats.ocorrenciasResolvidas,
+			icon: <TaskAltIcon />,
 		},
 	];
 

@@ -192,10 +192,13 @@ export default function Topbar({ handleDrawerOpen }) {
 						},
 					}}
 					onClick={() => {
-						// Ao clicar numa notificação, podemos navegar pra detalhe
-						// Exemplo: navigate(`/incidents/${t.id}`)
-						// Por enquanto apenas fecha o dropdown
 						setMenuAberto(false);
+
+						navigate("/ocorrencias", {
+							state: {
+								openIncidentId: t.id,
+							},
+						});
 					}}
 				>
 					<Typography variant="subtitle2" fontWeight={700}>
@@ -310,6 +313,7 @@ export default function Topbar({ handleDrawerOpen }) {
 				backgroundColor: "background.dark",
 				boxShadow: "none",
 				zIndex: (theme) => theme.zIndex.drawer + 1,
+				borderRadius: 0,
 			}}
 		>
 			<Toolbar style={{ paddingLeft: "12px", paddingRight: "12px" }}>
