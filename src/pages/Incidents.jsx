@@ -22,23 +22,30 @@ import { useEffect, useState } from "react";
 import Filters from "../components/Filters";
 import useIncidentFilters from "../utils/useIncidentFilters";
 import StatusChip from "../components/StatusChip";
-import { db } from "../services/firebase";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
-import { useLocation } from "react-router-dom";
 
+import { useLocation } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
+
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../services/firebase";
+
+import { useSentinelaData } from "../utils/SentinelaDataContext";
 
 export default function Incidents() {
 	const theme = useTheme();
 	const location = useLocation();
 
+	// 🔹 dados globais (já filtrados por cidade)
+	const { incidents, loading } = useSentinelaData();
+
+	// 🔹 filtros
 	const [statusFilter, setStatusFilter] = useState("all");
 	const [category, setCategory] = useState("all");
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [search, setSearch] = useState("");
 
-	const [rows, setRows] = useState([]);
+	// 🔹 UI
 	const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 	const [openModal, setOpenModal] = useState(false);
 	const [currentIncident, setCurrentIncident] = useState(null);
@@ -49,34 +56,13 @@ export default function Incidents() {
 	});
 
 	// =============================
-	//  CARREGA DADOS
-	// =============================
-	useEffect(() => {
-		async function loadData() {
-			const snapshot = await getDocs(collection(db, "incidents"));
-
-			const lista = snapshot.docs.map((doc) => {
-				const data = doc.data();
-				return {
-					id: doc.id,
-					...data,
-				};
-			});
-
-			setRows(lista);
-		}
-
-		loadData();
-	}, []);
-
-	// =============================
 	//  ABRIR MODAL VIA NOTIFICAÇÃO
 	// =============================
 	useEffect(() => {
 		if (!location.state?.openIncidentId) return;
-		if (rows.length === 0) return;
+		if (!incidents || incidents.length === 0) return;
 
-		const incident = rows.find(
+		const incident = incidents.find(
 			(item) => item.id === location.state.openIncidentId
 		);
 
@@ -84,16 +70,16 @@ export default function Incidents() {
 			setCurrentIncident(incident);
 			setOpenModal(true);
 		}
-	}, [location.state, rows]);
+	}, [location.state, incidents]);
 
 	// =============================
-	//  LIMPA STATE DA ROTA (EVITA REABRIR)
+	//  LIMPA STATE DA ROTA
 	// =============================
 	useEffect(() => {
 		if (openModal && location.state?.openIncidentId) {
 			window.history.replaceState({}, document.title);
 		}
-	}, [openModal]);
+	}, [openModal, location.state]);
 
 	function clearFilters() {
 		setStatusFilter("all");
@@ -103,20 +89,15 @@ export default function Incidents() {
 		setSearch("");
 	}
 
+	// =============================
+	//  ATUALIZA STATUS (WRITE)
+	// =============================
 	async function updateStatusInsideModal(newStatus) {
 		if (!currentIncident) return;
 
 		await updateDoc(doc(db, "incidents", currentIncident.id), {
 			status: newStatus,
 		});
-
-		setRows((old) =>
-			old.map((row) =>
-				row.id === currentIncident.id
-					? { ...row, status: newStatus }
-					: row
-			)
-		);
 
 		setSnackbar({
 			open: true,
@@ -126,32 +107,38 @@ export default function Incidents() {
 		setOpenModal(false);
 	}
 
+	// =============================
+	//  COLUNAS
+	// =============================
 	const columns = [
 		{
-			field: "ocorrencia.id",
+			field: "id",
 			headerName: "Identificador",
 			flex: 1,
-			valueGetter: (v, row) => row.id,
 		},
 		{
-			field: "ocorrencia.categoria",
+			field: "categoria",
 			headerName: "Categoria",
 			flex: 1,
-			valueGetter: (v, row) => row.ocorrencia?.categoria,
+			valueGetter: (_, row) => row.ocorrencia?.categoria,
 		},
 		{
-			field: "ocorrencia.tipo",
+			field: "tipo",
 			headerName: "Tipo",
 			flex: 1,
-			valueGetter: (v, row) => row.ocorrencia?.tipo,
+			valueGetter: (_, row) => row.ocorrencia?.tipo,
 		},
 		{
-			field: "geoloc.address",
+			field: "endereco",
 			headerName: "Endereço",
 			flex: 2,
-			valueGetter: (v, row) => row.geoloc?.address,
+			valueGetter: (_, row) => row.geoloc?.address,
 		},
-		{ field: "data", headerName: "Data", flex: 1 },
+		{
+			field: "data",
+			headerName: "Data",
+			flex: 1,
+		},
 		{
 			field: "status",
 			headerName: "Status",
@@ -160,13 +147,26 @@ export default function Incidents() {
 		},
 	];
 
-	const filteredRows = useIncidentFilters(rows, {
+	// =============================
+	//  FILTROS (CLIENT SIDE)
+	// =============================
+	const filteredRows = useIncidentFilters(incidents || [], {
 		status: statusFilter,
 		category,
 		startDate,
 		endDate,
 		search,
 	});
+
+	if (loading) {
+		return (
+			<Paper sx={{ p: 4 }}>
+				<Typography color="text.secondary">
+					Carregando ocorrências da cidade...
+				</Typography>
+			</Paper>
+		);
+	}
 
 	return (
 		<Paper sx={{ height: "100%", width: "100%" }}>

@@ -1,20 +1,50 @@
 import { useEffect, useState } from "react";
-import { Grid, Card, Typography, Box } from "@mui/material";
+import {
+	Grid,
+	Card,
+	Typography,
+	Box,
+	ToggleButton,
+	ToggleButtonGroup,
+	Fade,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import WarningIcon from "@mui/icons-material/Warning";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
-
-import { db } from "../services/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import MapIcon from "@mui/icons-material/Map";
 
 import CategoryChart from "../components/CategoryChart";
+import IncidentsMap from "./IncidentsMap";
+
+import { useSentinelaData } from "../utils/SentinelaDataContext";
 
 export default function Dashboard() {
 	const theme = useTheme();
 
+	// 🔹 dados globais (fonte única)
+	const { incidents, userCenter, loading } = useSentinelaData();
+
+	// modo da tela
+	const [viewMode, setViewMode] = useState("dashboard");
+
+	// estado do mapa (preserva zoom/posição)
+	const [mapState, setMapState] = useState(null);
+
+	// inicializa mapa no centro da cidade
+	useEffect(() => {
+		if (userCenter && !mapState) {
+			setMapState({
+				center: userCenter,
+				zoom: 12,
+			});
+		}
+	}, [userCenter, mapState]);
+
+	// métricas
 	const [stats, setStats] = useState({
 		ocorrenciasHoje: 0,
 		ocorrenciasAtivas: 0,
@@ -24,7 +54,19 @@ export default function Dashboard() {
 
 	const [categoryData, setCategoryData] = useState([]);
 
+	// 🔹 calcula métricas a partir dos incidents (já filtrados)
 	useEffect(() => {
+		if (!incidents || incidents.length === 0) {
+			setStats({
+				ocorrenciasHoje: 0,
+				ocorrenciasAtivas: 0,
+				emergencias: 0,
+				ocorrenciasResolvidas: 0,
+			});
+			setCategoryData([]);
+			return;
+		}
+
 		const formatarData = (d) => {
 			const dia = String(d.getDate()).padStart(2, "0");
 			const mes = String(d.getMonth() + 1).padStart(2, "0");
@@ -32,46 +74,46 @@ export default function Dashboard() {
 			return `${dia}/${mes}/${ano}`;
 		};
 
-		const carregarDados = async () => {
-			const dataHoje = formatarData(new Date());
-			const snapshot = await getDocs(collection(db, "incidents"));
-			const lista = snapshot.docs.map((doc) => doc.data());
+		const dataHoje = formatarData(new Date());
 
-			const ocorrenciasHoje = lista.filter(
-				(item) => item.data === dataHoje
-			).length;
-			const ocorrenciasAtivas = lista.filter(
-				(item) => item.status === "open"
-			).length;
-			const emergencias = lista.filter(
-				(item) => item.isEmergency === true
-			).length;
-			const ocorrenciasResolvidas = lista.filter(
-				(item) => item.status === "resolved"
-			).length;
+		const ocorrenciasHoje = incidents.filter(
+			(item) => item.data === dataHoje
+		).length;
 
-			const categorias = {};
-			lista.forEach((item) => {
-				const cat = item.ocorrencia?.categoria || "Sem categoria";
-				categorias[cat] = (categorias[cat] || 0) + 1;
-			});
+		const ocorrenciasAtivas = incidents.filter(
+			(item) => item.status === "open"
+		).length;
 
-			const categoriaFormatada = Object.entries(categorias).map(
-				([categoria, quantidade]) => ({ categoria, quantidade })
-			);
+		const emergencias = incidents.filter(
+			(item) => item.isEmergency === true
+		).length;
 
-			setStats({
-				ocorrenciasHoje,
-				ocorrenciasAtivas,
-				emergencias,
-				ocorrenciasResolvidas,
-			});
+		const ocorrenciasResolvidas = incidents.filter(
+			(item) => item.status === "resolved"
+		).length;
 
-			setCategoryData(categoriaFormatada);
-		};
+		const categorias = {};
+		incidents.forEach((item) => {
+			const cat = item.ocorrencia?.categoria || "Sem categoria";
+			categorias[cat] = (categorias[cat] || 0) + 1;
+		});
 
-		carregarDados();
-	}, []);
+		const categoriaFormatada = Object.entries(categorias).map(
+			([categoria, quantidade]) => ({
+				categoria,
+				quantidade,
+			})
+		);
+
+		setStats({
+			ocorrenciasHoje,
+			ocorrenciasAtivas,
+			emergencias,
+			ocorrenciasResolvidas,
+		});
+
+		setCategoryData(categoriaFormatada);
+	}, [incidents]);
 
 	const cards = [
 		{
@@ -96,75 +138,130 @@ export default function Dashboard() {
 		},
 	];
 
+	if (loading) {
+		return (
+			<Box sx={{ p: 4 }}>
+				<Typography color="text.secondary">
+					Carregando dados da cidade...
+				</Typography>
+			</Box>
+		);
+	}
+
 	return (
 		<Box sx={{ paddingTop: 2 }}>
-			<Typography variant="h4" fontWeight={700} sx={{ mb: 3 }}>
-				Dashboard
-			</Typography>
+			{/* HEADER */}
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
+					mb: 3,
+				}}
+			>
+				<Typography variant="h4" fontWeight={700}>
+					{viewMode === "dashboard"
+						? "Dashboard"
+						: "Mapa de Ocorrências"}
+				</Typography>
 
-			{/* CARDS */}
-			<Grid container spacing={3} justifyContent="center">
-				{cards.map((card, i) => (
-					<Grid item xs={12} sm={6} md={4} lg={3} key={i}>
-						<Card
-							sx={{
-								backgroundColor: theme.palette.background.paper,
-								borderRadius: 2,
-								padding: 2.5,
-								minHeight: 130,
-								display: "flex",
-								alignItems: "center",
-								gap: 2.5,
-								boxShadow: "0 4px 12px rgba(0,0,0,0.35)",
-							}}
-						>
-							{/* ÍCONE */}
-							<Box
-								sx={{
-									width: 54,
-									height: 54,
-									borderRadius: "12px",
-									backgroundColor:
-										theme.palette.primary.main + "25",
-									display: "flex",
-									alignItems: "center",
-									justifyContent: "center",
-									color: "#7BE26A", // cor do ícone
-									fontSize: "1.9rem",
-								}}
-							>
-								{card.icon}
-							</Box>
-
-							{/* TEXTO */}
-							<Box
-								sx={{
-									display: "flex",
-									flexDirection: "column",
-									gap: 0.5,
-								}}
-							>
-								<Typography variant="body2" fontWeight={600}>
-									{card.title}
-								</Typography>
-
-								<Typography
-									variant="h4"
-									fontWeight={700}
-									lineHeight="1.2"
-								>
-									{card.value}
-								</Typography>
-							</Box>
-						</Card>
-					</Grid>
-				))}
-			</Grid>
-
-			{/* GRÁFICO */}
-			<Box sx={{ mt: 5 }}>
-				<CategoryChart data={categoryData} />
+				<ToggleButtonGroup
+					value={viewMode}
+					exclusive
+					onChange={(_, val) => val && setViewMode(val)}
+					size="small"
+				>
+					<ToggleButton value="dashboard">
+						<DashboardIcon sx={{ mr: 1 }} />
+						Resumo
+					</ToggleButton>
+					<ToggleButton value="map">
+						<MapIcon sx={{ mr: 1 }} />
+						Mapa
+					</ToggleButton>
+				</ToggleButtonGroup>
 			</Box>
+
+			{/* DASHBOARD */}
+			<Fade in={viewMode === "dashboard"} timeout={300} unmountOnExit>
+				<Box>
+					<Grid container spacing={3} justifyContent="center">
+						{cards.map((card, i) => (
+							<Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+								<Card
+									sx={{
+										backgroundColor:
+											theme.palette.background.paper,
+										borderRadius: 2,
+										padding: 2.5,
+										minHeight: 130,
+										display: "flex",
+										alignItems: "center",
+										gap: 2.5,
+										boxShadow:
+											"0 4px 12px rgba(0,0,0,0.35)",
+									}}
+								>
+									<Box
+										sx={{
+											width: 54,
+											height: 54,
+											borderRadius: "12px",
+											backgroundColor:
+												theme.palette.primary.main +
+												"25",
+											display: "flex",
+											alignItems: "center",
+											justifyContent: "center",
+											color: "#7BE26A",
+											fontSize: "1.9rem",
+										}}
+									>
+										{card.icon}
+									</Box>
+
+									<Box>
+										<Typography
+											variant="body2"
+											fontWeight={600}
+										>
+											{card.title}
+										</Typography>
+
+										<Typography
+											variant="h4"
+											fontWeight={700}
+										>
+											{card.value}
+										</Typography>
+									</Box>
+								</Card>
+							</Grid>
+						))}
+					</Grid>
+
+					<Box sx={{ mt: 5 }}>
+						<CategoryChart data={categoryData} />
+					</Box>
+				</Box>
+			</Fade>
+
+			{/* MAPA */}
+			<Fade in={viewMode === "map"} timeout={300} unmountOnExit>
+				<Box
+					sx={{
+						height: "calc(100vh - 170px)",
+						borderRadius: 2,
+						overflow: "hidden",
+					}}
+				>
+					<IncidentsMap
+						incidents={incidents}
+						mapState={mapState}
+						onMapStateChange={setMapState}
+					/>
+				</Box>
+			</Fade>
 		</Box>
 	);
 }
