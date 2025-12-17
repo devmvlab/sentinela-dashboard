@@ -23,7 +23,7 @@ import Filters from "../components/Filters";
 import useIncidentFilters from "../utils/useIncidentFilters";
 import StatusChip from "../components/StatusChip";
 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 
 import { doc, updateDoc } from "firebase/firestore";
@@ -34,6 +34,7 @@ import { useSentinelaData } from "../utils/SentinelaDataContext";
 export default function Incidents() {
 	const theme = useTheme();
 	const location = useLocation();
+	const navigate = useNavigate();
 
 	// 🔹 dados globais (já filtrados por cidade)
 	const { incidents, loading, updateIncidentStatus } = useSentinelaData();
@@ -76,10 +77,10 @@ export default function Incidents() {
 	//  LIMPA STATE DA ROTA
 	// =============================
 	useEffect(() => {
-		if (openModal && location.state?.openIncidentId) {
-			window.history.replaceState({}, document.title);
+		if (location.state?.openIncidentId && openModal) {
+			navigate(location.pathname, { replace: true });
 		}
-	}, [openModal, location.state]);
+	}, [location.state, openModal, navigate, location.pathname]);
 
 	function clearFilters() {
 		setStatusFilter("all");
@@ -292,7 +293,7 @@ export default function Incidents() {
 
 							<Divider />
 
-							<Typography>
+							<Typography component="div">
 								<b>Status atual:</b>{" "}
 								<StatusChip status={currentIncident.status} />
 							</Typography>

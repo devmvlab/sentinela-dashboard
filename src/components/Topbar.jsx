@@ -25,11 +25,15 @@ import logo from "../assets/logo1.png";
 
 /* Firebase imports */
 import { db } from "../services/firebase";
-import { collection, onSnapshot } from "firebase/firestore";
-
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { useSentinelaData } from "../utils/SentinelaDataContext";
 export default function Topbar({ handleDrawerOpen }) {
 	const theme = useTheme();
 	const navigate = useNavigate();
+
+	const { userCity, loading } = useSentinelaData();
+
+	const isInitialLoad = useRef(true);
 
 	// profile menu
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -82,55 +86,36 @@ export default function Topbar({ handleDrawerOpen }) {
 	};
 
 	useEffect(() => {
-		// função utilitária para formatar data dd/mm/yyyy (se quiser usar)
-		const formatarData = (d) => {
-			const dia = String(d.getDate()).padStart(2, "0");
-			const mes = String(d.getMonth() + 1).padStart(2, "0");
-			const ano = d.getFullYear();
-			return `${dia}/${mes}/${ano}`;
-		};
+		if (loading) return; // 👈 ainda carregando
+		if (!userCity) return; // 👈 sem cidade definida
 
-		// listener real-time global (coleção "incidents")
-		const unsubscribe = onSnapshot(
+		const q = query(
 			collection(db, "incidents"),
-			(snapshot) => {
-				const lista = snapshot.docs.map((doc) => ({
-					id: doc.id,
-					...doc.data(),
-				}));
-
-				// identificar novos IDs
-				const idsAtuais = new Set(lista.map((d) => d.id));
-
-				if (previousIds.current.size > 0) {
-					const novosIds = [...idsAtuais].filter(
-						(id) => !previousIds.current.has(id)
-					);
-
-					if (novosIds.length > 0) {
-						// pega o primeiro novo (pode haver mais de 1, se quiser iterar é só)
-						const nova = lista.find(
-							(item) => item.id === novosIds[0]
-						);
-						if (nova) {
-							setNovaOcorrencia(true);
-							setContadorNovas((prev) => prev + 1);
-							adicionarToast(nova);
-						}
-					}
-				}
-
-				previousIds.current = idsAtuais;
-
-				// OBS: Topbar não precisa atualizar contadores da dashboard,
-				// apenas mantém histórico / toasts / badge.
-				// Se você quiser sincronizar contadores com um contexto global,
-				// podemos adicionar isso depois.
-			}
+			where("geoloc.city", "==", userCity)
 		);
 
+		const unsubscribe = onSnapshot(q, (snapshot) => {
+			if (isInitialLoad.current) {
+				isInitialLoad.current = false;
+				return;
+			}
+
+			snapshot.docChanges().forEach((change) => {
+				if (change.type === "added") {
+					const nova = {
+						id: change.doc.id,
+						...change.doc.data(),
+					};
+
+					setNovaOcorrencia(true);
+					setContadorNovas((prev) => prev + 1);
+					adicionarToast(nova);
+				}
+			});
+		});
+
 		return () => unsubscribe();
-	}, []);
+	}, [userCity, loading]);
 
 	// fechar dropdown ao clicar fora
 	useEffect(() => {
