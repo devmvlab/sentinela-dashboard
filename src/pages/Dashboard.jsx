@@ -21,6 +21,9 @@ import CategoryChart from "../components/CategoryChart";
 import StatusChart from "../components/StatusChart";
 import DistrictChart from "../components/DistrictChart";
 import IncidentsMap from "./IncidentsMap";
+import SafetyCard from "../components/SafetyCard";
+
+import { formatTime } from "../utils/FormatTime";
 
 import { useSentinelaData } from "../utils/SentinelaDataContext";
 
@@ -28,7 +31,7 @@ export default function Dashboard() {
 	const theme = useTheme();
 
 	// 🔹 dados globais (fonte única)
-	const { incidents, userCenter, loading } = useSentinelaData();
+	const { incidents, userCenter, loading, lastUpdate } = useSentinelaData();
 
 	// modo da tela
 	const [viewMode, setViewMode] = useState("dashboard");
@@ -50,7 +53,8 @@ export default function Dashboard() {
 	const [stats, setStats] = useState({
 		ocorrenciasHoje: 0,
 		ocorrenciasAtivas: 0,
-		emergencias: 0,
+		emergenciasAtivas: 0,
+		emergenciasResolvidas: 0,
 		ocorrenciasResolvidas: 0,
 	});
 
@@ -64,7 +68,8 @@ export default function Dashboard() {
 			setStats({
 				ocorrenciasHoje: 0,
 				ocorrenciasAtivas: 0,
-				emergencias: 0,
+				emergenciasAtivas: 0,
+				emergenciasResolvidas: 0,
 				ocorrenciasResolvidas: 0,
 			});
 			setCategoryData([]);
@@ -86,6 +91,14 @@ export default function Dashboard() {
 
 		const ocorrenciasAtivas = incidents.filter(
 			(item) => item.status === "open"
+		).length;
+
+		const emergenciasAtivas = incidents.filter(
+			(item) => item.isEmergency === true && item.status !== "resolved"
+		).length;
+
+		const emergenciasResolvidas = incidents.filter(
+			(item) => item.isEmergency === true && item.status === "resolved"
 		).length;
 
 		const emergencias = incidents.filter(
@@ -150,7 +163,8 @@ export default function Dashboard() {
 		setStats({
 			ocorrenciasHoje,
 			ocorrenciasAtivas,
-			emergencias,
+			emergenciasAtivas,
+			emergenciasResolvidas,
 			ocorrenciasResolvidas,
 		});
 
@@ -163,21 +177,31 @@ export default function Dashboard() {
 		{
 			title: "Ocorrências Hoje",
 			value: stats.ocorrenciasHoje,
+			description: "Registradas nas últimas 24 horas",
 			icon: <TrendingUpIcon />,
 		},
 		{
 			title: "Ocorrências em aberto",
 			value: stats.ocorrenciasAtivas,
+			description: "Aguardando atendimento ou resolução",
 			icon: <LocationOnIcon />,
 		},
 		{
-			title: "Emergências",
-			value: stats.emergencias,
+			title: "Emergências em aberto",
+			value: stats.emergenciasAtivas,
+			description: "Exigem atenção imediata",
 			icon: <WarningIcon />,
 		},
 		{
-			title: "Ocorrências Resolvidas",
+			title: "Emergências resolvidas",
+			value: stats.emergenciasResolvidas,
+			description: "Atendidas com sucesso",
+			icon: <TaskAltIcon />,
+		},
+		{
+			title: "Ocorrências resolvidas",
 			value: stats.ocorrenciasResolvidas,
+			description: "Encerradas com sucesso",
 			icon: <TaskAltIcon />,
 		},
 	];
@@ -230,6 +254,11 @@ export default function Dashboard() {
 			<Fade in={viewMode === "dashboard"} timeout={300} unmountOnExit>
 				<Box>
 					<Grid container spacing={3} justifyContent="center">
+						<SafetyCard
+							incidents={incidents}
+							userCenter={userCenter}
+							period="7d"
+						/>
 						{cards.map((card, i) => (
 							<Grid item xs={12} sm={6} md={4} lg={3} key={i}>
 								<Card
@@ -237,11 +266,10 @@ export default function Dashboard() {
 										backgroundColor:
 											theme.palette.background.paper,
 										borderRadius: 2,
-										padding: 2.5,
-										minHeight: 130,
+										p: 2.5,
+										minHeight: 170,
 										display: "flex",
-										alignItems: "center",
-										gap: 2.5,
+										gap: 2,
 										boxShadow:
 											"0 4px 12px rgba(0,0,0,0.35)",
 									}}
@@ -259,24 +287,36 @@ export default function Dashboard() {
 											justifyContent: "center",
 											color: "#7BE26A",
 											fontSize: "1.9rem",
+											flexShrink: 0,
 										}}
 									>
 										{card.icon}
 									</Box>
 
-									<Box>
+									<Box sx={{ flex: 1 }}>
 										<Typography
-											variant="body2"
-											fontWeight={600}
+											variant="caption"
+											fontWeight={700}
+											sx={{ opacity: 0.85 }}
 										>
 											{card.title}
 										</Typography>
 
 										<Typography
 											variant="h4"
-											fontWeight={700}
+											fontWeight={800}
+											sx={{ mt: 0.5 }}
 										>
 											{card.value}
+										</Typography>
+
+										<Typography
+											variant="caption"
+											color="text.secondary"
+											sx={{ mt: 1, display: "block" }}
+										>
+											Última atualização:{" "}
+											{formatTime(lastUpdate)}
 										</Typography>
 									</Box>
 								</Card>

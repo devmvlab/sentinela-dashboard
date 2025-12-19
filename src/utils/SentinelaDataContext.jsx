@@ -28,6 +28,8 @@ export function SentinelaDataProvider({ children }) {
 	const [incidents, setIncidents] = useState([]);
 	const [loading, setLoading] = useState(true);
 
+	const [lastUpdate, setLastUpdate] = useState(null);
+
 	function updateIncidentStatus(id, newStatus) {
 		setIncidents((prev) =>
 			prev.map((inc) =>
@@ -112,6 +114,7 @@ export function SentinelaDataProvider({ children }) {
 					}));
 
 					setIncidents(data);
+					setLastUpdate(new Date());
 				} catch (error) {
 					console.error(
 						"Erro ao carregar dados do Sentinela:",
@@ -135,6 +138,7 @@ export function SentinelaDataProvider({ children }) {
 				userCenter,
 				incidents,
 				loading,
+				lastUpdate,
 				updateIncidentStatus,
 			}}
 		>
