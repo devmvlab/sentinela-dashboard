@@ -18,6 +18,8 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import MapIcon from "@mui/icons-material/Map";
 
 import CategoryChart from "../components/CategoryChart";
+import StatusChart from "../components/StatusChart";
+import DistrictChart from "../components/DistrictChart";
 import IncidentsMap from "./IncidentsMap";
 
 import { useSentinelaData } from "../utils/SentinelaDataContext";
@@ -53,6 +55,8 @@ export default function Dashboard() {
 	});
 
 	const [categoryData, setCategoryData] = useState([]);
+	const [statusData, setStatusData] = useState([]);
+	const [districtData, setDistrictData] = useState([]);
 
 	// 🔹 calcula métricas a partir dos incidents (já filtrados)
 	useEffect(() => {
@@ -92,6 +96,18 @@ export default function Dashboard() {
 			(item) => item.status === "resolved"
 		).length;
 
+		const ocorrenciasEmAndamento = incidents.filter(
+			(item) => item.status === "in_progress"
+		).length;
+
+		const ocorrenciasFechadas = incidents.filter(
+			(item) => item.status === "closed"
+		).length;
+
+		const ocorrenciasPendentes = incidents.filter(
+			(item) => item.status === "pending"
+		).length;
+
 		const categorias = {};
 		incidents.forEach((item) => {
 			const cat = item.ocorrencia?.categoria || "Sem categoria";
@@ -105,6 +121,32 @@ export default function Dashboard() {
 			})
 		);
 
+		const status = {};
+		incidents.forEach((item) => {
+			const stat = item.status || "unknown";
+			status[stat] = (status[stat] || 0) + 1;
+		});
+
+		const statusFormatada = Object.entries(status).map(
+			([status, quantidade]) => ({
+				status,
+				quantidade,
+			})
+		);
+
+		const district = {};
+		incidents.forEach((item) => {
+			const zone = item.geoloc.district || "unknown";
+			district[zone] = (district[zone] || 0) + 1;
+		});
+
+		const districtFormatado = Object.entries(district).map(
+			([district, quantidade]) => ({
+				district,
+				quantidade,
+			})
+		);
+
 		setStats({
 			ocorrenciasHoje,
 			ocorrenciasAtivas,
@@ -113,6 +155,8 @@ export default function Dashboard() {
 		});
 
 		setCategoryData(categoriaFormatada);
+		setStatusData(statusFormatada);
+		setDistrictData(districtFormatado);
 	}, [incidents]);
 
 	const cards = [
@@ -242,6 +286,14 @@ export default function Dashboard() {
 
 					<Box sx={{ mt: 5 }}>
 						<CategoryChart data={categoryData} />
+					</Box>
+
+					<Box sx={{ mt: 5 }}>
+						<StatusChart data={statusData} />
+					</Box>
+
+					<Box sx={{ mt: 5 }}>
+						<DistrictChart data={districtData} />
 					</Box>
 				</Box>
 			</Fade>

@@ -317,7 +317,7 @@ export default function Topbar({ handleDrawerOpen }) {
 						}}
 					/>
 					<Typography variant="h6" sx={{ fontWeight: 700 }}>
-						Sentinela
+						SENTINELA
 					</Typography>
 				</Box>
 
