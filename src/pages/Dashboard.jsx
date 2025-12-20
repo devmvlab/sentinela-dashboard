@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
 	Grid,
 	Card,
@@ -20,36 +20,94 @@ import MapIcon from "@mui/icons-material/Map";
 import CategoryChart from "../components/CategoryChart";
 import StatusChart from "../components/StatusChart";
 import DistrictChart from "../components/DistrictChart";
+import PeakHourChart from "../components/PeakHourChart";
 import IncidentsMap from "./IncidentsMap";
 import SafetyCard from "../components/SafetyCard";
+import EmergencyPieChart from "../components/EmergencyPieChart";
 
 import { formatTime } from "../utils/FormatTime";
-
 import { useSentinelaData } from "../utils/SentinelaDataContext";
+
+/* =======================
+   FAIXAS DE HORÁRIO
+======================= */
+const hourRanges = [
+	{ label: "00–02h", start: 0, end: 2 },
+	{ label: "02–04h", start: 2, end: 4 },
+	{ label: "04–06h", start: 4, end: 6 },
+	{ label: "06–08h", start: 6, end: 8 },
+	{ label: "08–10h", start: 8, end: 10 },
+	{ label: "10–12h", start: 10, end: 12 },
+	{ label: "12–14h", start: 12, end: 14 },
+	{ label: "14–16h", start: 14, end: 16 },
+	{ label: "16–18h", start: 16, end: 18 },
+	{ label: "18–20h", start: 18, end: 20 },
+	{ label: "20–22h", start: 20, end: 22 },
+	{ label: "22–24h", start: 22, end: 24 },
+];
+
+const filterByPeriod = (incidents, period) => {
+	const now = new Date();
+
+	return incidents.filter((item) => {
+		if (!item.createdAt) return false;
+
+		const date = item.createdAt.toDate();
+
+		if (period === "today") {
+			return date.toDateString() === now.toDateString();
+		}
+
+		const diffDays =
+			(now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+
+		if (period === "7d") return diffDays <= 7;
+		if (period === "30d") return diffDays <= 30;
+
+		return true;
+	});
+};
+
+const buildPeakHourData = (incidents) => {
+	const data = hourRanges.map((r) => ({ hour: r.label, total: 0 }));
+
+	incidents.forEach((incident) => {
+		if (!incident.createdAt) return;
+
+		const hour = incident.createdAt.toDate().getHours();
+		const range = hourRanges.find((r) => hour >= r.start && hour < r.end);
+
+		if (range) {
+			const idx = data.findIndex((d) => d.hour === range.label);
+			if (idx !== -1) data[idx].total += 1;
+		}
+	});
+
+	return data;
+};
 
 export default function Dashboard() {
 	const theme = useTheme();
-
-	// 🔹 dados globais (fonte única)
 	const { incidents, userCenter, loading, lastUpdate } = useSentinelaData();
 
-	// modo da tela
 	const [viewMode, setViewMode] = useState("dashboard");
-
-	// estado do mapa (preserva zoom/posição)
 	const [mapState, setMapState] = useState(null);
 
-	// inicializa mapa no centro da cidade
-	useEffect(() => {
-		if (userCenter && !mapState) {
-			setMapState({
-				center: userCenter,
-				zoom: 12,
-			});
-		}
-	}, [userCenter, mapState]);
+	/* 🔹 FILTROS (AGORA GLOBAIS PARA GRÁFICOS) */
+	const [period, setPeriod] = useState("7d");
+	const [onlyEmergency, setOnlyEmergency] = useState(false);
 
-	// métricas
+	/* 🔹 INCIDENTES FILTRADOS (USADOS SOMENTE NOS GRÁFICOS) */
+	const filteredIncidents = useMemo(() => {
+		let data = filterByPeriod(incidents || [], period);
+
+		if (onlyEmergency) {
+			data = data.filter((i) => i.isEmergency);
+		}
+
+		return data;
+	}, [incidents, period, onlyEmergency]);
+
 	const [stats, setStats] = useState({
 		ocorrenciasHoje: 0,
 		ocorrenciasAtivas: 0,
@@ -61,104 +119,38 @@ export default function Dashboard() {
 	const [categoryData, setCategoryData] = useState([]);
 	const [statusData, setStatusData] = useState([]);
 	const [districtData, setDistrictData] = useState([]);
+	const [peakHourData, setPeakHourData] = useState([]);
+	const [emergencyPieData, setEmergencyPieData] = useState([]);
 
-	// 🔹 calcula métricas a partir dos incidents (já filtrados)
 	useEffect(() => {
-		if (!incidents || incidents.length === 0) {
-			setStats({
-				ocorrenciasHoje: 0,
-				ocorrenciasAtivas: 0,
-				emergenciasAtivas: 0,
-				emergenciasResolvidas: 0,
-				ocorrenciasResolvidas: 0,
-			});
-			setCategoryData([]);
-			return;
+		if (userCenter && !mapState) {
+			setMapState({ center: userCenter, zoom: 12 });
 		}
+	}, [userCenter, mapState]);
 
-		const formatarData = (d) => {
-			const dia = String(d.getDate()).padStart(2, "0");
-			const mes = String(d.getMonth() + 1).padStart(2, "0");
-			const ano = d.getFullYear();
-			return `${dia}/${mes}/${ano}`;
-		};
-
-		const dataHoje = formatarData(new Date());
+	/* 🔹 CARDS — INALTERADOS (USAM incidents ORIGINAL) */
+	useEffect(() => {
+		if (!incidents || incidents.length === 0) return;
 
 		const ocorrenciasHoje = incidents.filter(
-			(item) => item.data === dataHoje
+			(i) => i.status !== "resolved"
 		).length;
 
 		const ocorrenciasAtivas = incidents.filter(
-			(item) => item.status === "open"
+			(i) => i.status === "open"
 		).length;
 
 		const emergenciasAtivas = incidents.filter(
-			(item) => item.isEmergency === true && item.status !== "resolved"
+			(i) => i.isEmergency && i.status !== "resolved"
 		).length;
 
 		const emergenciasResolvidas = incidents.filter(
-			(item) => item.isEmergency === true && item.status === "resolved"
-		).length;
-
-		const emergencias = incidents.filter(
-			(item) => item.isEmergency === true
+			(i) => i.isEmergency && i.status === "resolved"
 		).length;
 
 		const ocorrenciasResolvidas = incidents.filter(
-			(item) => item.status === "resolved"
+			(i) => i.status === "resolved"
 		).length;
-
-		const ocorrenciasEmAndamento = incidents.filter(
-			(item) => item.status === "in_progress"
-		).length;
-
-		const ocorrenciasFechadas = incidents.filter(
-			(item) => item.status === "closed"
-		).length;
-
-		const ocorrenciasPendentes = incidents.filter(
-			(item) => item.status === "pending"
-		).length;
-
-		const categorias = {};
-		incidents.forEach((item) => {
-			const cat = item.ocorrencia?.categoria || "Sem categoria";
-			categorias[cat] = (categorias[cat] || 0) + 1;
-		});
-
-		const categoriaFormatada = Object.entries(categorias).map(
-			([categoria, quantidade]) => ({
-				categoria,
-				quantidade,
-			})
-		);
-
-		const status = {};
-		incidents.forEach((item) => {
-			const stat = item.status || "unknown";
-			status[stat] = (status[stat] || 0) + 1;
-		});
-
-		const statusFormatada = Object.entries(status).map(
-			([status, quantidade]) => ({
-				status,
-				quantidade,
-			})
-		);
-
-		const district = {};
-		incidents.forEach((item) => {
-			const zone = item.geoloc.district || "unknown";
-			district[zone] = (district[zone] || 0) + 1;
-		});
-
-		const districtFormatado = Object.entries(district).map(
-			([district, quantidade]) => ({
-				district,
-				quantidade,
-			})
-		);
 
 		setStats({
 			ocorrenciasHoje,
@@ -167,44 +159,62 @@ export default function Dashboard() {
 			emergenciasResolvidas,
 			ocorrenciasResolvidas,
 		});
-
-		setCategoryData(categoriaFormatada);
-		setStatusData(statusFormatada);
-		setDistrictData(districtFormatado);
 	}, [incidents]);
 
-	const cards = [
-		{
-			title: "Ocorrências Hoje",
-			value: stats.ocorrenciasHoje,
-			description: "Registradas nas últimas 24 horas",
-			icon: <TrendingUpIcon />,
-		},
-		{
-			title: "Ocorrências em aberto",
-			value: stats.ocorrenciasAtivas,
-			description: "Aguardando atendimento ou resolução",
-			icon: <LocationOnIcon />,
-		},
-		{
-			title: "Emergências em aberto",
-			value: stats.emergenciasAtivas,
-			description: "Exigem atenção imediata",
-			icon: <WarningIcon />,
-		},
-		{
-			title: "Emergências resolvidas",
-			value: stats.emergenciasResolvidas,
-			description: "Atendidas com sucesso",
-			icon: <TaskAltIcon />,
-		},
-		{
-			title: "Ocorrências resolvidas",
-			value: stats.ocorrenciasResolvidas,
-			description: "Encerradas com sucesso",
-			icon: <TaskAltIcon />,
-		},
-	];
+	/* 🔹 GRÁFICOS — AGORA USAM filteredIncidents */
+	useEffect(() => {
+		if (!filteredIncidents.length) return;
+
+		const totalEmergencias = filteredIncidents.filter(
+			(i) => i.isEmergency
+		).length;
+
+		const totalOcorrencias = filteredIncidents.length - totalEmergencias;
+
+		setEmergencyPieData([
+			{ name: "Emergências", value: totalEmergencias },
+			{ name: "Ocorrências", value: totalOcorrencias },
+		]);
+
+		const categorias = {};
+		const status = {};
+		const district = {};
+
+		filteredIncidents.forEach((item) => {
+			categorias[item.ocorrencia?.categoria || "Sem categoria"] =
+				(categorias[item.ocorrencia?.categoria || "Sem categoria"] ||
+					0) + 1;
+
+			status[item.status || "unknown"] =
+				(status[item.status || "unknown"] || 0) + 1;
+
+			district[item.geoloc?.district || "unknown"] =
+				(district[item.geoloc?.district || "unknown"] || 0) + 1;
+		});
+
+		setCategoryData(
+			Object.entries(categorias).map(([categoria, quantidade]) => ({
+				categoria,
+				quantidade,
+			}))
+		);
+
+		setStatusData(
+			Object.entries(status).map(([status, quantidade]) => ({
+				status,
+				quantidade,
+			}))
+		);
+
+		setDistrictData(
+			Object.entries(district).map(([district, quantidade]) => ({
+				district,
+				quantidade,
+			}))
+		);
+
+		setPeakHourData(buildPeakHourData(filteredIncidents));
+	}, [filteredIncidents]);
 
 	if (loading) {
 		return (
@@ -216,6 +226,34 @@ export default function Dashboard() {
 		);
 	}
 
+	const cards = [
+		{
+			title: "Ocorrências Hoje",
+			value: stats.ocorrenciasHoje,
+			icon: <TrendingUpIcon />,
+		},
+		{
+			title: "Ocorrências em aberto",
+			value: stats.ocorrenciasAtivas,
+			icon: <LocationOnIcon />,
+		},
+		{
+			title: "Emergências em aberto",
+			value: stats.emergenciasAtivas,
+			icon: <WarningIcon />,
+		},
+		{
+			title: "Emergências resolvidas",
+			value: stats.emergenciasResolvidas,
+			icon: <TaskAltIcon />,
+		},
+		{
+			title: "Ocorrências resolvidas",
+			value: stats.ocorrenciasResolvidas,
+			icon: <TaskAltIcon />,
+		},
+	];
+
 	return (
 		<Box sx={{ paddingTop: 2 }}>
 			{/* HEADER */}
@@ -225,6 +263,8 @@ export default function Dashboard() {
 					justifyContent: "space-between",
 					alignItems: "center",
 					mb: 3,
+					flexWrap: "wrap",
+					gap: 2,
 				}}
 			>
 				<Typography variant="h4" fontWeight={700}>
@@ -233,24 +273,46 @@ export default function Dashboard() {
 						: "Mapa de Ocorrências"}
 				</Typography>
 
-				<ToggleButtonGroup
-					value={viewMode}
-					exclusive
-					onChange={(_, val) => val && setViewMode(val)}
-					size="small"
-				>
-					<ToggleButton value="dashboard">
-						<DashboardIcon sx={{ mr: 1 }} />
-						Resumo
+				<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+					{/* 🔹 FILTROS */}
+					<ToggleButtonGroup
+						value={period}
+						exclusive
+						onChange={(_, v) => v && setPeriod(v)}
+						size="small"
+					>
+						<ToggleButton value="today">Hoje</ToggleButton>
+						<ToggleButton value="7d">7 dias</ToggleButton>
+						<ToggleButton value="30d">30 dias</ToggleButton>
+					</ToggleButtonGroup>
+
+					<ToggleButton
+						selected={onlyEmergency}
+						onChange={() => setOnlyEmergency(!onlyEmergency)}
+						size="small"
+					>
+						Somente Emergências
 					</ToggleButton>
-					<ToggleButton value="map">
-						<MapIcon sx={{ mr: 1 }} />
-						Mapa
-					</ToggleButton>
-				</ToggleButtonGroup>
+
+					<ToggleButtonGroup
+						color="primary"
+						value={viewMode}
+						exclusive
+						onChange={(_, val) => val && setViewMode(val)}
+						size="small"
+					>
+						<ToggleButton value="dashboard">
+							<DashboardIcon sx={{ mr: 1 }} />
+							Resumo
+						</ToggleButton>
+						<ToggleButton value="map">
+							<MapIcon sx={{ mr: 1 }} />
+							Mapa
+						</ToggleButton>
+					</ToggleButtonGroup>
+				</Box>
 			</Box>
 
-			{/* DASHBOARD */}
 			<Fade in={viewMode === "dashboard"} timeout={300} unmountOnExit>
 				<Box>
 					<Grid container spacing={3} justifyContent="center">
@@ -325,6 +387,14 @@ export default function Dashboard() {
 					</Grid>
 
 					<Box sx={{ mt: 5 }}>
+						<PeakHourChart data={peakHourData} />
+					</Box>
+
+					<Box sx={{ mt: 5 }}>
+						<EmergencyPieChart data={emergencyPieData} />
+					</Box>
+
+					<Box sx={{ mt: 5 }}>
 						<CategoryChart data={categoryData} />
 					</Box>
 
@@ -338,7 +408,6 @@ export default function Dashboard() {
 				</Box>
 			</Fade>
 
-			{/* MAPA */}
 			<Fade in={viewMode === "map"} timeout={300} unmountOnExit>
 				<Box
 					sx={{
@@ -348,7 +417,7 @@ export default function Dashboard() {
 					}}
 				>
 					<IncidentsMap
-						incidents={incidents}
+						incidents={filteredIncidents}
 						mapState={mapState}
 						onMapStateChange={setMapState}
 					/>

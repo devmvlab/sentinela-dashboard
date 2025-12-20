@@ -91,7 +91,7 @@ export default function Topbar({ handleDrawerOpen }) {
 
 		const q = query(
 			collection(db, "incidents"),
-			where("geoloc.city", "==", userCity)
+			where("geoloc.cityId", "==", userCity)
 		);
 
 		const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -267,7 +267,7 @@ export default function Topbar({ handleDrawerOpen }) {
 					)}
 
 					<Typography variant="body2">
-						<b>Hora:</b> {t.geoloc.city} - {t.hora}
+						<b>Hora:</b> {t.hora} - {t.geoloc.city}
 					</Typography>
 
 					<Box

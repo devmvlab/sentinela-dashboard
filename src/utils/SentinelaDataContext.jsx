@@ -5,9 +5,9 @@ import {
 	collection,
 	query,
 	where,
-	getDocs,
 	doc,
 	getDoc,
+	onSnapshot,
 } from "firebase/firestore";
 
 import { onAuthStateChanged } from "firebase/auth";
@@ -39,17 +39,26 @@ export function SentinelaDataProvider({ children }) {
 	}
 
 	useEffect(() => {
-		// escuta o estado de autenticação corretamente
+		let unsubscribeIncidents;
+
+		// escuta o estado de autenticação
 		const unsubscribeAuth = onAuthStateChanged(
 			auth,
 			async (currentUser) => {
-				// usuário ainda não logado
+				// usuário não logado
 				if (!currentUser) {
 					setUser(null);
 					setUserCity(null);
 					setUserCenter(null);
 					setIncidents([]);
+					setLastUpdate(null);
 					setLoading(false);
+
+					// encerra listener antigo
+					if (typeof unsubscribeIncidents === "function") {
+						unsubscribeIncidents();
+						unsubscribeIncidents = null;
+					}
 					return;
 				}
 
@@ -57,7 +66,7 @@ export function SentinelaDataProvider({ children }) {
 					setLoading(true);
 
 					// =============================
-					//  BUSCAR USUÁRIO NO FIRESTORE
+					// BUSCAR USUÁRIO NO FIRESTORE
 					// =============================
 					const userRef = doc(db, "users", currentUser.uid);
 					const userSnap = await getDoc(userRef);
@@ -71,7 +80,7 @@ export function SentinelaDataProvider({ children }) {
 					const userData = userSnap.data();
 
 					setUser(userData);
-					setUserCity(userData.displayName || null);
+					setUserCity(userData.cityId || null);
 
 					if (
 						userData.coordinates?.latitude &&
@@ -86,7 +95,7 @@ export function SentinelaDataProvider({ children }) {
 					}
 
 					// =============================
-					//  BUSCAR INCIDENTES DA CIDADE
+					// BUSCAR INCIDENTES DA CIDADE
 					// =============================
 					if (!userData.displayName) {
 						console.warn("Usuário não possui displayName (cidade)");
@@ -102,32 +111,38 @@ export function SentinelaDataProvider({ children }) {
 					} else {
 						q = query(
 							collection(db, "incidents"),
-							where("geoloc.city", "==", userData.displayName)
+							where("geoloc.cityId", "==", userData.cityId)
 						);
 					}
 
-					const snapshot = await getDocs(q);
+					// 🔔 LISTENER EM TEMPO REAL (ESSENCIAL PARA NOTIFICAÇÕES)
+					unsubscribeIncidents = onSnapshot(q, (snapshot) => {
+						const data = snapshot.docs.map((doc) => ({
+							id: doc.id,
+							...doc.data(),
+						}));
 
-					const data = snapshot.docs.map((doc) => ({
-						id: doc.id,
-						...doc.data(),
-					}));
-
-					setIncidents(data);
-					setLastUpdate(new Date());
+						setIncidents(data);
+						setLastUpdate(new Date());
+						setLoading(false);
+					});
 				} catch (error) {
 					console.error(
 						"Erro ao carregar dados do Sentinela:",
 						error
 					);
 					setIncidents([]);
-				} finally {
 					setLoading(false);
 				}
 			}
 		);
 
-		return () => unsubscribeAuth();
+		return () => {
+			unsubscribeAuth();
+			if (typeof unsubscribeIncidents === "function") {
+				unsubscribeIncidents();
+			}
+		};
 	}, []);
 
 	return (
