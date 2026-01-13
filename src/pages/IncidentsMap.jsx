@@ -31,6 +31,7 @@ export default function IncidentsMap({ mapState, onMapStateChange }) {
 				tipo: d.ocorrencia?.tipo,
 				descricao: d.desc,
 				endereco: d.geoloc?.address,
+				status: d.status,
 				hora: d.hora,
 
 				// ícone por categoria

@@ -6,6 +6,7 @@ import {
 } from "@react-google-maps/api";
 import { useState, useCallback } from "react";
 import { Box, Typography } from "@mui/material";
+import { statusLabels } from "../components/StatusChip";
 
 const containerStyle = {
 	width: "100%",
@@ -23,6 +24,7 @@ export default function SentinelaMap({
 	onMapStateChange,
 }) {
 	const [selected, setSelected] = useState(null);
+	const status = selected?.status?.toLowerCase();
 
 	const { isLoaded } = useJsApiLoader({
 		googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -133,6 +135,22 @@ export default function SentinelaMap({
 								sx={{ color: "#555", lineHeight: 1.4 }}
 							>
 								{selected.endereco}
+							</Typography>
+
+							{/* status com cor */}
+
+							<Typography
+								variant="body2"
+								sx={{
+									color:
+										status === "resolved"
+											? "#4CAF50"
+											: "#F44336",
+									lineHeight: 1.4,
+									paddingTop: 4,
+								}}
+							>
+								Status: {statusLabels[status] || status}
 							</Typography>
 
 							<Typography

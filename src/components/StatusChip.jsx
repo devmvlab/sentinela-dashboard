@@ -1,15 +1,14 @@
 import Chip from "@mui/material/Chip";
 
-// Map de tradução dos labels
-const statusLabels = {
+// 👇 exporte os maps
+export const statusLabels = {
 	pending: "PENDENTE",
-	open: "ABERTO",
+	open: "EM ABERTO",
 	closed: "FECHADO",
 	resolved: "RESOLVIDO",
 };
 
-// Map de cores do Chip
-const statusColors = {
+export const statusColors = {
 	pending: "default",
 	open: "warning",
 	closed: "error",
@@ -17,13 +16,12 @@ const statusColors = {
 };
 
 export default function StatusChip({ status }) {
-	const label = statusLabels[status] || status;
-	const color = statusColors[status] || "default";
+	const normalizedStatus = status?.toLowerCase();
 
 	return (
 		<Chip
-			label={label}
-			color={color}
+			label={statusLabels[normalizedStatus] || normalizedStatus}
+			color={statusColors[normalizedStatus] || "default"}
 			size="small"
 			variant="filled"
 			sx={{ fontWeight: "bold" }}
