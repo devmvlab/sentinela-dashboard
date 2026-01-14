@@ -13,7 +13,7 @@ export default function Settings() {
 		>
 			{/* Título da página */}
 			<Typography variant="h5" fontWeight="bold">
-				Configurações
+				Relatórios
 			</Typography>
 
 			{/* Subtítulo */}

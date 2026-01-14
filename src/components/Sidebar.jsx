@@ -7,12 +7,13 @@ import {
 	ListItemText,
 	IconButton,
 	Divider,
+	Tooltip,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import WarningIcon from "@mui/icons-material/Warning";
-import SettingsIcon from "@mui/icons-material/Settings";
+import DescriptionIcon from "@mui/icons-material/Description";
 import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
@@ -25,9 +26,9 @@ export default function Sidebar({ open, handleDrawerClose, theme }) {
 		{ text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
 		{ text: "Ocorrências", icon: <WarningIcon />, path: "/ocorrencias" },
 		{
-			text: "Configurações",
-			icon: <SettingsIcon />,
-			path: "/configuracoes",
+			text: "Relatórios",
+			icon: <DescriptionIcon />,
+			path: "/relatorios",
 		},
 	];
 
@@ -67,40 +68,48 @@ export default function Sidebar({ open, handleDrawerClose, theme }) {
 
 			<List sx={{ mt: 1 }}>
 				{menuItems.map(({ text, icon, path }) => (
-					<ListItem
+					<Tooltip
+						title={text}
+						placement="right"
+						arrow
 						key={text}
-						disablePadding
-						sx={{ display: "block" }}
+						disableHoverListener={open}
+						disableFocusListener={open}
+						disableTouchListener={open}
 					>
-						<ListItemButton
-							onClick={() => navigate(path)}
-							sx={{
-								minHeight: 48,
-								justifyContent: open ? "flex-start" : "center",
-								px: open ? 2.5 : 0,
-							}}
-						>
-							<ListItemIcon
+						<ListItem disablePadding sx={{ display: "block" }}>
+							<ListItemButton
+								onClick={() => navigate(path)}
 								sx={{
-									minWidth: 0,
-									width: open ? "auto" : "100%",
-									display: "flex",
-									justifyContent: "center",
-									mr: open ? 3 : 0,
-									color: "primary.text",
+									minHeight: 48,
+									justifyContent: open
+										? "flex-start"
+										: "center",
+									px: open ? 2.5 : 0,
 								}}
 							>
-								{icon}
-							</ListItemIcon>
+								<ListItemIcon
+									sx={{
+										minWidth: 0,
+										width: open ? "auto" : "100%",
+										display: "flex",
+										justifyContent: "center",
+										mr: open ? 3 : 0,
+										color: "primary.text",
+									}}
+								>
+									{icon}
+								</ListItemIcon>
 
-							{open && (
-								<ListItemText
-									primary={text}
-									sx={{ whiteSpace: "nowrap" }}
-								/>
-							)}
-						</ListItemButton>
-					</ListItem>
+								{open && (
+									<ListItemText
+										primary={text}
+										sx={{ whiteSpace: "nowrap" }}
+									/>
+								)}
+							</ListItemButton>
+						</ListItem>
+					</Tooltip>
 				))}
 			</List>
 		</Drawer>

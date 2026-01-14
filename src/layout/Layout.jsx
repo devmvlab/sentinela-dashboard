@@ -15,7 +15,7 @@ const drawerWidthClosed = 70;
 
 export default function Layout() {
 	const theme = useTheme();
-	const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(true);
 
 	return (
 		<Box sx={{ display: "flex" }}>

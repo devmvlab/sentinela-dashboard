@@ -314,15 +314,17 @@ export default function Dashboard() {
 			</Box>
 
 			<Fade in={viewMode === "dashboard"} timeout={300} unmountOnExit>
-				<Box>
-					<Grid container spacing={3} justifyContent="center">
-						<SafetyCard
-							incidents={incidents}
-							userCenter={userCenter}
-							period="7d"
-						/>
+				<Box style={{ width: "100%" }}>
+					<Grid container spacing={3}>
+						<Grid item xs={12} md={6} lg={4} xl={4}>
+							<SafetyCard
+								incidents={incidents}
+								userCenter={userCenter}
+								period="7d"
+							/>
+						</Grid>
 						{cards.map((card, i) => (
-							<Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+							<Grid item key={i} xs={12} md={6} lg={4} xl={4}>
 								<Card
 									sx={{
 										backgroundColor:

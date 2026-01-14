@@ -4,7 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Layout from "./layout/Layout";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Incidents from "./pages/Incidents";
-import Configurations from "./pages/Configurations";
+import Reports from "./pages/Reports";
 
 const router = createBrowserRouter([
 	// 🔹 Tela de login (sem Layout)
@@ -31,8 +31,8 @@ const router = createBrowserRouter([
 				element: <Incidents />,
 			},
 			{
-				path: "/configuracoes",
-				element: <Configurations />,
+				path: "/relatorios",
+				element: <Reports />,
 			},
 			{
 				path: "usuarios",
