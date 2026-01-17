@@ -391,25 +391,29 @@ export default function Dashboard() {
 						))}
 					</Grid>
 
-					<Box sx={{ mt: 5 }}>
-						<PeakHourChart data={peakHourData} />
-					</Box>
+					<Grid size={{ xs: 12 }}>
+						<Grid container spacing={3} sx={{ mt: 5 }}>
+							<Grid size={{ xs: 12, md: 6 }}>
+								<PeakHourChart data={peakHourData} />
+							</Grid>
 
-					<Box sx={{ mt: 5 }}>
-						<EmergencyPieChart data={emergencyPieData} />
-					</Box>
+							<Grid size={{ xs: 12, md: 6 }}>
+								<EmergencyPieChart data={emergencyPieData} />
+							</Grid>
 
-					<Box sx={{ mt: 5 }}>
-						<CategoryChart data={categoryData} />
-					</Box>
+							<Grid size={{ xs: 12, md: 6 }}>
+								<CategoryChart data={categoryData} />
+							</Grid>
 
-					<Box sx={{ mt: 5 }}>
-						<StatusChart data={statusData} />
-					</Box>
+							<Grid size={{ xs: 12, md: 6 }}>
+								<StatusChart data={statusData} />
+							</Grid>
 
-					<Box sx={{ mt: 5 }}>
-						<DistrictChart data={districtData} />
-					</Box>
+							<Grid size={{ xs: 12, md: 6 }}>
+								<DistrictChart data={districtData} />
+							</Grid>
+						</Grid>
+					</Grid>
 				</Box>
 			</Fade>
 
