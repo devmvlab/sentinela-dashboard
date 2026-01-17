@@ -6,7 +6,9 @@ import {
 	MenuItem,
 	TextField,
 	Button,
+	InputAdornment,
 } from "@mui/material";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
 import { categories } from "../utils/Categories";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -74,7 +76,6 @@ export default function Filters({
 				type="date"
 				label="Data Inicial"
 				InputLabelProps={{ shrink: true }}
-				sx={{ width: 160 }}
 				value={startDate}
 				max={endDate || undefined}
 				onChange={(e) => {
@@ -85,6 +86,12 @@ export default function Filters({
 						setEndDate(value);
 					}
 				}}
+				sx={{
+					width: 160,
+					"& input::-webkit-calendar-picker-indicator": {
+						filter: "invert(1)", // muda a cor (hack)
+					},
+				}}
 			/>
 
 			{/* DATA FINAL */}
@@ -93,7 +100,12 @@ export default function Filters({
 				type="date"
 				label="Data Final"
 				InputLabelProps={{ shrink: true }}
-				sx={{ width: 160 }}
+				sx={{
+					width: 160,
+					"& input::-webkit-calendar-picker-indicator": {
+						filter: "invert(1)", // muda a cor (hack)
+					},
+				}}
 				value={endDate}
 				min={startDate || undefined}
 				onChange={(e) => {
