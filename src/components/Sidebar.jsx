@@ -14,13 +14,14 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import WarningIcon from "@mui/icons-material/Warning";
 import DescriptionIcon from "@mui/icons-material/Description";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const drawerWidth = 240;
 const drawerWidthClosed = 70;
 
 export default function Sidebar({ open, handleDrawerClose, theme }) {
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const menuItems = [
 		{ text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
@@ -67,50 +68,66 @@ export default function Sidebar({ open, handleDrawerClose, theme }) {
 			<Divider />
 
 			<List sx={{ mt: 1 }}>
-				{menuItems.map(({ text, icon, path }) => (
-					<Tooltip
-						title={text}
-						placement="right"
-						arrow
-						key={text}
-						disableHoverListener={open}
-						disableFocusListener={open}
-						disableTouchListener={open}
-					>
-						<ListItem disablePadding sx={{ display: "block" }}>
-							<ListItemButton
-								onClick={() => navigate(path)}
-								sx={{
-									minHeight: 48,
-									justifyContent: open
-										? "flex-start"
-										: "center",
-									px: open ? 2.5 : 0,
-								}}
-							>
-								<ListItemIcon
+				{menuItems.map(({ text, icon, path }) => {
+					const selected = location.pathname === path;
+
+					return (
+						<Tooltip
+							title={text}
+							placement="right"
+							arrow
+							key={text}
+							disableHoverListener={open}
+							disableFocusListener={open}
+							disableTouchListener={open}
+						>
+							<ListItem disablePadding sx={{ display: "block" }}>
+								<ListItemButton
+									selected={selected}
+									onClick={() => navigate(path)}
 									sx={{
-										minWidth: 0,
-										width: open ? "auto" : "100%",
-										display: "flex",
-										justifyContent: "center",
-										mr: open ? 3 : 0,
-										color: "primary.text",
+										minHeight: 48,
+										justifyContent: open
+											? "flex-start"
+											: "center",
+										px: open ? 2.5 : 0,
+
+										// 🎯 ESTILO SELECIONADO
+										"&.Mui-selected": {
+											backgroundColor: "#222639",
+											color: "text.primary",
+										},
+										"&.Mui-selected:hover": {
+											backgroundColor: "#222639",
+										},
 									}}
 								>
-									{icon}
-								</ListItemIcon>
+									<ListItemIcon
+										sx={{
+											minWidth: 0,
+											width: open ? "auto" : "100%",
+											display: "flex",
+											justifyContent: "center",
+											mr: open ? 3 : 0,
+											color: "text.primary",
+										}}
+									>
+										{icon}
+									</ListItemIcon>
 
-								{open && (
-									<ListItemText
-										primary={text}
-										sx={{ whiteSpace: "nowrap" }}
-									/>
-								)}
-							</ListItemButton>
-						</ListItem>
-					</Tooltip>
-				))}
+									{open && (
+										<ListItemText
+											primary={text}
+											sx={{
+												whiteSpace: "nowrap",
+											}}
+										/>
+									)}
+								</ListItemButton>
+							</ListItem>
+						</Tooltip>
+					);
+				})}
 			</List>
 		</Drawer>
 	);
