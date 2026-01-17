@@ -36,8 +36,9 @@ export default function SafetyCard({ incidents, userCenter, period }) {
 				backgroundColor: "background.paper",
 				borderRadius: 2,
 				p: 2.5,
-				minHeight: 170, // ⬅️ aumentamos a altura
+				minHeight: 170,
 				display: "flex",
+				alignItems: "center",
 				gap: 2,
 				boxShadow: "0 4px 12px rgba(0,0,0,0.35)",
 			}}
@@ -45,8 +46,8 @@ export default function SafetyCard({ incidents, userCenter, period }) {
 			{/* ÍCONE */}
 			<Box
 				sx={{
-					width: 54,
-					height: 54,
+					width: 100,
+					height: 100,
 					borderRadius: "12px",
 					backgroundColor: data.color + "25",
 					display: "flex",
@@ -57,17 +58,20 @@ export default function SafetyCard({ incidents, userCenter, period }) {
 					flexShrink: 0,
 				}}
 			>
-				<ShieldIcon />
+				<ShieldIcon sx={{ fontSize: 48 }} />
 			</Box>
 
 			{/* CONTEÚDO */}
-			<Box sx={{ flex: 1 }}>
+			<Box
+				sx={{
+					flex: 1,
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "flex-end",
+				}}
+			>
 				{/* LABEL */}
-				<Typography
-					variant="caption"
-					fontWeight={700}
-					sx={{ opacity: 0.85 }}
-				>
+				<Typography variant="body1" fontWeight={700}>
 					Nível de segurança
 				</Typography>
 
@@ -103,6 +107,7 @@ export default function SafetyCard({ incidents, userCenter, period }) {
 					value={data.score}
 					sx={{
 						mt: 1,
+						width: "100%",
 						height: 6,
 						borderRadius: 4,
 						backgroundColor: "#2a2a2a",

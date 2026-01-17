@@ -230,27 +230,27 @@ export default function Dashboard() {
 		{
 			title: "Ocorrências Hoje",
 			value: stats.ocorrenciasHoje,
-			icon: <TrendingUpIcon />,
+			icon: <TrendingUpIcon sx={{ fontSize: 48 }} />,
 		},
 		{
 			title: "Ocorrências em aberto",
 			value: stats.ocorrenciasAtivas,
-			icon: <LocationOnIcon />,
+			icon: <LocationOnIcon sx={{ fontSize: 48 }} />,
 		},
 		{
 			title: "Emergências em aberto",
 			value: stats.emergenciasAtivas,
-			icon: <WarningIcon />,
+			icon: <WarningIcon sx={{ fontSize: 48 }} />,
 		},
 		{
 			title: "Emergências resolvidas",
 			value: stats.emergenciasResolvidas,
-			icon: <TaskAltIcon />,
+			icon: <TaskAltIcon sx={{ fontSize: 48 }} />,
 		},
 		{
 			title: "Ocorrências resolvidas",
 			value: stats.ocorrenciasResolvidas,
-			icon: <TaskAltIcon />,
+			icon: <TaskAltIcon sx={{ fontSize: 48 }} />,
 		},
 	];
 
@@ -336,6 +336,7 @@ export default function Dashboard() {
 										p: 2.5,
 										minHeight: 170,
 										display: "flex",
+										alignItems: "center",
 										gap: 2,
 										boxShadow:
 											"0 4px 12px rgba(0,0,0,0.35)",
@@ -343,8 +344,8 @@ export default function Dashboard() {
 								>
 									<Box
 										sx={{
-											width: 54,
-											height: 54,
+											width: 100,
+											height: 100,
 											borderRadius: "12px",
 											backgroundColor:
 												theme.palette.primary.main +
@@ -360,11 +361,17 @@ export default function Dashboard() {
 										{card.icon}
 									</Box>
 
-									<Box sx={{ flex: 1 }}>
+									<Box
+										sx={{
+											flex: 1,
+											display: "flex",
+											flexDirection: "column",
+											alignItems: "flex-end",
+										}}
+									>
 										<Typography
-											variant="caption"
+											variant="body1"
 											fontWeight={700}
-											sx={{ opacity: 0.85 }}
 										>
 											{card.title}
 										</Typography>
@@ -380,7 +387,11 @@ export default function Dashboard() {
 										<Typography
 											variant="caption"
 											color="text.secondary"
-											sx={{ mt: 1, display: "block" }}
+											sx={{
+												mt: 1,
+												display: "block",
+												fontStyle: "italic",
+											}}
 										>
 											Última atualização:{" "}
 											{formatTime(lastUpdate)}
