@@ -42,6 +42,7 @@ export default function DistrictChart({ data }) {
 
 						{/* Tooltip */}
 						<Tooltip
+							cursor={false}
 							contentStyle={{
 								backgroundColor: theme.palette.background.paper,
 								color: "#fff",

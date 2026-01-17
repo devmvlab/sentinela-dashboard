@@ -41,6 +41,7 @@ export default function EmergencyPieChart({ data }) {
 
 							{/* Tooltip customizado */}
 							<Tooltip
+								cursor={false}
 								contentStyle={{
 									backgroundColor:
 										theme.palette.background.paper,

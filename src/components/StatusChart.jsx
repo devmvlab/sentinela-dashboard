@@ -54,6 +54,7 @@ export default function StatusChart({ data }) {
 						<YAxis stroke="#ccc" />
 
 						<Tooltip
+							cursor={false}
 							contentStyle={{
 								backgroundColor: theme.palette.background.paper,
 								borderRadius: "8px",

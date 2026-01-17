@@ -42,6 +42,7 @@ export default function PeakHourChart({ data }) {
 
 						{/* Tooltip customizado (igual CategoryChart) */}
 						<Tooltip
+							cursor={false}
 							contentStyle={{
 								backgroundColor: theme.palette.background.paper,
 								color: "#fff",
