@@ -299,6 +299,7 @@ export default function Topbar({ handleDrawerOpen }) {
 				boxShadow: "none",
 				zIndex: (theme) => theme.zIndex.drawer + 1,
 				borderRadius: 0,
+				borderBottom: "1px solid #ffffff33",
 			}}
 		>
 			<Toolbar style={{ paddingLeft: "12px", paddingRight: "12px" }}>
