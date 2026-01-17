@@ -1,42 +1,105 @@
 import { Box, Typography, Paper } from "@mui/material";
+import Filters from "../components/Filters";
+import useIncidentFilters from "../utils/useIncidentFilters";
+import { useState } from "react";
+import { useSentinelaData } from "../utils/SentinelaDataContext";
+
+import Button from "@mui/material/Button";
+import DescriptionIcon from "@mui/icons-material/Description";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import Stack from "@mui/material/Stack";
 
 export default function Settings() {
+	const [statusFilter, setStatusFilter] = useState("all");
+	const [category, setCategory] = useState("all");
+	const [startDate, setStartDate] = useState("");
+	const [endDate, setEndDate] = useState("");
+	const [search, setSearch] = useState("");
+
+	const { incidents } = useSentinelaData();
+
+	function clearFilters() {
+		setStatusFilter("all");
+		setCategory("all");
+		setStartDate("");
+		setEndDate("");
+		setSearch("");
+	}
+
+	const filteredRows = useIncidentFilters(incidents || [], {
+		status: statusFilter,
+		category,
+		startDate,
+		endDate,
+		search,
+	});
+
 	return (
-		<Box
-			sx={{
-				height: "100%",
-				padding: 3,
-				display: "flex",
-				flexDirection: "column",
-				gap: 2,
-			}}
-		>
-			{/* Título da página */}
-			<Typography variant="h5" fontWeight="bold">
-				Relatórios
-			</Typography>
-
-			{/* Subtítulo */}
-			<Typography variant="body2" color="text.secondary">
-				Ajustes e preferências do sistema
-			</Typography>
-
-			{/* Conteúdo vazio */}
-			<Paper
-				elevation={0}
+		console.log(filteredRows),
+		(
+			<Box
 				sx={{
-					flex: 1,
-					borderRadius: 2,
-					border: "1px dashed",
-					borderColor: "divider",
+					height: "100%",
+					padding: 3,
 					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					color: "text.secondary",
+					flexDirection: "column",
+					gap: 2,
 				}}
 			>
-				<Typography variant="body2">Em desenvolvimento 🚧</Typography>
-			</Paper>
-		</Box>
+				{/* Título da página */}
+				<Typography variant="h5" fontWeight="bold">
+					Relatórios
+				</Typography>
+
+				{/* Subtítulo */}
+				<Typography variant="body2" color="text.secondary">
+					Ajustes e preferências do sistema
+				</Typography>
+
+				{/* Conteúdo vazio */}
+				<Paper
+					sx={{
+						height: "100%",
+						width: "100%",
+						alignItems: "center",
+						p: 1,
+						display: "flex",
+						flexDirection: "column",
+						justifyContent: "center",
+						gap: 1,
+					}}
+				>
+					<Filters
+						status={statusFilter}
+						setStatus={setStatusFilter}
+						category={category}
+						setCategory={setCategory}
+						startDate={startDate}
+						setStartDate={setStartDate}
+						endDate={endDate}
+						setEndDate={setEndDate}
+						search={search}
+						setSearch={setSearch}
+						onClear={clearFilters}
+						showSearch={false}
+					/>
+
+					<Stack direction="row" spacing={2}>
+						<Button
+							variant="outlined"
+							startIcon={<DescriptionIcon />}
+						>
+							Gerar Excel
+						</Button>
+						<Button
+							variant="outlined"
+							endIcon={<PictureAsPdfIcon />}
+						>
+							Gerar PDF
+						</Button>
+					</Stack>
+				</Paper>
+			</Box>
+		)
 	);
 }

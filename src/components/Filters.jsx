@@ -23,6 +23,7 @@ export default function Filters({
 	search,
 	setSearch,
 	onClear,
+	showSearch = true,
 }) {
 	return (
 		<Box
@@ -106,14 +107,16 @@ export default function Filters({
 			/>
 
 			{/* BUSCA POR TEXTO */}
-			<TextField
-				size="small"
-				sx={{ width: 220 }}
-				label="Buscar..."
-				placeholder="Endereço, tipo, categoria..."
-				value={search}
-				onChange={(e) => setSearch(e.target.value)}
-			/>
+			{showSearch && (
+				<TextField
+					size="small"
+					sx={{ width: 220 }}
+					label="Buscar..."
+					placeholder="Endereço, tipo, categoria..."
+					value={search}
+					onChange={(e) => setSearch(e.target.value)}
+				/>
+			)}
 
 			{/* BOTÃO LIMPAR FILTROS */}
 			<Button
