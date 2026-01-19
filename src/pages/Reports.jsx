@@ -8,6 +8,8 @@ import Button from "@mui/material/Button";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import Stack from "@mui/material/Stack";
+import { exportIncidentsToExcel } from "../utils/exportToExcel";
+import { exportIncidentsToPdf } from "../utils/exportIncidentsToPdf";
 
 export default function Settings() {
 	const [statusFilter, setStatusFilter] = useState("all");
@@ -88,12 +90,14 @@ export default function Settings() {
 						<Button
 							variant="outlined"
 							startIcon={<DescriptionIcon />}
+							onClick={() => exportIncidentsToExcel(filteredRows)}
 						>
 							Gerar Excel
 						</Button>
 						<Button
 							variant="outlined"
 							endIcon={<PictureAsPdfIcon />}
+							onClick={() => exportIncidentsToPdf(filteredRows)}
 						>
 							Gerar PDF
 						</Button>
