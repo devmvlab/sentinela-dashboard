@@ -305,7 +305,6 @@ export default function Topbar({ handleDrawerOpen }) {
 				<IconButton onClick={handleDrawerOpen} sx={{ mr: 2 }}>
 					<MenuIcon />
 				</IconButton>
-
 				<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 					<img
 						src={logo}
@@ -320,10 +319,9 @@ export default function Topbar({ handleDrawerOpen }) {
 						SENTINELA
 					</Typography>
 				</Box>
-
 				{/* empurra o resto para a direita */}
 				<Box sx={{ flexGrow: 1 }} />
-
+				{auth.currentUser?.displayName}
 				{/* SINO (badge) */}
 				<Box
 					sx={{
@@ -359,7 +357,6 @@ export default function Topbar({ handleDrawerOpen }) {
 					{/* dropdown posicionado relativo ao AppBar */}
 					{NotificacoesDropdown}
 				</Box>
-
 				{/* AVATAR / MENU PERFIL */}
 				<IconButton onClick={openProfileMenu} sx={{ p: 0 }}>
 					<Avatar
@@ -369,7 +366,6 @@ export default function Topbar({ handleDrawerOpen }) {
 						{auth.currentUser?.displayName?.charAt(0)}
 					</Avatar>
 				</IconButton>
-
 				<Menu
 					anchorEl={anchorEl}
 					open={Boolean(anchorEl)}
@@ -388,10 +384,8 @@ export default function Topbar({ handleDrawerOpen }) {
 						<LogoutIcon sx={{ mr: 1 }} /> Sair
 					</MenuItem>
 				</Menu>
-
 				{/* Toasts (global) */}
 				{ToastContainer}
-
 				{/* animações CSS keyframes inline */}
 				<Box
 					sx={{

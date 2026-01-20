@@ -87,7 +87,7 @@ export default function Login() {
 					backgroundColor: "background.paper",
 					borderRadius: 4,
 					textAlign: "center",
-					paddingY: 3,
+					paddingY: 1,
 					boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
 				}}
 			>
@@ -99,17 +99,21 @@ export default function Login() {
 							width: 130,
 							height: 130,
 							objectFit: "contain",
-							marginBottom: 8,
 						}}
 					/>
 
+					<Typography variant="h5" fontWeight={700}>
+						SENTINELA
+					</Typography>
+
 					<Typography
-						variant="h5"
-						fontWeight={700}
-						color="primary.main"
-						sx={{ mb: 3 }}
+						variant="caption"
+						color="text.primary"
+						sx={{
+							mb: 3,
+						}}
 					>
-						Sentinela
+						Segurança colaborativa em tempo real
 					</Typography>
 
 					<TextField
@@ -170,28 +174,42 @@ export default function Login() {
 						</Typography>
 					)}
 
-					<Button
-						variant="contained"
-						fullWidth
-						onClick={handleLogin}
-						disabled={loading}
+					<Box sx={{ mt: 2, mb: 3 }}>
+						<Button
+							variant="contained"
+							fullWidth
+							onClick={handleLogin}
+							disabled={loading}
+							sx={{
+								py: 1.2,
+								borderRadius: 2,
+								fontWeight: 700,
+							}}
+						>
+							{loading ? (
+								<CircularProgress
+									size={26}
+									sx={{ color: "#20284E" }}
+								/>
+							) : (
+								"Entrar"
+							)}
+						</Button>
+					</Box>
+				</CardContent>
+
+				<Box sx={{ mt: 4 }}>
+					<Typography
+						variant="caption"
+						color="text.secondary"
 						sx={{
-							mt: 2,
-							py: 1.2,
-							borderRadius: 2,
-							fontWeight: 700,
+							textAlign: "center",
+							opacity: 0.6,
 						}}
 					>
-						{loading ? (
-							<CircularProgress
-								size={26}
-								sx={{ color: "#20284E" }}
-							/>
-						) : (
-							"Entrar"
-						)}
-					</Button>
-				</CardContent>
+						Plataforma de monitoramento
+					</Typography>
+				</Box>
 			</Card>
 		</Box>
 	);
