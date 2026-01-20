@@ -5,6 +5,7 @@ import Layout from "./layout/Layout";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Incidents from "./pages/Incidents";
 import Reports from "./pages/Reports";
+import Profile from "./pages/Profile";
 
 const router = createBrowserRouter([
 	// 🔹 Tela de login (sem Layout)
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
 			{
 				path: "/dashboard",
 				element: <Dashboard />,
+			},
+			{
+				path: "/perfil",
+				element: <Profile />,
 			},
 			{
 				path: "/ocorrencias",

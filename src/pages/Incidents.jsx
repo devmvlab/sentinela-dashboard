@@ -64,7 +64,7 @@ export default function Incidents() {
 		if (!incidents || incidents.length === 0) return;
 
 		const incident = incidents.find(
-			(item) => item.id === location.state.openIncidentId
+			(item) => item.id === location.state.openIncidentId,
 		);
 
 		if (incident) {
@@ -173,163 +173,180 @@ export default function Incidents() {
 	}
 
 	return (
-		<Paper sx={{ height: "100%", width: "100%" }}>
-			{/* FILTROS */}
-			<Filters
-				status={statusFilter}
-				setStatus={setStatusFilter}
-				category={category}
-				setCategory={setCategory}
-				startDate={startDate}
-				setStartDate={setStartDate}
-				endDate={endDate}
-				setEndDate={setEndDate}
-				search={search}
-				setSearch={setSearch}
-				onClear={clearFilters}
-			/>
-
-			<DataGrid
-				rows={filteredRows}
-				columns={columns}
-				getRowId={(row) => row.id}
-				paginationModel={paginationModel}
-				onPaginationModelChange={setPaginationModel}
-				pageSizeOptions={[5, 10, 15, 20]}
-				sx={{
-					border: 0,
-					cursor: "pointer",
-					"& .MuiDataGrid-row:hover": {
-						backgroundColor: theme.palette.tableHover,
-					},
-					"& .MuiDataGrid-columnHeaderTitle": {
-						fontWeight: "bold",
-						textTransform: "uppercase",
-						fontSize: "0.85rem",
-						color: theme.palette.primary.main,
-					},
-				}}
-				onRowClick={(params) => {
-					setCurrentIncident(params.row);
-					setOpenModal(true);
-				}}
-			/>
-
-			{/* MODAL */}
-			<Dialog
-				open={openModal}
-				onClose={() => setOpenModal(false)}
-				fullWidth
-				maxWidth="md"
+		<Box>
+			<Typography
+				variant="h4"
+				paddingTop={2}
+				paddingBottom={2}
+				fontWeight={700}
 			>
-				<DialogTitle sx={{ fontWeight: "bold", m: 0, p: 2 }}>
-					Detalhes da Ocorrência
-					<IconButton
-						aria-label="close"
-						onClick={() => setOpenModal(false)}
-						sx={{
-							position: "absolute",
-							right: 8,
-							top: 8,
-							color: (theme) => theme.palette.grey[500],
-						}}
-					>
-						<CloseIcon />
-					</IconButton>
-				</DialogTitle>
+				Ocorrências
+			</Typography>
+			<Paper sx={{ height: "100%", width: "100%" }}>
+				{/* FILTROS */}
+				<Filters
+					status={statusFilter}
+					setStatus={setStatusFilter}
+					category={category}
+					setCategory={setCategory}
+					startDate={startDate}
+					setStartDate={setStartDate}
+					endDate={endDate}
+					setEndDate={setEndDate}
+					search={search}
+					setSearch={setSearch}
+					onClear={clearFilters}
+				/>
 
-				<DialogContent dividers>
-					{currentIncident && (
-						<Box
+				<DataGrid
+					rows={filteredRows}
+					columns={columns}
+					getRowId={(row) => row.id}
+					paginationModel={paginationModel}
+					onPaginationModelChange={setPaginationModel}
+					pageSizeOptions={[5, 10, 15, 20]}
+					sx={{
+						border: 0,
+						cursor: "pointer",
+						"& .MuiDataGrid-row:hover": {
+							backgroundColor: theme.palette.tableHover,
+						},
+						"& .MuiDataGrid-columnHeaderTitle": {
+							fontWeight: "bold",
+							textTransform: "uppercase",
+							fontSize: "0.85rem",
+							color: theme.palette.primary.main,
+						},
+					}}
+					onRowClick={(params) => {
+						setCurrentIncident(params.row);
+						setOpenModal(true);
+					}}
+				/>
+
+				{/* MODAL */}
+				<Dialog
+					open={openModal}
+					onClose={() => setOpenModal(false)}
+					fullWidth
+					maxWidth="md"
+				>
+					<DialogTitle sx={{ fontWeight: "bold", m: 0, p: 2 }}>
+						Detalhes da Ocorrência
+						<IconButton
+							aria-label="close"
+							onClick={() => setOpenModal(false)}
 							sx={{
-								display: "flex",
-								flexDirection: "column",
-								gap: 2,
+								position: "absolute",
+								right: 8,
+								top: 8,
+								color: (theme) => theme.palette.grey[500],
 							}}
 						>
-							{currentIncident.imageUrl && (
-								<img
-									src={currentIncident.imageUrl}
-									alt="Imagem da ocorrência"
-									style={{
-										width: "100%",
-										borderRadius: 8,
-										marginBottom: 10,
-									}}
-								/>
-							)}
+							<CloseIcon />
+						</IconButton>
+					</DialogTitle>
 
-							<Typography>
-								<b>Descrição:</b> {currentIncident.desc}
-							</Typography>
+					<DialogContent dividers>
+						{currentIncident && (
+							<Box
+								sx={{
+									display: "flex",
+									flexDirection: "column",
+									gap: 2,
+								}}
+							>
+								{currentIncident.imageUrl && (
+									<img
+										src={currentIncident.imageUrl}
+										alt="Imagem da ocorrência"
+										style={{
+											width: "100%",
+											borderRadius: 8,
+											marginBottom: 10,
+										}}
+									/>
+								)}
 
-							<Divider />
+								<Typography>
+									<b>Descrição:</b> {currentIncident.desc}
+								</Typography>
 
-							<Typography>
-								<b>Categoria:</b>{" "}
-								{currentIncident.ocorrencia?.categoria}
-							</Typography>
-							<Typography>
-								<b>Tipo:</b> {currentIncident.ocorrencia?.tipo}
-							</Typography>
-							<Typography>
-								<b>Data:</b> {currentIncident.data} às{" "}
-								{currentIncident.hora}
-							</Typography>
+								<Divider />
 
-							<Divider />
+								<Typography>
+									<b>Categoria:</b>{" "}
+									{currentIncident.ocorrencia?.categoria}
+								</Typography>
+								<Typography>
+									<b>Tipo:</b>{" "}
+									{currentIncident.ocorrencia?.tipo}
+								</Typography>
+								<Typography>
+									<b>Data:</b> {currentIncident.data} às{" "}
+									{currentIncident.hora}
+								</Typography>
 
-							<Typography>
-								<b>Endereço:</b>{" "}
-								{currentIncident.geoloc?.address}
-							</Typography>
-							<Typography>
-								<b>Cidade:</b> {currentIncident.geoloc?.city} -{" "}
-								{currentIncident.geoloc?.state}
-							</Typography>
-							<Typography>
-								<b>CEP:</b> {currentIncident.geoloc?.postalCode}
-							</Typography>
+								<Divider />
 
-							<Divider />
+								<Typography>
+									<b>Endereço:</b>{" "}
+									{currentIncident.geoloc?.address}
+								</Typography>
+								<Typography>
+									<b>Cidade:</b>{" "}
+									{currentIncident.geoloc?.city} -{" "}
+									{currentIncident.geoloc?.state}
+								</Typography>
+								<Typography>
+									<b>CEP:</b>{" "}
+									{currentIncident.geoloc?.postalCode}
+								</Typography>
 
-							<Typography component="div">
-								<b>Status atual:</b>{" "}
-								<StatusChip status={currentIncident.status} />
-							</Typography>
-						</Box>
-					)}
-				</DialogContent>
+								<Divider />
 
-				<DialogActions>
-					<Button
-						variant="outlined"
-						color="error"
-						startIcon={<CloseIcon />}
-						onClick={() => updateStatusInsideModal("closed")}
-					>
-						Marcar como FECHADO
-					</Button>
+								<Typography component="div">
+									<b>Status atual:</b>{" "}
+									<StatusChip
+										status={currentIncident.status}
+									/>
+								</Typography>
+							</Box>
+						)}
+					</DialogContent>
 
-					<Button
-						variant="contained"
-						color="success"
-						startIcon={<CheckIcon />}
-						onClick={() => updateStatusInsideModal("resolved")}
-					>
-						Marcar como RESOLVIDO
-					</Button>
-				</DialogActions>
-			</Dialog>
+					<DialogActions>
+						<Button
+							variant="outlined"
+							color="error"
+							startIcon={<CloseIcon />}
+							onClick={() =>
+								updateStatusInsideModal("in_progress")
+							}
+						>
+							Marcar como EM ANDAMENTO
+						</Button>
 
-			{/* SNACKBAR */}
-			<Snackbar
-				open={snackbar.open}
-				autoHideDuration={3000}
-				onClose={() => setSnackbar({ open: false, message: "" })}
-			>
-				<Alert severity="success">{snackbar.message}</Alert>
-			</Snackbar>
-		</Paper>
+						<Button
+							variant="contained"
+							color="success"
+							startIcon={<CheckIcon />}
+							onClick={() => updateStatusInsideModal("resolved")}
+						>
+							Marcar como RESOLVIDO
+						</Button>
+					</DialogActions>
+				</Dialog>
+
+				{/* SNACKBAR */}
+				<Snackbar
+					open={snackbar.open}
+					autoHideDuration={3000}
+					onClose={() => setSnackbar({ open: false, message: "" })}
+				>
+					<Alert severity="success">{snackbar.message}</Alert>
+				</Snackbar>
+			</Paper>
+		</Box>
 	);
 }

@@ -49,13 +49,13 @@ export default function Settings() {
 				}}
 			>
 				{/* Título da página */}
-				<Typography variant="h5" fontWeight="bold">
+				<Typography variant="h4" fontWeight="bold">
 					Relatórios
 				</Typography>
 
 				{/* Subtítulo */}
 				<Typography variant="body2" color="text.secondary">
-					Ajustes e preferências do sistema
+					Gerar relatórios das ocorrências registradas no sistema.
 				</Typography>
 
 				{/* Conteúdo vazio */}

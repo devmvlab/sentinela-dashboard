@@ -91,7 +91,7 @@ export default function Topbar({ handleDrawerOpen }) {
 
 		const q = query(
 			collection(db, "incidents"),
-			where("geoloc.cityId", "==", userCity)
+			where("geoloc.cityId", "==", userCity),
 		);
 
 		const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -211,15 +211,14 @@ export default function Topbar({ handleDrawerOpen }) {
 					<Typography
 						variant="button"
 						onClick={() => {
-							// futuro: levar para tela de todas as notificações
-							// navigate("/notificacoes")
+							setHistoricoNotificacoes([]);
 						}}
 						sx={{
 							cursor: "pointer",
 							color: theme.palette.primary.main,
 						}}
 					>
-						Ver todas
+						LIMPAR
 					</Typography>
 				</Box>
 			)}
@@ -273,7 +272,7 @@ export default function Topbar({ handleDrawerOpen }) {
 					<Box
 						onClick={() =>
 							setToasts((prev) =>
-								prev.filter((p) => p.id !== t.id)
+								prev.filter((p) => p.id !== t.id),
 							)
 						}
 						sx={{
@@ -363,7 +362,12 @@ export default function Topbar({ handleDrawerOpen }) {
 
 				{/* AVATAR / MENU PERFIL */}
 				<IconButton onClick={openProfileMenu} sx={{ p: 0 }}>
-					<Avatar sx={{ bgcolor: "primary.main" }}>S</Avatar>
+					<Avatar
+						src={auth.currentUser?.photoURL}
+						sx={{ bgcolor: "primary.main" }}
+					>
+						{auth.currentUser?.displayName?.charAt(0)}
+					</Avatar>
 				</IconButton>
 
 				<Menu

@@ -110,7 +110,7 @@ export default function Dashboard() {
 
 	const [stats, setStats] = useState({
 		ocorrenciasHoje: 0,
-		ocorrenciasAtivas: 0,
+		ocorrenciasEmAndamento: 0,
 		emergenciasAtivas: 0,
 		emergenciasResolvidas: 0,
 		ocorrenciasResolvidas: 0,
@@ -133,28 +133,28 @@ export default function Dashboard() {
 		if (!incidents || incidents.length === 0) return;
 
 		const ocorrenciasHoje = incidents.filter(
-			(i) => i.status !== "resolved"
+			(i) => i.status !== "resolved",
 		).length;
 
-		const ocorrenciasAtivas = incidents.filter(
-			(i) => i.status === "open"
+		const ocorrenciasEmAndamento = incidents.filter(
+			(i) => i.status === "in_progress",
 		).length;
 
 		const emergenciasAtivas = incidents.filter(
-			(i) => i.isEmergency && i.status !== "resolved"
+			(i) => i.isEmergency && i.status !== "resolved",
 		).length;
 
 		const emergenciasResolvidas = incidents.filter(
-			(i) => i.isEmergency && i.status === "resolved"
+			(i) => i.isEmergency && i.status === "resolved",
 		).length;
 
 		const ocorrenciasResolvidas = incidents.filter(
-			(i) => i.status === "resolved"
+			(i) => i.status === "resolved",
 		).length;
 
 		setStats({
 			ocorrenciasHoje,
-			ocorrenciasAtivas,
+			ocorrenciasEmAndamento,
 			emergenciasAtivas,
 			emergenciasResolvidas,
 			ocorrenciasResolvidas,
@@ -166,7 +166,7 @@ export default function Dashboard() {
 		if (!filteredIncidents.length) return;
 
 		const totalEmergencias = filteredIncidents.filter(
-			(i) => i.isEmergency
+			(i) => i.isEmergency,
 		).length;
 
 		const totalOcorrencias = filteredIncidents.length - totalEmergencias;
@@ -196,21 +196,21 @@ export default function Dashboard() {
 			Object.entries(categorias).map(([categoria, quantidade]) => ({
 				categoria,
 				quantidade,
-			}))
+			})),
 		);
 
 		setStatusData(
 			Object.entries(status).map(([status, quantidade]) => ({
 				status,
 				quantidade,
-			}))
+			})),
 		);
 
 		setDistrictData(
 			Object.entries(district).map(([district, quantidade]) => ({
 				district,
 				quantidade,
-			}))
+			})),
 		);
 
 		setPeakHourData(buildPeakHourData(filteredIncidents));
@@ -233,8 +233,8 @@ export default function Dashboard() {
 			icon: <TrendingUpIcon sx={{ fontSize: 48 }} />,
 		},
 		{
-			title: "Ocorrências em aberto",
-			value: stats.ocorrenciasAtivas,
+			title: "Ocorrências em andamento",
+			value: stats.ocorrenciasEmAndamento,
 			icon: <LocationOnIcon sx={{ fontSize: 48 }} />,
 		},
 		{

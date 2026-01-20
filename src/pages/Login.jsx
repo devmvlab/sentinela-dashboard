@@ -36,7 +36,7 @@ export default function Login() {
 			const userCredential = await signInWithEmailAndPassword(
 				auth,
 				email,
-				password
+				password,
 			);
 
 			const user = userCredential.user;
@@ -190,17 +190,6 @@ export default function Login() {
 						) : (
 							"Entrar"
 						)}
-					</Button>
-
-					<Button
-						variant="text"
-						sx={{
-							mt: 1,
-							fontWeight: 700,
-							color: "primary.main",
-						}}
-					>
-						Registrar-se
 					</Button>
 				</CardContent>
 			</Card>
