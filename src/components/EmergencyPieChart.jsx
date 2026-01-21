@@ -1,5 +1,12 @@
 import { Card, CardContent, Typography, Box } from "@mui/material";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import {
+	PieChart,
+	Pie,
+	Cell,
+	Tooltip,
+	ResponsiveContainer,
+	Legend,
+} from "recharts";
 import { useTheme } from "@mui/material/styles";
 
 export default function EmergencyPieChart({ data }) {
@@ -50,6 +57,16 @@ export default function EmergencyPieChart({ data }) {
 								}}
 								itemStyle={{
 									color: theme.palette.text.primary, // valores
+								}}
+							/>
+
+							<Legend
+								verticalAlign="bottom"
+								align="center"
+								iconType="circle"
+								wrapperStyle={{
+									fontSize: 14,
+									color: theme.palette.text.secondary,
 								}}
 							/>
 						</PieChart>

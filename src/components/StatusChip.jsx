@@ -17,7 +17,7 @@ export const statusColors = {
 	resolved: "success",
 };
 
-export default function StatusChip({ status }) {
+export default function StatusChip({ status, sx }) {
 	const normalizedStatus = status?.toLowerCase();
 
 	return (
@@ -26,7 +26,7 @@ export default function StatusChip({ status }) {
 			color={statusColors[normalizedStatus] || "default"}
 			size="small"
 			variant="filled"
-			sx={{ fontWeight: "bold" }}
+			sx={{ fontWeight: "bold", ...sx }}
 		/>
 	);
 }

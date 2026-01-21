@@ -320,89 +320,110 @@ export default function Topbar({ handleDrawerOpen }) {
 					</Typography>
 				</Box>
 				{/* empurra o resto para a direita */}
-				<Box sx={{ flexGrow: 1 }} />
-				{auth.currentUser?.displayName}
-				{/* SINO (badge) */}
 				<Box
 					sx={{
-						position: "relative",
 						display: "flex",
+						justifyContent: "flex-end",
 						alignItems: "center",
+						flex: 1,
 					}}
 				>
-					<IconButton
-						onClick={() => {
-							setMenuAberto((prev) => !prev);
-							setNovaOcorrencia(false);
-							setContadorNovas(0);
-						}}
-						sx={{ mr: 2 }}
-					>
-						<Badge
-							color="error"
-							variant={contadorNovas > 0 ? "standard" : "dot"}
-							badgeContent={
-								contadorNovas > 0 ? contadorNovas : null
-							}
-						>
-							<NotificationsIcon
-								sx={{
-									fontSize: 28,
-									color: theme.palette.text.primary,
-								}}
-							/>
-						</Badge>
-					</IconButton>
+					{auth.currentUser?.displayName}
 
-					{/* dropdown posicionado relativo ao AppBar */}
-					{NotificacoesDropdown}
-				</Box>
-				{/* AVATAR / MENU PERFIL */}
-				<IconButton onClick={openProfileMenu} sx={{ p: 0 }}>
-					<Avatar
-						src={auth.currentUser?.photoURL}
-						sx={{ bgcolor: "primary.main" }}
+					{/* SINO (badge) */}
+					<Box
+						sx={{
+							position: "relative",
+							display: "flex",
+							alignItems: "center",
+							marginX: 1,
+						}}
 					>
-						{auth.currentUser?.displayName?.charAt(0)}
-					</Avatar>
-				</IconButton>
-				<Menu
-					anchorEl={anchorEl}
-					open={Boolean(anchorEl)}
-					onClose={closeProfileMenu}
-					anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-					transformOrigin={{ vertical: "top", horizontal: "right" }}
-				>
-					<MenuItem onClick={() => navigate("/perfil")}>
-						<PersonIcon sx={{ mr: 1 }} /> Meu perfil
-					</MenuItem>
-					<MenuItem onClick={() => navigate("/config")}>
-						<SettingsIcon sx={{ mr: 1 }} /> Configurações
-					</MenuItem>
-					<Divider />
-					<MenuItem onClick={handleLogout}>
-						<LogoutIcon sx={{ mr: 1 }} /> Sair
-					</MenuItem>
-				</Menu>
-				{/* Toasts (global) */}
-				{ToastContainer}
-				{/* animações CSS keyframes inline */}
-				<Box
-					sx={{
-						"@keyframes slideIn": {
-							from: { transform: "translateX(140%)", opacity: 0 },
-							to: { transform: "translateX(0)", opacity: 1 },
-						},
-						"@keyframes fadeOut": {
-							from: { opacity: 1 },
-							to: { opacity: 0 },
-						},
-						"@keyframes fadeIn": {
-							from: { opacity: 0, transform: "translateY(-5px)" },
-							to: { opacity: 1, transform: "translateY(0)" },
-						},
-					}}
-				/>
+						<IconButton
+							onClick={() => {
+								setMenuAberto((prev) => !prev);
+								setNovaOcorrencia(false);
+								setContadorNovas(0);
+							}}
+						>
+							<Badge
+								color="error"
+								variant={contadorNovas > 0 ? "standard" : "dot"}
+								badgeContent={
+									contadorNovas > 0 ? contadorNovas : null
+								}
+							>
+								<NotificationsIcon
+									sx={{
+										fontSize: 28,
+										color: theme.palette.text.primary,
+									}}
+								/>
+							</Badge>
+						</IconButton>
+
+						{/* dropdown posicionado relativo ao AppBar */}
+						{NotificacoesDropdown}
+					</Box>
+					{/* AVATAR / MENU PERFIL */}
+					<IconButton onClick={openProfileMenu}>
+						<Avatar
+							src={auth.currentUser?.photoURL}
+							sx={{ bgcolor: "primary.main" }}
+						>
+							{auth.currentUser?.displayName?.charAt(0)}
+						</Avatar>
+					</IconButton>
+					<Menu
+						anchorEl={anchorEl}
+						open={Boolean(anchorEl)}
+						onClose={closeProfileMenu}
+						anchorOrigin={{
+							vertical: "bottom",
+							horizontal: "right",
+						}}
+						transformOrigin={{
+							vertical: "top",
+							horizontal: "right",
+						}}
+					>
+						<MenuItem onClick={() => navigate("/perfil")}>
+							<PersonIcon sx={{ mr: 1 }} /> Meu perfil
+						</MenuItem>
+						<MenuItem onClick={() => navigate("/config")}>
+							<SettingsIcon sx={{ mr: 1 }} /> Configurações
+						</MenuItem>
+						<Divider />
+						<MenuItem onClick={handleLogout}>
+							<LogoutIcon sx={{ mr: 1 }} /> Sair
+						</MenuItem>
+					</Menu>
+					{/* Toasts (global) */}
+					{/* {ToastContainer} */}
+					{/* animações CSS keyframes inline */}
+					<Box
+						sx={{
+							"@keyframes slideIn": {
+								from: {
+									transform: "translateX(140%)",
+									opacity: 0,
+								},
+								to: { transform: "translateX(0)", opacity: 1 },
+							},
+							"@keyframes fadeOut": {
+								from: { opacity: 1 },
+								to: { opacity: 0 },
+							},
+							"@keyframes fadeIn": {
+								from: {
+									opacity: 0,
+									transform: "translateY(-5px)",
+								},
+								to: { opacity: 1, transform: "translateY(0)" },
+							},
+						}}
+					/>
+				</Box>
 			</Toolbar>
 		</AppBar>
 	);

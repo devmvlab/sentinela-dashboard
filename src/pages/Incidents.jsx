@@ -233,6 +233,10 @@ export default function Incidents() {
 				>
 					<DialogTitle sx={{ fontWeight: "bold", m: 0, p: 2 }}>
 						Detalhes da Ocorrência
+						<StatusChip
+							sx={{ ml: 1 }}
+							status={currentIncident?.status}
+						/>
 						<IconButton
 							aria-label="close"
 							onClick={() => setOpenModal(false)}
@@ -257,23 +261,30 @@ export default function Incidents() {
 								}}
 							>
 								{currentIncident.imageUrl && (
-									<img
-										src={currentIncident.imageUrl}
-										alt="Imagem da ocorrência"
-										style={{
-											width: "100%",
-											borderRadius: 8,
-											marginBottom: 10,
-										}}
-									/>
+									<>
+										<Box
+											sx={{
+												display: "flex",
+												justifyContent: "center",
+											}}
+										>
+											<img
+												src={currentIncident.imageUrl}
+												alt="Imagem da ocorrência"
+												style={{
+													width: "50%",
+													borderRadius: 8,
+													marginBottom: 10,
+												}}
+											/>
+										</Box>
+										<Divider />
+									</>
 								)}
 
 								<Typography>
 									<b>Descrição:</b> {currentIncident.desc}
 								</Typography>
-
-								<Divider />
-
 								<Typography>
 									<b>Categoria:</b>{" "}
 									{currentIncident.ocorrencia?.categoria}
@@ -301,15 +312,6 @@ export default function Incidents() {
 								<Typography>
 									<b>CEP:</b>{" "}
 									{currentIncident.geoloc?.postalCode}
-								</Typography>
-
-								<Divider />
-
-								<Typography component="div">
-									<b>Status atual:</b>{" "}
-									<StatusChip
-										status={currentIncident.status}
-									/>
 								</Typography>
 							</Box>
 						)}
