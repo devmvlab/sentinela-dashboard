@@ -3,6 +3,9 @@ import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
+import PendingIcon from "@mui/icons-material/Pending";
 
 import IconButton from "@mui/material/IconButton";
 
@@ -14,8 +17,11 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+
 import CloseIcon from "@mui/icons-material/Close";
-import CheckIcon from "@mui/icons-material/Check";
 
 import { useEffect, useState } from "react";
 
@@ -31,22 +37,38 @@ import { db } from "../services/firebase";
 
 import { useSentinelaData } from "../utils/SentinelaDataContext";
 
+/* =============================
+   FLUXO DE STATUS
+============================= */
+const INCIDENT_STEPS = [
+	{ key: "open", label: "Aberta" },
+	{ key: "in_progress", label: "Em andamento" },
+	{ key: "resolved", label: "Resolvida" },
+];
+
+const getActiveStep = (status) =>
+	INCIDENT_STEPS.findIndex((s) => s.key === status);
+
+const isStepCompleted = (stepKey, currentStatus) => {
+	if (currentStatus === "resolved") return true;
+	if (currentStatus === "open") return stepKey === "open";
+	if (currentStatus === "in_progress") return stepKey === "open";
+	return false;
+};
+
 export default function Incidents() {
 	const theme = useTheme();
 	const location = useLocation();
 	const navigate = useNavigate();
 
-	// 🔹 dados globais (já filtrados por cidade)
 	const { incidents, loading, updateIncidentStatus } = useSentinelaData();
 
-	// 🔹 filtros
 	const [statusFilter, setStatusFilter] = useState("all");
 	const [category, setCategory] = useState("all");
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [search, setSearch] = useState("");
 
-	// 🔹 UI
 	const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 	const [openModal, setOpenModal] = useState(false);
 	const [currentIncident, setCurrentIncident] = useState(null);
@@ -56,9 +78,6 @@ export default function Incidents() {
 		pageSize: 10,
 	});
 
-	// =============================
-	//  ABRIR MODAL VIA NOTIFICAÇÃO
-	// =============================
 	useEffect(() => {
 		if (!location.state?.openIncidentId) return;
 		if (!incidents || incidents.length === 0) return;
@@ -73,9 +92,6 @@ export default function Incidents() {
 		}
 	}, [location.state, incidents]);
 
-	// =============================
-	//  LIMPA STATE DA ROTA
-	// =============================
 	useEffect(() => {
 		if (location.state?.openIncidentId && openModal) {
 			navigate(location.pathname, { replace: true });
@@ -90,36 +106,68 @@ export default function Incidents() {
 		setSearch("");
 	}
 
-	// =============================
-	//  ATUALIZA STATUS (WRITE)
-	// =============================
 	async function updateStatusInsideModal(newStatus) {
-		if (!currentIncident) return;
+		if (!currentIncident || newStatus === currentIncident.status) return;
 
 		await updateDoc(doc(db, "incidents", currentIncident.id), {
 			status: newStatus,
 		});
 
-		//  ATUALIZA O STATE GLOBAL
 		updateIncidentStatus(currentIncident.id, newStatus);
+
+		const statusLabel = INCIDENT_STEPS.find(
+			(step) => step.key === newStatus,
+		)?.label;
 
 		setSnackbar({
 			open: true,
-			message: `Status atualizado para ${newStatus.toUpperCase()}`,
+			message: `Status atualizado para ${statusLabel}`,
 		});
 
 		setOpenModal(false);
 	}
 
-	// =============================
-	//  COLUNAS
-	// =============================
+	function CustomStepIcon(props) {
+		const { icon, ownerState } = props;
+
+		// icon = índice do step (1, 2, 3)
+		const stepIndex = Number(icon) - 1;
+		const currentStatus = ownerState.currentStatus;
+
+		const stepKey = INCIDENT_STEPS[stepIndex].key;
+
+		// OPEN → sempre completed
+		if (stepKey === "open") {
+			return <CheckCircleIcon sx={{ color: "primary.main" }} />;
+		}
+
+		// IN_PROGRESS
+		if (stepKey === "in_progress") {
+			if (currentStatus === "in_progress") {
+				return <QueryBuilderIcon sx={{ color: "primary.main" }} />;
+			}
+
+			if (currentStatus === "resolved") {
+				return <CheckCircleIcon sx={{ color: "primary.main" }} />;
+			}
+
+			return <PendingIcon sx={{ color: "grey.400" }} />;
+		}
+
+		// RESOLVED
+		if (stepKey === "resolved") {
+			if (currentStatus === "resolved") {
+				return <CheckCircleIcon sx={{ color: "primary.main" }} />;
+			}
+
+			return <PendingIcon sx={{ color: "grey.400" }} />;
+		}
+
+		return null;
+	}
+
 	const columns = [
-		{
-			field: "id",
-			headerName: "Identificador",
-			flex: 1,
-		},
+		{ field: "id", headerName: "Identificador", flex: 1 },
 		{
 			field: "categoria",
 			headerName: "Categoria",
@@ -138,11 +186,7 @@ export default function Incidents() {
 			flex: 2,
 			valueGetter: (_, row) => row.geoloc?.address,
 		},
-		{
-			field: "data",
-			headerName: "Data",
-			flex: 1,
-		},
+		{ field: "data", headerName: "Data", flex: 1 },
 		{
 			field: "status",
 			headerName: "Status",
@@ -151,9 +195,6 @@ export default function Incidents() {
 		},
 	];
 
-	// =============================
-	//  FILTROS (CLIENT SIDE)
-	// =============================
 	const filteredRows = useIncidentFilters(incidents || [], {
 		status: statusFilter,
 		category,
@@ -174,16 +215,11 @@ export default function Incidents() {
 
 	return (
 		<Box>
-			<Typography
-				variant="h4"
-				paddingTop={2}
-				paddingBottom={2}
-				fontWeight={700}
-			>
+			<Typography variant="h4" py={2} fontWeight={700}>
 				Ocorrências
 			</Typography>
-			<Paper sx={{ height: "100%", width: "100%" }}>
-				{/* FILTROS */}
+
+			<Paper>
 				<Filters
 					status={statusFilter}
 					setStatus={setStatusFilter}
@@ -211,12 +247,6 @@ export default function Incidents() {
 						"& .MuiDataGrid-row:hover": {
 							backgroundColor: theme.palette.tableHover,
 						},
-						"& .MuiDataGrid-columnHeaderTitle": {
-							fontWeight: "bold",
-							textTransform: "uppercase",
-							fontSize: "0.85rem",
-							color: theme.palette.primary.main,
-						},
 					}}
 					onRowClick={(params) => {
 						setCurrentIncident(params.row);
@@ -231,21 +261,11 @@ export default function Incidents() {
 					fullWidth
 					maxWidth="md"
 				>
-					<DialogTitle sx={{ fontWeight: "bold", m: 0, p: 2 }}>
+					<DialogTitle sx={{ fontWeight: "bold" }}>
 						Detalhes da Ocorrência
-						<StatusChip
-							sx={{ ml: 1 }}
-							status={currentIncident?.status}
-						/>
 						<IconButton
-							aria-label="close"
 							onClick={() => setOpenModal(false)}
-							sx={{
-								position: "absolute",
-								right: 8,
-								top: 8,
-								color: (theme) => theme.palette.grey[500],
-							}}
+							sx={{ position: "absolute", right: 8, top: 8 }}
 						>
 							<CloseIcon />
 						</IconButton>
@@ -253,94 +273,120 @@ export default function Incidents() {
 
 					<DialogContent dividers>
 						{currentIncident && (
-							<Box
-								sx={{
-									display: "flex",
-									flexDirection: "column",
-									gap: 2,
-								}}
-							>
-								{currentIncident.imageUrl && (
-									<>
-										<Box
-											sx={{
-												display: "flex",
-												justifyContent: "center",
-											}}
-										>
-											<img
-												src={currentIncident.imageUrl}
-												alt="Imagem da ocorrência"
-												style={{
-													width: "50%",
-													borderRadius: 8,
-													marginBottom: 10,
+							<>
+								<Stepper alternativeLabel sx={{ mb: 3 }}>
+									{INCIDENT_STEPS.map((step, index) => (
+										<Step key={step.key}>
+											<StepLabel
+												StepIconComponent={(props) => (
+													<CustomStepIcon
+														{...props}
+														ownerState={{
+															currentStatus:
+																currentIncident.status,
+														}}
+													/>
+												)}
+												onClick={() =>
+													updateStatusInsideModal(
+														step.key,
+													)
+												}
+												sx={{
+													cursor: "pointer",
+													"& .MuiStepLabel-label": {
+														fontWeight:
+															step.key ===
+															currentIncident.status
+																? 600
+																: 400,
+														color:
+															step.key ===
+																"open" ||
+															step.key ===
+																currentIncident.status ||
+															currentIncident.status ===
+																"resolved"
+																? "primary.main"
+																: "text.secondary",
+													},
 												}}
-											/>
-										</Box>
-										<Divider />
-									</>
-								)}
+											>
+												{step.label}
+											</StepLabel>
+										</Step>
+									))}
+								</Stepper>
 
-								<Typography>
-									<b>Descrição:</b> {currentIncident.desc}
-								</Typography>
-								<Typography>
-									<b>Categoria:</b>{" "}
-									{currentIncident.ocorrencia?.categoria}
-								</Typography>
-								<Typography>
-									<b>Tipo:</b>{" "}
-									{currentIncident.ocorrencia?.tipo}
-								</Typography>
-								<Typography>
-									<b>Data:</b> {currentIncident.data} às{" "}
-									{currentIncident.hora}
-								</Typography>
+								<Box
+									display="flex"
+									flexDirection="column"
+									gap={2}
+								>
+									{currentIncident.imageUrl && (
+										<>
+											<Box
+												display="flex"
+												justifyContent="center"
+											>
+												<img
+													src={
+														currentIncident.imageUrl
+													}
+													alt="Ocorrência"
+													style={{
+														width: "50%",
+														borderRadius: 8,
+													}}
+												/>
+											</Box>
+											<Divider />
+										</>
+									)}
 
-								<Divider />
+									<Typography>
+										<b>Descrição:</b> {currentIncident.desc}
+									</Typography>
+									<Typography>
+										<b>Categoria:</b>{" "}
+										{currentIncident.ocorrencia?.categoria}
+									</Typography>
+									<Typography>
+										<b>Tipo:</b>{" "}
+										{currentIncident.ocorrencia?.tipo}
+									</Typography>
+									<Typography>
+										<b>Data:</b> {currentIncident.data} às{" "}
+										{currentIncident.hora}
+									</Typography>
 
-								<Typography>
-									<b>Endereço:</b>{" "}
-									{currentIncident.geoloc?.address}
-								</Typography>
-								<Typography>
-									<b>Cidade:</b>{" "}
-									{currentIncident.geoloc?.city} -{" "}
-									{currentIncident.geoloc?.state}
-								</Typography>
-								<Typography>
-									<b>CEP:</b>{" "}
-									{currentIncident.geoloc?.postalCode}
-								</Typography>
-							</Box>
+									<Divider />
+
+									<Typography>
+										<b>Endereço:</b>{" "}
+										{currentIncident.geoloc?.address}
+									</Typography>
+									<Typography>
+										<b>Cidade:</b>{" "}
+										{currentIncident.geoloc?.city} -{" "}
+										{currentIncident.geoloc?.state}
+									</Typography>
+									<Typography>
+										<b>CEP:</b>{" "}
+										{currentIncident.geoloc?.postalCode}
+									</Typography>
+								</Box>
+							</>
 						)}
 					</DialogContent>
 
 					<DialogActions>
-						<Button
-							variant="outlined"
-							color="error"
-							startIcon={<CloseIcon />}
-							onClick={() =>
-								updateStatusInsideModal("in_progress")
-							}
-						>
-							Marcar como EM ANDAMENTO
-						</Button>
-
-						<Button
-							variant="contained"
-							color="success"
-							startIcon={<CheckIcon />}
-							onClick={() => updateStatusInsideModal("resolved")}
-						>
-							Marcar como RESOLVIDO
+						<Button onClick={() => setOpenModal(false)}>
+							Fechar
 						</Button>
 					</DialogActions>
 				</Dialog>
 
-				{/* SNACKBAR */}
 				<Snackbar
 					open={snackbar.open}
 					autoHideDuration={3000}
