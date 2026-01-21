@@ -86,6 +86,26 @@ export default function Topbar({ handleDrawerOpen }) {
 	};
 
 	useEffect(() => {
+		const unlockAudio = () => {
+			const audio = new Audio("/alert.mp3");
+			audio.volume = 0;
+			audio
+				.play()
+				.then(() => {
+					audio.pause();
+					audio.currentTime = 0;
+				})
+				.catch(() => {});
+		};
+
+		window.addEventListener("click", unlockAudio, { once: true });
+
+		return () => {
+			window.removeEventListener("click", unlockAudio);
+		};
+	}, []);
+
+	useEffect(() => {
 		if (loading) return; // 👈 ainda carregando
 		if (!userCity) return; // 👈 sem cidade definida
 
@@ -106,6 +126,16 @@ export default function Topbar({ handleDrawerOpen }) {
 						id: change.doc.id,
 						...change.doc.data(),
 					};
+
+					// toca som
+					try {
+						const audio = new Audio("/alert.mp3");
+						audio.volume = 0.7;
+						// play pode falhar se o usuário não interagiu com a página ainda; tentar/catch para evitar erros
+						audio.play().catch(() => {});
+					} catch (e) {
+						// ignore
+					}
 
 					setNovaOcorrencia(true);
 					setContadorNovas((prev) => prev + 1);
@@ -348,7 +378,7 @@ export default function Topbar({ handleDrawerOpen }) {
 						>
 							<Badge
 								color="error"
-								variant={contadorNovas > 0 ? "standard" : "dot"}
+								variant={contadorNovas > 0 ? "standard" : null}
 								badgeContent={
 									contadorNovas > 0 ? contadorNovas : null
 								}

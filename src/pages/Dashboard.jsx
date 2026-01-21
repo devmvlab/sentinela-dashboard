@@ -11,7 +11,6 @@ import {
 import { useTheme } from "@mui/material/styles";
 
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import WarningIcon from "@mui/icons-material/Warning";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -26,6 +25,7 @@ import SafetyCard from "../components/SafetyCard";
 import EmergencyPieChart from "../components/EmergencyPieChart";
 
 import { formatTime } from "../utils/FormatTime";
+import { useIncidents } from "../hooks/useIncidents";
 import { useSentinelaData } from "../utils/SentinelaDataContext";
 
 /* =======================
@@ -45,28 +45,6 @@ const hourRanges = [
 	{ label: "20–22h", start: 20, end: 22 },
 	{ label: "22–24h", start: 22, end: 24 },
 ];
-
-const filterByPeriod = (incidents, period) => {
-	const now = new Date();
-
-	return incidents.filter((item) => {
-		if (!item.createdAt) return false;
-
-		const date = item.createdAt.toDate();
-
-		if (period === "today") {
-			return date.toDateString() === now.toDateString();
-		}
-
-		const diffDays =
-			(now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
-
-		if (period === "7d") return diffDays <= 7;
-		if (period === "30d") return diffDays <= 30;
-
-		return true;
-	});
-};
 
 const buildPeakHourData = (incidents) => {
 	const data = hourRanges.map((r) => ({ hour: r.label, total: 0 }));
@@ -88,99 +66,100 @@ const buildPeakHourData = (incidents) => {
 
 export default function Dashboard() {
 	const theme = useTheme();
-	const { incidents, userCenter, loading, lastUpdate } = useSentinelaData();
 
 	const [viewMode, setViewMode] = useState("dashboard");
 	const [mapState, setMapState] = useState(null);
 
-	/* 🔹 FILTROS (AGORA GLOBAIS PARA GRÁFICOS) */
-	const [period, setPeriod] = useState("7d");
+	/* 🔹 FILTROS */
+	const [period, setPeriod] = useState("today");
 	const [onlyEmergency, setOnlyEmergency] = useState(false);
 
-	/* 🔹 INCIDENTES FILTRADOS (USADOS SOMENTE NOS GRÁFICOS) */
-	const filteredIncidents = useMemo(() => {
-		let data = filterByPeriod(incidents || [], period);
-
-		if (onlyEmergency) {
-			data = data.filter((i) => i.isEmergency);
-		}
-
-		return data;
-	}, [incidents, period, onlyEmergency]);
-
-	const [stats, setStats] = useState({
-		ocorrenciasHoje: 0,
-		ocorrenciasEmAndamento: 0,
-		emergenciasAtivas: 0,
-		emergenciasResolvidas: 0,
-		ocorrenciasResolvidas: 0,
+	/* 🔹 INCIDENTS (FIREBASE JÁ FILTRADO) */
+	const { incidents, loading, lastUpdate } = useIncidents({
+		period,
+		onlyEmergency,
+		realtime: true,
 	});
 
-	const [categoryData, setCategoryData] = useState([]);
-	const [statusData, setStatusData] = useState([]);
-	const [districtData, setDistrictData] = useState([]);
-	const [peakHourData, setPeakHourData] = useState([]);
-	const [emergencyPieData, setEmergencyPieData] = useState([]);
+	const { userCenter } = useSentinelaData();
 
+	/* =======================
+	   MAPA
+	======================= */
 	useEffect(() => {
-		if (userCenter && !mapState) {
-			setMapState({ center: userCenter, zoom: 12 });
+		if (!mapState && incidents?.length) {
+			const first = incidents.find((i) => i.geoloc?.lat && i.geoloc?.lng);
+			if (first) {
+				setMapState({
+					center: { lat: first.geoloc.lat, lng: first.geoloc.lng },
+					zoom: 12,
+				});
+			}
 		}
-	}, [userCenter, mapState]);
+	}, [incidents, mapState]);
 
-	/* 🔹 CARDS — INALTERADOS (USAM incidents ORIGINAL) */
-	useEffect(() => {
-		if (!incidents || incidents.length === 0) return;
+	const periodLabelMap = {
+		today: "hoje",
+		"7d": "nos últimos 7 dias",
+		"30d": "nos últimos 30 dias",
+	};
 
-		const ocorrenciasHoje = incidents.filter(
-			(i) => i.status !== "resolved",
-		).length;
+	const getBaseLabel = (onlyEmergency) =>
+		onlyEmergency ? "Emergências" : "Ocorrências";
 
+	const buildCardTitle = ({ base, status, period }) => {
+		return `${base} ${status} ${periodLabelMap[period]}`;
+	};
+
+	/* ================= CARDS ================= */
+	const stats = useMemo(() => {
 		const ocorrenciasEmAndamento = incidents.filter(
 			(i) => i.status === "in_progress",
-		).length;
-
-		const emergenciasAtivas = incidents.filter(
-			(i) => i.isEmergency && i.status !== "resolved",
-		).length;
-
-		const emergenciasResolvidas = incidents.filter(
-			(i) => i.isEmergency && i.status === "resolved",
 		).length;
 
 		const ocorrenciasResolvidas = incidents.filter(
 			(i) => i.status === "resolved",
 		).length;
 
-		setStats({
-			ocorrenciasHoje,
-			ocorrenciasEmAndamento,
-			emergenciasAtivas,
-			emergenciasResolvidas,
-			ocorrenciasResolvidas,
-		});
-	}, [incidents]);
-
-	/* 🔹 GRÁFICOS — AGORA USAM filteredIncidents */
-	useEffect(() => {
-		if (!filteredIncidents.length) return;
-
-		const totalEmergencias = filteredIncidents.filter(
-			(i) => i.isEmergency,
+		const ocorrenciasAbertas = incidents.filter(
+			(i) => i.status == "open",
 		).length;
 
-		const totalOcorrencias = filteredIncidents.length - totalEmergencias;
+		return {
+			ocorrenciasAbertas,
+			ocorrenciasEmAndamento,
+			ocorrenciasResolvidas,
+		};
+	}, [incidents]);
 
-		setEmergencyPieData([
-			{ name: "Emergências", value: totalEmergencias },
-			{ name: "Ocorrências", value: totalOcorrencias },
-		]);
+	/* =======================
+	   GRÁFICOS
+	======================= */
+	const {
+		categoryData,
+		statusData,
+		districtData,
+		peakHourData,
+		emergencyPieData,
+	} = useMemo(() => {
+		if (!incidents.length) {
+			return {
+				categoryData: [],
+				statusData: [],
+				districtData: [],
+				peakHourData: [],
+				emergencyPieData: [],
+			};
+		}
 
 		const categorias = {};
 		const status = {};
 		const district = {};
+		let emergencias = 0;
 
-		filteredIncidents.forEach((item) => {
+		incidents.forEach((item) => {
+			if (item.isEmergency) emergencias++;
+
 			categorias[item.ocorrencia?.categoria || "Sem categoria"] =
 				(categorias[item.ocorrencia?.categoria || "Sem categoria"] ||
 					0) + 1;
@@ -192,29 +171,59 @@ export default function Dashboard() {
 				(district[item.geoloc?.district || "unknown"] || 0) + 1;
 		});
 
-		setCategoryData(
-			Object.entries(categorias).map(([categoria, quantidade]) => ({
-				categoria,
-				quantidade,
-			})),
-		);
-
-		setStatusData(
-			Object.entries(status).map(([status, quantidade]) => ({
+		return {
+			categoryData: Object.entries(categorias).map(
+				([categoria, quantidade]) => ({
+					categoria,
+					quantidade,
+				}),
+			),
+			statusData: Object.entries(status).map(([status, quantidade]) => ({
 				status,
 				quantidade,
 			})),
-		);
+			districtData: Object.entries(district).map(
+				([district, quantidade]) => ({
+					district,
+					quantidade,
+				}),
+			),
+			peakHourData: buildPeakHourData(incidents),
+			emergencyPieData: [
+				{ name: "Emergências", value: emergencias },
+				{ name: "Ocorrências", value: incidents.length - emergencias },
+			],
+		};
+	}, [incidents]);
 
-		setDistrictData(
-			Object.entries(district).map(([district, quantidade]) => ({
-				district,
-				quantidade,
-			})),
-		);
-
-		setPeakHourData(buildPeakHourData(filteredIncidents));
-	}, [filteredIncidents]);
+	const baseLabel = getBaseLabel(onlyEmergency);
+	const cards = [
+		{
+			key: "open",
+			statusLabel: "abertas",
+			value: stats.ocorrenciasAbertas,
+			icon: <TrendingUpIcon sx={{ fontSize: 48 }} />,
+		},
+		{
+			key: "in_progress",
+			statusLabel: "em andamento",
+			value: stats.ocorrenciasEmAndamento,
+			icon: <LocationOnIcon sx={{ fontSize: 48 }} />,
+		},
+		{
+			key: "resolved",
+			statusLabel: "resolvidas",
+			value: stats.ocorrenciasResolvidas,
+			icon: <TaskAltIcon sx={{ fontSize: 48 }} />,
+		},
+	].map((card) => ({
+		...card,
+		title: buildCardTitle({
+			base: baseLabel,
+			status: card.statusLabel,
+			period,
+		}),
+	}));
 
 	if (loading) {
 		return (
@@ -225,34 +234,6 @@ export default function Dashboard() {
 			</Box>
 		);
 	}
-
-	const cards = [
-		{
-			title: "Ocorrências Hoje",
-			value: stats.ocorrenciasHoje,
-			icon: <TrendingUpIcon sx={{ fontSize: 48 }} />,
-		},
-		{
-			title: "Ocorrências em andamento",
-			value: stats.ocorrenciasEmAndamento,
-			icon: <LocationOnIcon sx={{ fontSize: 48 }} />,
-		},
-		{
-			title: "Emergências em aberto",
-			value: stats.emergenciasAtivas,
-			icon: <WarningIcon sx={{ fontSize: 48 }} />,
-		},
-		{
-			title: "Emergências resolvidas",
-			value: stats.emergenciasResolvidas,
-			icon: <TaskAltIcon sx={{ fontSize: 48 }} />,
-		},
-		{
-			title: "Ocorrências resolvidas",
-			value: stats.ocorrenciasResolvidas,
-			icon: <TaskAltIcon sx={{ fontSize: 48 }} />,
-		},
-	];
 
 	return (
 		<Box sx={{ paddingTop: 2 }}>
@@ -274,7 +255,6 @@ export default function Dashboard() {
 				</Typography>
 
 				<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-					{/* 🔹 FILTROS */}
 					<ToggleButtonGroup
 						value={period}
 						exclusive
@@ -314,20 +294,18 @@ export default function Dashboard() {
 			</Box>
 
 			<Fade in={viewMode === "dashboard"} timeout={300} unmountOnExit>
-				<Box style={{ width: "100%" }}>
+				<Box>
 					<Grid container spacing={3}>
-						<Grid size={{ xs: 12, md: 6, lg: 4, xl: 4 }}>
+						<Grid size={{ xs: 12, md: 6, lg: 4 }}>
 							<SafetyCard
 								incidents={incidents}
+								period={period}
 								userCenter={userCenter}
-								period="7d"
 							/>
 						</Grid>
+
 						{cards.map((card, i) => (
-							<Grid
-								key={i}
-								size={{ xs: 12, md: 6, lg: 4, xl: 4 }}
-							>
+							<Grid key={i} size={{ xs: 12, md: 6, lg: 4 }}>
 								<Card
 									sx={{
 										backgroundColor:
@@ -372,6 +350,7 @@ export default function Dashboard() {
 										<Typography
 											variant="body1"
 											fontWeight={700}
+											sx={{ textAlign: "end" }}
 										>
 											{card.title}
 										</Typography>
@@ -402,42 +381,30 @@ export default function Dashboard() {
 						))}
 					</Grid>
 
-					<Grid size={{ xs: 12 }}>
-						<Grid container spacing={3} sx={{ mt: 5 }}>
-							<Grid size={{ xs: 12, md: 6 }}>
-								<PeakHourChart data={peakHourData} />
-							</Grid>
-
-							<Grid size={{ xs: 12, md: 6 }}>
-								<EmergencyPieChart data={emergencyPieData} />
-							</Grid>
-
-							<Grid size={{ xs: 12, md: 6 }}>
-								<CategoryChart data={categoryData} />
-							</Grid>
-
-							<Grid size={{ xs: 12, md: 6 }}>
-								<StatusChart data={statusData} />
-							</Grid>
-
-							<Grid size={{ xs: 12, md: 12 }}>
-								<DistrictChart data={districtData} />
-							</Grid>
+					<Grid container spacing={3} sx={{ mt: 5 }}>
+						<Grid size={{ xs: 12, md: 6 }}>
+							<PeakHourChart data={peakHourData} />
+						</Grid>
+						<Grid size={{ xs: 12, md: 6 }}>
+							<EmergencyPieChart data={emergencyPieData} />
+						</Grid>
+						<Grid size={{ xs: 12, md: 6 }}>
+							<CategoryChart data={categoryData} />
+						</Grid>
+						<Grid size={{ xs: 12, md: 6 }}>
+							<StatusChart data={statusData} />
+						</Grid>
+						<Grid size={{ xs: 12 }}>
+							<DistrictChart data={districtData} />
 						</Grid>
 					</Grid>
 				</Box>
 			</Fade>
 
 			<Fade in={viewMode === "map"} timeout={300} unmountOnExit>
-				<Box
-					sx={{
-						height: "calc(100vh - 170px)",
-						borderRadius: 2,
-						overflow: "hidden",
-					}}
-				>
+				<Box sx={{ height: "calc(100vh - 170px)" }}>
 					<IncidentsMap
-						incidents={filteredIncidents}
+						incidents={incidents}
 						mapState={mapState}
 						onMapStateChange={setMapState}
 					/>
