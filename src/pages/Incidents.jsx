@@ -6,6 +6,7 @@ import Alert from "@mui/material/Alert";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
 import PendingIcon from "@mui/icons-material/Pending";
+import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
 
 import IconButton from "@mui/material/IconButton";
 
@@ -310,61 +311,82 @@ export default function Incidents() {
 
 								<Box
 									display="flex"
-									flexDirection="column"
-									gap={2}
+									flexDirection="row"
+									justifyContent="center"
+									gap={4}
 								>
-									{currentIncident.imageUrl && (
-										<>
-											<Box
-												display="flex"
-												justifyContent="center"
-											>
-												<img
-													src={
-														currentIncident.imageUrl
-													}
-													alt="Ocorrência"
-													style={{
-														width: "50%",
-														borderRadius: 8,
-													}}
-												/>
-											</Box>
-											<Divider />
-										</>
+									{currentIncident.imageUrl ? (
+										<img
+											src={currentIncident.imageUrl}
+											alt="Ocorrência"
+											style={{
+												width: 300,
+												height: 300,
+												borderRadius: 8,
+											}}
+										/>
+									) : (
+										<Box
+											display={"flex"}
+											justifyContent={"center"}
+											alignItems={"center"}
+											flexDirection={"column"}
+											width={300}
+											height={300}
+											bgcolor={
+												theme.palette.text.secondary
+											}
+											borderRadius={8}
+										>
+											<ImageNotSupportedIcon
+												sx={{ fontSize: 100 }}
+											/>
+											<Typography>
+												Nenhuma imagem
+											</Typography>
+										</Box>
 									)}
 
-									<Typography>
-										<b>Descrição:</b> {currentIncident.desc}
-									</Typography>
-									<Typography>
-										<b>Categoria:</b>{" "}
-										{currentIncident.ocorrencia?.categoria}
-									</Typography>
-									<Typography>
-										<b>Tipo:</b>{" "}
-										{currentIncident.ocorrencia?.tipo}
-									</Typography>
-									<Typography>
-										<b>Data:</b> {currentIncident.data} às{" "}
-										{currentIncident.hora}
-									</Typography>
+									<Box
+										display="flex"
+										flexDirection="column"
+										justifyContent={"space-between"}
+										gap={2}
+									>
+										<Typography>
+											<b>Categoria:</b>{" "}
+											{
+												currentIncident.ocorrencia
+													?.categoria
+											}
+										</Typography>
+										<Typography>
+											<b>Tipo:</b>{" "}
+											{currentIncident.ocorrencia?.tipo}
+										</Typography>
+										<Typography>
+											<b>Descrição:</b>{" "}
+											{currentIncident.desc}
+										</Typography>
+										<Typography>
+											<b>Data:</b> {currentIncident.data}{" "}
+											às {currentIncident.hora}
+										</Typography>
 
-									<Divider />
-
-									<Typography>
-										<b>Endereço:</b>{" "}
-										{currentIncident.geoloc?.address}
-									</Typography>
-									<Typography>
-										<b>Cidade:</b>{" "}
-										{currentIncident.geoloc?.city} -{" "}
-										{currentIncident.geoloc?.state}
-									</Typography>
-									<Typography>
-										<b>CEP:</b>{" "}
-										{currentIncident.geoloc?.postalCode}
-									</Typography>
+										<Typography>
+											<b>Endereço:</b>{" "}
+											{currentIncident.geoloc?.address}
+										</Typography>
+										<Typography>
+											<b>Cidade:</b>{" "}
+											{currentIncident.geoloc?.city} -{" "}
+											{currentIncident.geoloc?.state}
+										</Typography>
+										<Typography>
+											<b>CEP:</b>{" "}
+											{currentIncident.geoloc?.postalCode}
+										</Typography>
+									</Box>
 								</Box>
 							</>
 						)}
