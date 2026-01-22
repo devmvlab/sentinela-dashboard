@@ -14,6 +14,7 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import GroupIcon from "@mui/icons-material/Group";
 import MapIcon from "@mui/icons-material/Map";
 
 import CategoryChart from "../components/CategoryChart";
@@ -24,9 +25,10 @@ import IncidentsMap from "./IncidentsMap";
 import SafetyCard from "../components/SafetyCard";
 import EmergencyPieChart from "../components/EmergencyPieChart";
 
-import { formatTime } from "../utils/FormatTime";
 import { useIncidents } from "../hooks/useIncidents";
+import { useUsersByCity } from "../hooks/useUsersByCity";
 import { useSentinelaData } from "../utils/SentinelaDataContext";
+import CustomCard from "../components/CustomCard";
 
 /* =======================
    FAIXAS DE HORÁRIO
@@ -65,8 +67,6 @@ const buildPeakHourData = (incidents) => {
 };
 
 export default function Dashboard() {
-	const theme = useTheme();
-
 	const [viewMode, setViewMode] = useState("dashboard");
 	const [mapState, setMapState] = useState(null);
 
@@ -82,6 +82,7 @@ export default function Dashboard() {
 	});
 
 	const { userCenter } = useSentinelaData();
+	const { users } = useUsersByCity();
 
 	/* =======================
 	   MAPA
@@ -256,6 +257,7 @@ export default function Dashboard() {
 
 				<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
 					<ToggleButtonGroup
+						color="primary"
 						value={period}
 						exclusive
 						onChange={(_, v) => v && setPeriod(v)}
@@ -267,6 +269,7 @@ export default function Dashboard() {
 					</ToggleButtonGroup>
 
 					<ToggleButton
+						color="primary"
 						selected={onlyEmergency}
 						onChange={() => setOnlyEmergency(!onlyEmergency)}
 						size="small"
@@ -296,7 +299,7 @@ export default function Dashboard() {
 			<Fade in={viewMode === "dashboard"} timeout={300} unmountOnExit>
 				<Box>
 					<Grid container spacing={3}>
-						<Grid size={{ xs: 12, md: 6, lg: 4 }}>
+						<Grid size={{ xs: 12, md: 6, lg: 6 }}>
 							<SafetyCard
 								incidents={incidents}
 								period={period}
@@ -304,79 +307,23 @@ export default function Dashboard() {
 							/>
 						</Grid>
 
+						<Grid size={{ xs: 12, md: 6, lg: 6 }}>
+							<CustomCard
+								card={{
+									title: `Usuários cadastrados na cidade`,
+									value: users.length,
+									icon: <GroupIcon sx={{ fontSize: 48 }} />,
+								}}
+								lastUpdate={lastUpdate}
+							/>
+						</Grid>
+
 						{cards.map((card, i) => (
 							<Grid key={i} size={{ xs: 12, md: 6, lg: 4 }}>
-								<Card
-									sx={{
-										backgroundColor:
-											theme.palette.background.paper,
-										borderRadius: 2,
-										p: 2.5,
-										minHeight: 170,
-										display: "flex",
-										alignItems: "center",
-										gap: 2,
-										boxShadow:
-											"0 4px 12px rgba(0,0,0,0.35)",
-									}}
-								>
-									<Box
-										sx={{
-											width: 100,
-											height: 100,
-											borderRadius: "12px",
-											backgroundColor:
-												theme.palette.primary.main +
-												"25",
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
-											color: "#7BE26A",
-											fontSize: "1.9rem",
-											flexShrink: 0,
-										}}
-									>
-										{card.icon}
-									</Box>
-
-									<Box
-										sx={{
-											flex: 1,
-											display: "flex",
-											flexDirection: "column",
-											alignItems: "flex-end",
-										}}
-									>
-										<Typography
-											variant="body1"
-											fontWeight={700}
-											sx={{ textAlign: "end" }}
-										>
-											{card.title}
-										</Typography>
-
-										<Typography
-											variant="h4"
-											fontWeight={800}
-											sx={{ mt: 0.5 }}
-										>
-											{card.value}
-										</Typography>
-
-										<Typography
-											variant="caption"
-											color="text.secondary"
-											sx={{
-												mt: 1,
-												display: "block",
-												fontStyle: "italic",
-											}}
-										>
-											Última atualização:{" "}
-											{formatTime(lastUpdate)}
-										</Typography>
-									</Box>
-								</Card>
+								<CustomCard
+									card={card}
+									lastUpdate={lastUpdate}
+								/>
 							</Grid>
 						))}
 					</Grid>

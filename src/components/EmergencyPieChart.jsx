@@ -17,6 +17,8 @@ export default function EmergencyPieChart({ data }) {
 		theme.palette.primary.main, // 🔵 Ocorrências
 	];
 
+	const total = data.reduce((acc, item) => acc + item.value, 0);
+
 	return (
 		<Card sx={{ borderRadius: "8px" }}>
 			<CardContent>

@@ -46,16 +46,6 @@ const INCIDENT_STEPS = [
 	{ key: "resolved", label: "Resolvida" },
 ];
 
-const getActiveStep = (status) =>
-	INCIDENT_STEPS.findIndex((s) => s.key === status);
-
-const isStepCompleted = (stepKey, currentStatus) => {
-	if (currentStatus === "resolved") return true;
-	if (currentStatus === "open") return stepKey === "open";
-	if (currentStatus === "in_progress") return stepKey === "open";
-	return false;
-};
-
 export default function Incidents() {
 	const theme = useTheme();
 	const location = useLocation();
