@@ -4,11 +4,13 @@ import SentinelaMap from "../components/SentinelaMap";
 import { categories } from "../utils/Categories";
 import { getMarkerIconByCategory } from "../utils/markerIcons";
 
-import { useSentinelaData } from "../utils/SentinelaDataContext";
-
-export default function IncidentsMap({ mapState, onMapStateChange }) {
+export default function IncidentsMap({
+	mapState,
+	onMapStateChange,
+	incidents,
+	loading,
+}) {
 	// 🔹 dados globais (já filtrados por cidade)
-	const { incidents, loading } = useSentinelaData();
 
 	// 🔹 transforma incidents em ocorrências do mapa
 	const ocorrencias = (incidents || [])
@@ -16,7 +18,7 @@ export default function IncidentsMap({ mapState, onMapStateChange }) {
 			const category = categories.find(
 				(c) =>
 					c.title.trim().toLowerCase() ===
-					d.ocorrencia?.categoria?.trim().toLowerCase()
+					d.ocorrencia?.categoria?.trim().toLowerCase(),
 			);
 
 			return {
@@ -36,7 +38,7 @@ export default function IncidentsMap({ mapState, onMapStateChange }) {
 
 				// ícone por categoria
 				markerIcon: getMarkerIconByCategory(
-					category?.icon || "dots-horizontal-circle-outline"
+					category?.icon || "dots-horizontal-circle-outline",
 				),
 			};
 		})

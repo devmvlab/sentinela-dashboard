@@ -89,10 +89,16 @@ export default function Dashboard() {
 	======================= */
 	useEffect(() => {
 		if (!mapState && incidents?.length) {
-			const first = incidents.find((i) => i.geoloc?.lat && i.geoloc?.lng);
+			const first = incidents.find(
+				(i) => i.geoloc?.latitude && i.geoloc?.longitude,
+			);
+
 			if (first) {
 				setMapState({
-					center: { lat: first.geoloc.lat, lng: first.geoloc.lng },
+					center: {
+						lat: first.geoloc.latitude,
+						lng: first.geoloc.longitude,
+					},
 					zoom: 12,
 				});
 			}
@@ -352,6 +358,7 @@ export default function Dashboard() {
 				<Box sx={{ height: "calc(100vh - 170px)" }}>
 					<IncidentsMap
 						incidents={incidents}
+						loading={loading}
 						mapState={mapState}
 						onMapStateChange={setMapState}
 					/>
