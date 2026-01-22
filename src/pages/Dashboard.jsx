@@ -101,6 +101,14 @@ export default function Dashboard() {
 					},
 					zoom: 12,
 				});
+			} else {
+				setMapState({
+					center: {
+						lat: userCenter?.lat,
+						lng: userCenter?.lng,
+					},
+					zoom: 12,
+				});
 			}
 		}
 	}, [incidents, mapState]);
