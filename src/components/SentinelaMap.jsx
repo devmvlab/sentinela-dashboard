@@ -48,7 +48,7 @@ export default function SentinelaMap({
 				zoom: map.getZoom(),
 			});
 		},
-		[onMapStateChange]
+		[onMapStateChange],
 	);
 
 	// 🔹 limpa seleção ao trocar para heatmap
@@ -72,7 +72,7 @@ export default function SentinelaMap({
 				<Box
 					onClick={() =>
 						setViewMode((prev) =>
-							prev === "markers" ? "heatmap" : "markers"
+							prev === "markers" ? "heatmap" : "markers",
 						)
 					}
 					sx={{
@@ -113,6 +113,12 @@ export default function SentinelaMap({
 				options={{
 					disableDefaultUI: true,
 					zoomControl: true,
+					styles: [
+						{
+							featureType: "poi",
+							stylers: [{ visibility: "off" }],
+						},
+					],
 				}}
 			>
 				{/* 📍 MARKERS */}
@@ -130,7 +136,7 @@ export default function SentinelaMap({
 				{viewMode === "heatmap" && (
 					<HeatmapLayer
 						data={ocorrencias.map(
-							(o) => new window.google.maps.LatLng(o.lat, o.lng)
+							(o) => new window.google.maps.LatLng(o.lat, o.lng),
 						)}
 						options={{
 							radius: 28,
