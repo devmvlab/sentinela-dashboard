@@ -7,14 +7,13 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
 import PendingIcon from "@mui/icons-material/Pending";
 import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
-
+import StepConnector from "@mui/material/StepConnector";
 import IconButton from "@mui/material/IconButton";
 
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
@@ -31,7 +30,7 @@ import useIncidentFilters from "../utils/useIncidentFilters";
 import StatusChip from "../components/StatusChip";
 
 import { useLocation, useNavigate } from "react-router-dom";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, styled } from "@mui/material/styles";
 
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../services/firebase";
@@ -118,6 +117,29 @@ export default function Incidents() {
 		setOpenModal(false);
 	}
 
+	const statusToStepIndex = {
+		open: 0,
+		in_progress: 1,
+		resolved: 2,
+	};
+
+	const activeStep = statusToStepIndex[currentIncident?.status] ?? 0;
+
+	const CustomStepConnector = styled(StepConnector)(({ theme }) => ({
+		"& .MuiStepConnector-line": {
+			borderColor: theme.palette.divider,
+			borderTopWidth: 2,
+		},
+
+		"&.Mui-active .MuiStepConnector-line": {
+			borderColor: theme.palette.primary.main,
+		},
+
+		"&.Mui-completed .MuiStepConnector-line": {
+			borderColor: theme.palette.primary.main,
+		},
+	}));
+
 	function CustomStepIcon(props) {
 		const { icon, ownerState } = props;
 
@@ -177,7 +199,12 @@ export default function Incidents() {
 			flex: 2,
 			valueGetter: (_, row) => row.geoloc?.address,
 		},
-		{ field: "data", headerName: "Data", flex: 1 },
+		{
+			field: "data",
+			headerName: "Data",
+			flex: 1,
+			valueGetter: (_, row) => `${row.data} - ${row.hora}`,
+		},
 		{
 			field: "status",
 			headerName: "Status",
@@ -193,6 +220,8 @@ export default function Incidents() {
 		endDate,
 		search,
 	});
+
+	console.log({ filteredRows });
 
 	if (loading) {
 		return (
@@ -265,7 +294,12 @@ export default function Incidents() {
 					<DialogContent dividers>
 						{currentIncident && (
 							<>
-								<Stepper alternativeLabel sx={{ mb: 3 }}>
+								<Stepper
+									alternativeLabel
+									sx={{ marginY: 3 }}
+									connector={<CustomStepConnector />}
+									activeStep={activeStep}
+								>
 									{INCIDENT_STEPS.map((step, index) => (
 										<Step key={step.key}>
 											<StepLabel
