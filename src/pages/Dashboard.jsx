@@ -86,8 +86,10 @@ export default function Dashboard() {
 		onlyEmergency,
 		realtime: true,
 	});
-
+	/* 🔹 INCIDENTS FILTRADOS PELO TIPO DE OCORRÊNCIA */
 	const filteredIncidents = useMemo(() => {
+		if (!Array.isArray(incidentTypes)) return [];
+
 		return incidents.filter((inc) =>
 			incidentTypes.includes(inc.ocorrencia?.tipo),
 		);
