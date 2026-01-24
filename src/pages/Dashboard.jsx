@@ -10,6 +10,10 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, onSnapshot } from "firebase/firestore";
+import { auth, db } from "../services/firebase";
+
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
@@ -70,6 +74,8 @@ export default function Dashboard() {
 	const [viewMode, setViewMode] = useState("dashboard");
 	const [mapState, setMapState] = useState(null);
 
+	const [incidentTypes, setIncidentTypes] = useState(null);
+
 	/* 🔹 FILTROS */
 	const [period, setPeriod] = useState("today");
 	const [onlyEmergency, setOnlyEmergency] = useState(false);
@@ -81,8 +87,46 @@ export default function Dashboard() {
 		realtime: true,
 	});
 
+	const filteredIncidents = useMemo(() => {
+		return incidents.filter((inc) =>
+			incidentTypes.includes(inc.ocorrencia?.tipo),
+		);
+	}, [incidents, incidentTypes]);
+
 	const { userCenter } = useSentinelaData();
 	const { users } = useUsersByCity();
+
+	/* =======================
+	   DEFINE INCIDENT TYPES
+	======================= */
+
+	useEffect(() => {
+		let unsubscribeSettings = null;
+
+		const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+			if (!user) {
+				setIncidentTypes(null);
+				if (unsubscribeSettings) unsubscribeSettings();
+				return;
+			}
+
+			const ref = doc(db, "users", user.uid, "settings", "default");
+
+			unsubscribeSettings = onSnapshot(ref, (snap) => {
+				const data = snap.data();
+				setIncidentTypes(
+					Array.isArray(data?.incidentTypes)
+						? data.incidentTypes
+						: [],
+				);
+			});
+		});
+
+		return () => {
+			if (unsubscribeSettings) unsubscribeSettings();
+			unsubscribeAuth();
+		};
+	}, []);
 
 	/* =======================
 	   MAPA
@@ -127,17 +171,37 @@ export default function Dashboard() {
 	};
 
 	/* ================= CARDS ================= */
+	// const stats = useMemo(() => {
+	// 	const ocorrenciasEmAndamento = incidents.filter(
+	// 		(i) => i.status === "in_progress",
+	// 	).length;
+
+	// 	const ocorrenciasResolvidas = incidents.filter(
+	// 		(i) => i.status === "resolved",
+	// 	).length;
+
+	// 	const ocorrenciasAbertas = incidents.filter(
+	// 		(i) => i.status == "open",
+	// 	).length;
+
+	// 	return {
+	// 		ocorrenciasAbertas,
+	// 		ocorrenciasEmAndamento,
+	// 		ocorrenciasResolvidas,
+	// 	};
+	// }, [incidents]);
+
 	const stats = useMemo(() => {
-		const ocorrenciasEmAndamento = incidents.filter(
+		const ocorrenciasEmAndamento = filteredIncidents.filter(
 			(i) => i.status === "in_progress",
 		).length;
 
-		const ocorrenciasResolvidas = incidents.filter(
+		const ocorrenciasResolvidas = filteredIncidents.filter(
 			(i) => i.status === "resolved",
 		).length;
 
-		const ocorrenciasAbertas = incidents.filter(
-			(i) => i.status == "open",
+		const ocorrenciasAbertas = filteredIncidents.filter(
+			(i) => i.status === "open",
 		).length;
 
 		return {
@@ -145,7 +209,7 @@ export default function Dashboard() {
 			ocorrenciasEmAndamento,
 			ocorrenciasResolvidas,
 		};
-	}, [incidents]);
+	}, [filteredIncidents]);
 
 	/* =======================
 	   GRÁFICOS
@@ -157,7 +221,7 @@ export default function Dashboard() {
 		peakHourData,
 		emergencyPieData,
 	} = useMemo(() => {
-		if (!incidents.length) {
+		if (!filteredIncidents.length) {
 			return {
 				categoryData: [],
 				statusData: [],
@@ -172,7 +236,7 @@ export default function Dashboard() {
 		const district = {};
 		let emergencias = 0;
 
-		incidents.forEach((item) => {
+		filteredIncidents.forEach((item) => {
 			if (item.isEmergency) emergencias++;
 
 			categorias[item.ocorrencia?.categoria || "Sem categoria"] =
@@ -203,14 +267,16 @@ export default function Dashboard() {
 					quantidade,
 				}),
 			),
-			peakHourData: buildPeakHourData(incidents),
+			peakHourData: buildPeakHourData(filteredIncidents),
 			emergencyPieData: [
 				{ name: "Emergências", value: emergencias },
-				{ name: "Ocorrências", value: incidents.length - emergencias },
+				{
+					name: "Ocorrências",
+					value: filteredIncidents.length - emergencias,
+				},
 			],
 		};
-	}, [incidents]);
-
+	}, [filteredIncidents]);
 	const baseLabel = getBaseLabel(onlyEmergency);
 	const cards = [
 		{
@@ -239,6 +305,16 @@ export default function Dashboard() {
 			period,
 		}),
 	}));
+
+	if (incidentTypes === null) {
+		return (
+			<Box sx={{ p: 4 }}>
+				<Typography color="text.secondary">
+					Carregando configurações do usuário...
+				</Typography>
+			</Box>
+		);
+	}
 
 	if (loading) {
 		return (
@@ -315,7 +391,7 @@ export default function Dashboard() {
 					<Grid container spacing={3}>
 						<Grid size={{ xs: 12, md: 6, lg: 6 }}>
 							<SafetyCard
-								incidents={incidents}
+								incidents={filteredIncidents}
 								period={period}
 								userCenter={userCenter}
 							/>
@@ -365,7 +441,7 @@ export default function Dashboard() {
 			<Fade in={viewMode === "map"} timeout={300} unmountOnExit>
 				<Box sx={{ height: "calc(100vh - 170px)" }}>
 					<IncidentsMap
-						incidents={incidents}
+						incidents={filteredIncidents}
 						loading={loading}
 						mapState={mapState}
 						onMapStateChange={setMapState}

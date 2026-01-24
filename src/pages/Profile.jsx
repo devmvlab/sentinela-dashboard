@@ -99,8 +99,6 @@ export default function ProfilePage() {
 				displayName: profile.name,
 				photoURL: avatarUrl,
 			});
-
-			console.log("Perfil salvo com sucesso");
 		} catch (error) {
 			console.error("Erro ao salvar perfil:", error);
 		}
