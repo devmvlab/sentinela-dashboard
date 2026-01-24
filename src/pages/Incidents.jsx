@@ -221,8 +221,6 @@ export default function Incidents() {
 		search,
 	});
 
-	console.log({ filteredRows });
-
 	if (loading) {
 		return (
 			<Paper sx={{ p: 4 }}>

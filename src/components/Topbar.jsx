@@ -20,20 +20,28 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { useTheme } from "@mui/material/styles";
+import { onAuthStateChanged } from "firebase/auth";
 
 import logo from "../assets/logo1.png";
 
 /* Firebase imports */
 import { db } from "../services/firebase";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, onSnapshot, query, where, doc } from "firebase/firestore";
 import { useSentinelaData } from "../utils/SentinelaDataContext";
+
 export default function Topbar({ handleDrawerOpen }) {
 	const theme = useTheme();
 	const navigate = useNavigate();
 
-	const { userCity, loading } = useSentinelaData();
+	const [incidentTypes, setIncidentTypes] = useState(null);
 
-	const isInitialLoad = useRef(true);
+	// AJUSTE 1 — trava temporária após salvar config
+	const [configSyncing, setConfigSyncing] = useState(false);
+
+	// AJUSTE 2 — marco temporal para não notificar histórico
+	const notificationsStartAt = useRef(Date.now());
+
+	const { userCity, loading } = useSentinelaData();
 
 	// profile menu
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -63,23 +71,17 @@ export default function Topbar({ handleDrawerOpen }) {
 		const id = Date.now();
 		setToasts((prev) => [...prev, { id, ...oc }]);
 
-		// salva no histórico (máximo 10)
 		setHistoricoNotificacoes((prev) => {
 			const novaLista = [{ ...oc }, ...prev];
 			return novaLista.slice(0, 10);
 		});
 
-		// toca som
 		try {
 			const audio = new Audio("/alert.mp3");
 			audio.volume = 0.7;
-			// play pode falhar se o usuário não interagiu com a página ainda; tentar/catch para evitar erros
 			audio.play().catch(() => {});
-		} catch (e) {
-			// ignore
-		}
+		} catch {}
 
-		// remover toast automaticamente
 		setTimeout(() => {
 			setToasts((prev) => prev.filter((t) => t.id !== id));
 		}, 6000);
@@ -99,15 +101,58 @@ export default function Topbar({ handleDrawerOpen }) {
 		};
 
 		window.addEventListener("click", unlockAudio, { once: true });
+		return () => window.removeEventListener("click", unlockAudio);
+	}, []);
+
+	// AJUSTE 3 — se acabou de salvar config, bloqueia temporariamente
+	useEffect(() => {
+		if (localStorage.getItem("incidentTypesSyncing") === "true") {
+			setConfigSyncing(true);
+		}
+	}, []);
+
+	// listener realtime das configs
+	useEffect(() => {
+		let unsubscribeSettings = null;
+
+		const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+			if (!user) {
+				setIncidentTypes(null);
+				if (unsubscribeSettings) unsubscribeSettings();
+				return;
+			}
+
+			const ref = doc(db, "users", user.uid, "settings", "default");
+
+			unsubscribeSettings = onSnapshot(ref, (snap) => {
+				if (!snap.exists()) {
+					setIncidentTypes([]);
+				} else {
+					const data = snap.data();
+					setIncidentTypes(
+						Array.isArray(data.incidentTypes)
+							? data.incidentTypes
+							: [],
+					);
+				}
+
+				// 🔧 AJUSTE — config confirmada
+				setConfigSyncing(false);
+				localStorage.removeItem("incidentTypesSyncing");
+				notificationsStartAt.current = Date.now();
+			});
+		});
 
 		return () => {
-			window.removeEventListener("click", unlockAudio);
+			if (unsubscribeSettings) unsubscribeSettings();
+			unsubscribeAuth();
 		};
 	}, []);
 
+	// listener realtime das ocorrências
 	useEffect(() => {
-		if (loading) return; // 👈 ainda carregando
-		if (!userCity) return; // 👈 sem cidade definida
+		if (loading) return;
+		if (!userCity) return;
 
 		const q = query(
 			collection(db, "incidents"),
@@ -115,37 +160,43 @@ export default function Topbar({ handleDrawerOpen }) {
 		);
 
 		const unsubscribe = onSnapshot(q, (snapshot) => {
-			if (isInitialLoad.current) {
-				isInitialLoad.current = false;
-				return;
-			}
-
 			snapshot.docChanges().forEach((change) => {
-				if (change.type === "added") {
-					const nova = {
-						id: change.doc.id,
-						...change.doc.data(),
-					};
+				if (change.type !== "added") return;
 
-					// toca som
-					try {
-						const audio = new Audio("/alert.mp3");
-						audio.volume = 0.7;
-						// play pode falhar se o usuário não interagiu com a página ainda; tentar/catch para evitar erros
-						audio.play().catch(() => {});
-					} catch (e) {
-						// ignore
-					}
+				const nova = {
+					id: change.doc.id,
+					...change.doc.data(),
+				};
 
-					setNovaOcorrencia(true);
-					setContadorNovas((prev) => prev + 1);
-					adicionarToast(nova);
-				}
+				const tipoOcorrencia = nova.ocorrencia?.tipo;
+
+				// AJUSTE — bloqueios corretos
+
+				// config acabou de salvar
+				if (configSyncing) return;
+
+				// config ainda não carregou
+				if (incidentTypes === null) return;
+
+				// tipo não permitido
+				if (!incidentTypes.includes(tipoOcorrencia)) return;
+
+				// ocorrência antiga (já existia antes)
+				const createdAt =
+					nova.createdAt?.toMillis?.() ??
+					nova.createdAt ??
+					Date.now();
+
+				if (createdAt < notificationsStartAt.current) return;
+
+				setNovaOcorrencia(true);
+				setContadorNovas((prev) => prev + 1);
+				adicionarToast(nova);
 			});
 		});
 
 		return () => unsubscribe();
-	}, [userCity, loading]);
+	}, [userCity, loading, incidentTypes, configSyncing]);
 
 	// fechar dropdown ao clicar fora
 	useEffect(() => {
@@ -157,11 +208,13 @@ export default function Topbar({ handleDrawerOpen }) {
 				setMenuAberto(false);
 			}
 		};
+
 		if (menuAberto) {
 			document.addEventListener("mousedown", handleClickOutside);
 		} else {
 			document.removeEventListener("mousedown", handleClickOutside);
 		}
+
 		return () =>
 			document.removeEventListener("mousedown", handleClickOutside);
 	}, [menuAberto]);

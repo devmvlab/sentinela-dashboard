@@ -37,73 +37,70 @@ export default function Settings() {
 	});
 
 	return (
-		console.log(filteredRows),
-		(
-			<Box
+		<Box
+			sx={{
+				height: "100%",
+				padding: 3,
+				display: "flex",
+				flexDirection: "column",
+				gap: 2,
+			}}
+		>
+			{/* Título da página */}
+			<Typography variant="h4" fontWeight="bold">
+				Relatórios
+			</Typography>
+
+			{/* Subtítulo */}
+			<Typography variant="body2" color="text.secondary">
+				Gerar relatórios das ocorrências registradas no sistema.
+			</Typography>
+
+			{/* Conteúdo vazio */}
+			<Paper
 				sx={{
 					height: "100%",
-					padding: 3,
+					width: "100%",
+					alignItems: "center",
+					p: 1,
 					display: "flex",
 					flexDirection: "column",
-					gap: 2,
+					justifyContent: "center",
+					gap: 1,
 				}}
 			>
-				{/* Título da página */}
-				<Typography variant="h4" fontWeight="bold">
-					Relatórios
-				</Typography>
+				<Filters
+					status={statusFilter}
+					setStatus={setStatusFilter}
+					category={category}
+					setCategory={setCategory}
+					startDate={startDate}
+					setStartDate={setStartDate}
+					endDate={endDate}
+					setEndDate={setEndDate}
+					search={search}
+					setSearch={setSearch}
+					onClear={clearFilters}
+					showSearch={false}
+				/>
 
-				{/* Subtítulo */}
-				<Typography variant="body2" color="text.secondary">
-					Gerar relatórios das ocorrências registradas no sistema.
-				</Typography>
-
-				{/* Conteúdo vazio */}
-				<Paper
-					sx={{
-						height: "100%",
-						width: "100%",
-						alignItems: "center",
-						p: 1,
-						display: "flex",
-						flexDirection: "column",
-						justifyContent: "center",
-						gap: 1,
-					}}
-				>
-					<Filters
-						status={statusFilter}
-						setStatus={setStatusFilter}
-						category={category}
-						setCategory={setCategory}
-						startDate={startDate}
-						setStartDate={setStartDate}
-						endDate={endDate}
-						setEndDate={setEndDate}
-						search={search}
-						setSearch={setSearch}
-						onClear={clearFilters}
-						showSearch={false}
-					/>
-
-					<Stack direction="row" spacing={2}>
-						<Button
-							variant="outlined"
-							startIcon={<DescriptionIcon />}
-							onClick={() => exportIncidentsToExcel(filteredRows)}
-						>
-							Gerar Excel
-						</Button>
-						<Button
-							variant="outlined"
-							endIcon={<PictureAsPdfIcon />}
-							onClick={() => exportIncidentsToPdf(filteredRows)}
-						>
-							Gerar PDF
-						</Button>
-					</Stack>
-				</Paper>
-			</Box>
-		)
+				<Stack direction="row" spacing={2}>
+					<Button
+						variant="outlined"
+						startIcon={<DescriptionIcon />}
+						onClick={() => exportIncidentsToExcel(filteredRows)}
+					>
+						Gerar Excel
+					</Button>
+					<Button
+						variant="outlined"
+						endIcon={<PictureAsPdfIcon />}
+						onClick={() => exportIncidentsToPdf(filteredRows)}
+					>
+						Gerar PDF
+					</Button>
+				</Stack>
+			</Paper>
+		</Box>
 	);
 }
