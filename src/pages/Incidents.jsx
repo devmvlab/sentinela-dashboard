@@ -1,29 +1,20 @@
 import { DataGrid } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
-import Button from "@mui/material/Button";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
 import PendingIcon from "@mui/icons-material/Pending";
-import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
 import StepConnector from "@mui/material/StepConnector";
-import IconButton from "@mui/material/IconButton";
 
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
+import TextField from "@mui/material/TextField";
+
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-
 import CloseIcon from "@mui/icons-material/Close";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 
 import Filters from "../components/Filters";
 import useIncidentFilters from "../utils/useIncidentFilters";
@@ -36,14 +27,17 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../services/firebase";
 
 import { useSentinelaData } from "../utils/SentinelaDataContext";
+import IncidentModal from "../components/IncidentModal";
 
 /* =============================
    FLUXO DE STATUS
 ============================= */
 const INCIDENT_STEPS = [
 	{ key: "open", label: "Aberta" },
+	{ key: "review", label: "Em análise" },
 	{ key: "in_progress", label: "Em andamento" },
 	{ key: "resolved", label: "Resolvida" },
+	{ key: "cancelled", label: "Cancelada" },
 ];
 
 export default function Incidents() {
@@ -62,6 +56,8 @@ export default function Incidents() {
 	const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 	const [openModal, setOpenModal] = useState(false);
 	const [currentIncident, setCurrentIncident] = useState(null);
+	const [showCancelReason, setShowCancelReason] = useState(false);
+	const [cancelReason, setCancelReason] = useState("");
 
 	const [paginationModel, setPaginationModel] = useState({
 		page: 0,
@@ -97,7 +93,25 @@ export default function Incidents() {
 	}
 
 	async function updateStatusInsideModal(newStatus) {
-		if (!currentIncident || newStatus === currentIncident.status) return;
+		if (!currentIncident) return;
+
+		const currentStatus = currentIncident.status;
+
+		// Se já está cancelada, não muda mais
+		if (currentStatus === "cancelled") return;
+
+		// Cancelamento só pelo botão
+		if (newStatus === "cancelled") return;
+
+		// Não permitir pular etapas
+		const allowedTransitions = {
+			open: ["review"],
+			review: ["in_progress"],
+			in_progress: ["resolved"],
+			resolved: [],
+		};
+
+		if (!allowedTransitions[currentStatus]?.includes(newStatus)) return;
 
 		await updateDoc(doc(db, "incidents", currentIncident.id), {
 			status: newStatus,
@@ -117,67 +131,43 @@ export default function Incidents() {
 		setOpenModal(false);
 	}
 
-	const statusToStepIndex = {
-		open: 0,
-		in_progress: 1,
-		resolved: 2,
-	};
+	async function aceitarOcorrencia() {
+		if (!currentIncident) return;
 
-	const activeStep = statusToStepIndex[currentIncident?.status] ?? 0;
+		const newStatus = "review";
 
-	const CustomStepConnector = styled(StepConnector)(({ theme }) => ({
-		"& .MuiStepConnector-line": {
-			borderColor: theme.palette.divider,
-			borderTopWidth: 2,
-		},
+		if (currentIncident.status === newStatus) return;
 
-		"&.Mui-active .MuiStepConnector-line": {
-			borderColor: theme.palette.primary.main,
-		},
+		await updateDoc(doc(db, "incidents", currentIncident.id), {
+			status: newStatus,
+		});
 
-		"&.Mui-completed .MuiStepConnector-line": {
-			borderColor: theme.palette.primary.main,
-		},
-	}));
+		updateIncidentStatus(currentIncident.id, newStatus);
 
-	function CustomStepIcon(props) {
-		const { icon, ownerState } = props;
+		setSnackbar({
+			open: true,
+			message: "Ocorrência aceita e em análise",
+		});
 
-		// icon = índice do step (1, 2, 3)
-		const stepIndex = Number(icon) - 1;
-		const currentStatus = ownerState.currentStatus;
-
-		const stepKey = INCIDENT_STEPS[stepIndex].key;
-
-		// OPEN → sempre completed
-		if (stepKey === "open") {
-			return <CheckCircleIcon sx={{ color: "primary.main" }} />;
-		}
-
-		// IN_PROGRESS
-		if (stepKey === "in_progress") {
-			if (currentStatus === "in_progress") {
-				return <QueryBuilderIcon sx={{ color: "primary.main" }} />;
-			}
-
-			if (currentStatus === "resolved") {
-				return <CheckCircleIcon sx={{ color: "primary.main" }} />;
-			}
-
-			return <PendingIcon sx={{ color: "grey.400" }} />;
-		}
-
-		// RESOLVED
-		if (stepKey === "resolved") {
-			if (currentStatus === "resolved") {
-				return <CheckCircleIcon sx={{ color: "primary.main" }} />;
-			}
-
-			return <PendingIcon sx={{ color: "grey.400" }} />;
-		}
-
-		return null;
+		setOpenModal(false);
 	}
+
+	const stepsToRender =
+		currentIncident?.status === "cancelled"
+			? [
+					{ key: "open", label: "Aberta" },
+					{ key: "cancelled", label: "Cancelada" },
+				]
+			: [
+					{ key: "open", label: "Aberta" },
+					{ key: "review", label: "Em análise" },
+					{ key: "in_progress", label: "Em andamento" },
+					{ key: "resolved", label: "Resolvida" },
+				];
+
+	const activeStep = stepsToRender.findIndex(
+		(step) => step.key === currentIncident?.status,
+	);
 
 	const columns = [
 		{ field: "id", headerName: "Identificador", flex: 1 },
@@ -273,163 +263,26 @@ export default function Incidents() {
 				/>
 
 				{/* MODAL */}
-				<Dialog
+				<IncidentModal
 					open={openModal}
 					onClose={() => setOpenModal(false)}
-					fullWidth
-					maxWidth="md"
-				>
-					<DialogTitle sx={{ fontWeight: "bold" }}>
-						Detalhes da Ocorrência
-						<IconButton
-							onClick={() => setOpenModal(false)}
-							sx={{ position: "absolute", right: 8, top: 8 }}
-						>
-							<CloseIcon />
-						</IconButton>
-					</DialogTitle>
-
-					<DialogContent dividers>
-						{currentIncident && (
-							<>
-								<Stepper
-									alternativeLabel
-									sx={{ marginY: 3 }}
-									connector={<CustomStepConnector />}
-									activeStep={activeStep}
-								>
-									{INCIDENT_STEPS.map((step, index) => (
-										<Step key={step.key}>
-											<StepLabel
-												StepIconComponent={(props) => (
-													<CustomStepIcon
-														{...props}
-														ownerState={{
-															currentStatus:
-																currentIncident.status,
-														}}
-													/>
-												)}
-												onClick={() =>
-													updateStatusInsideModal(
-														step.key,
-													)
-												}
-												sx={{
-													cursor: "pointer",
-													"& .MuiStepLabel-label": {
-														fontWeight:
-															step.key ===
-															currentIncident.status
-																? 600
-																: 400,
-														color:
-															step.key ===
-																"open" ||
-															step.key ===
-																currentIncident.status ||
-															currentIncident.status ===
-																"resolved"
-																? "primary.main"
-																: "text.secondary",
-													},
-												}}
-											>
-												{step.label}
-											</StepLabel>
-										</Step>
-									))}
-								</Stepper>
-
-								<Box
-									display="flex"
-									flexDirection="row"
-									justifyContent="center"
-									gap={4}
-								>
-									{currentIncident.imageUrl ? (
-										<img
-											src={currentIncident.imageUrl}
-											alt="Ocorrência"
-											style={{
-												width: 300,
-												height: 300,
-												borderRadius: 8,
-											}}
-										/>
-									) : (
-										<Box
-											display={"flex"}
-											justifyContent={"center"}
-											alignItems={"center"}
-											flexDirection={"column"}
-											width={300}
-											height={300}
-											bgcolor={
-												theme.palette.text.secondary
-											}
-											borderRadius={8}
-										>
-											<ImageNotSupportedIcon
-												sx={{ fontSize: 100 }}
-											/>
-											<Typography>
-												Nenhuma imagem
-											</Typography>
-										</Box>
-									)}
-
-									<Box
-										display="flex"
-										flexDirection="column"
-										justifyContent={"space-between"}
-										gap={2}
-									>
-										<Typography>
-											<b>Categoria:</b>{" "}
-											{
-												currentIncident.ocorrencia
-													?.categoria
-											}
-										</Typography>
-										<Typography>
-											<b>Tipo:</b>{" "}
-											{currentIncident.ocorrencia?.tipo}
-										</Typography>
-										<Typography>
-											<b>Descrição:</b>{" "}
-											{currentIncident.desc}
-										</Typography>
-										<Typography>
-											<b>Data:</b> {currentIncident.data}{" "}
-											às {currentIncident.hora}
-										</Typography>
-
-										<Typography>
-											<b>Endereço:</b>{" "}
-											{currentIncident.geoloc?.address}
-										</Typography>
-										<Typography>
-											<b>Cidade:</b>{" "}
-											{currentIncident.geoloc?.city} -{" "}
-											{currentIncident.geoloc?.state}
-										</Typography>
-										<Typography>
-											<b>CEP:</b>{" "}
-											{currentIncident.geoloc?.postalCode}
-										</Typography>
-									</Box>
-								</Box>
-							</>
-						)}
-					</DialogContent>
-
-					<DialogActions>
-						<Button onClick={() => setOpenModal(false)}>
-							Fechar
-						</Button>
-					</DialogActions>
-				</Dialog>
+					incident={currentIncident}
+					stepsToRender={stepsToRender}
+					activeStep={activeStep}
+					onStepClick={updateStatusInsideModal}
+					onAccept={aceitarOcorrencia}
+					onConfirmCancel={async (reason) => {
+						await updateDoc(
+							doc(db, "incidents", currentIncident.id),
+							{
+								status: "cancelled",
+								cancelReason: reason,
+							},
+						);
+						updateIncidentStatus(currentIncident.id, "cancelled");
+						setOpenModal(false);
+					}}
+				/>
 
 				<Snackbar
 					open={snackbar.open}
