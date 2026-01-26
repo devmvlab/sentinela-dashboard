@@ -2,17 +2,9 @@ import { DataGrid } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import QueryBuilderIcon from "@mui/icons-material/QueryBuilder";
-import PendingIcon from "@mui/icons-material/Pending";
-import StepConnector from "@mui/material/StepConnector";
-
-import TextField from "@mui/material/TextField";
 
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-
-import CloseIcon from "@mui/icons-material/Close";
 
 import { useEffect, useState, useCallback, memo } from "react";
 
@@ -33,8 +25,8 @@ import IncidentModal from "../components/IncidentModal";
    FLUXO DE STATUS
 ============================= */
 const INCIDENT_STEPS = [
-	{ key: "open", label: "Aberta" },
-	{ key: "review", label: "Em análise" },
+	{ key: "pending_review", label: "Em análise" },
+	{ key: "accepted", label: "Aceita" },
 	{ key: "in_progress", label: "Em andamento" },
 	{ key: "resolved", label: "Resolvida" },
 	{ key: "cancelled", label: "Cancelada" },
@@ -56,8 +48,6 @@ export default function Incidents() {
 	const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 	const [openModal, setOpenModal] = useState(false);
 	const [currentIncident, setCurrentIncident] = useState(null);
-	const [showCancelReason, setShowCancelReason] = useState(false);
-	const [cancelReason, setCancelReason] = useState("");
 
 	const [paginationModel, setPaginationModel] = useState({
 		page: 0,
@@ -105,8 +95,8 @@ export default function Incidents() {
 
 		// Não permitir pular etapas
 		const allowedTransitions = {
-			open: ["review"],
-			review: ["in_progress"],
+			pending_review: ["accepted"],
+			accepted: ["in_progress"],
 			in_progress: ["resolved"],
 			resolved: [],
 		};
@@ -134,7 +124,7 @@ export default function Incidents() {
 	async function aceitarOcorrencia() {
 		if (!currentIncident) return;
 
-		const newStatus = "review";
+		const newStatus = "accepted";
 
 		if (currentIncident.status === newStatus) return;
 
@@ -155,12 +145,12 @@ export default function Incidents() {
 	const stepsToRender =
 		currentIncident?.status === "cancelled"
 			? [
-					{ key: "open", label: "Aberta" },
+					{ key: "pending_review", label: "Em análise" },
 					{ key: "cancelled", label: "Cancelada" },
 				]
 			: [
-					{ key: "open", label: "Aberta" },
-					{ key: "review", label: "Em análise" },
+					{ key: "pending_review", label: "Em análise" },
+					{ key: "accepted", label: "Aceita" },
 					{ key: "in_progress", label: "Em andamento" },
 					{ key: "resolved", label: "Resolvida" },
 				];

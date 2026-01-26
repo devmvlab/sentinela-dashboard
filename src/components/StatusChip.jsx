@@ -1,36 +1,37 @@
 import Chip from "@mui/material/Chip";
+import { useTheme } from "@mui/material/styles";
 
-//  exporte os maps
 export const statusLabels = {
-	pending: "PENDENTE",
-	review: "EM ANÁLISE",
-	open: "ABERTA",
+	accepted: "ACEITA",
+	pending_review: "EM ANÁLISE",
 	in_progress: "EM ANDAMENTO",
-	closed: "ENCERRADA",
 	resolved: "RESOLVIDA",
 	cancelled: "CANCELADA",
 };
 
-export const statusColors = {
-	pending: "default",
-	review: "primary",
-	open: "warning",
-	in_progress: "info",
-	closed: "error",
-	resolved: "success",
-	cancelled: "error",
-};
-
 export default function StatusChip({ status, sx }) {
+	const theme = useTheme();
 	const normalizedStatus = status?.toLowerCase();
+
+	const statusColors = {
+		accepted: theme.palette.other.accepted,
+		pending_review: theme.palette.other.pending_review,
+		in_progress: theme.palette.other.in_progress,
+		resolved: theme.palette.other.resolved,
+		cancelled: theme.palette.other.cancelled,
+	};
 
 	return (
 		<Chip
 			label={statusLabels[normalizedStatus] || normalizedStatus}
-			color={statusColors[normalizedStatus] || "default"}
 			size="small"
 			variant="filled"
-			sx={{ fontWeight: "bold", ...sx }}
+			sx={{
+				fontWeight: "bold",
+				backgroundColor: statusColors[normalizedStatus],
+				color: theme.palette.primary.contrastText,
+				...sx,
+			}}
 		/>
 	);
 }

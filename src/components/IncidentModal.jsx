@@ -20,7 +20,7 @@ import {
 	Close as CloseIcon,
 } from "@mui/icons-material";
 import StepConnector from "@mui/material/StepConnector";
-import { styled } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material/styles";
 import { memo, useState, useCallback } from "react";
 
 /* =============================
@@ -42,12 +42,12 @@ const CustomStepConnector = styled(StepConnector)(({ theme }) => ({
 function CustomStepIcon({ ownerState }) {
 	const { currentStatus, stepKey } = ownerState;
 
-	if (stepKey === "open") {
+	if (stepKey === "pending_review") {
 		return <CheckCircleIcon color="primary" />;
 	}
 
-	if (stepKey === "review") {
-		if (["review", "in_progress"].includes(currentStatus)) {
+	if (stepKey === "accepted") {
+		if (["accepted", "in_progress"].includes(currentStatus)) {
 			return <QueryBuilderIcon color="primary" />;
 		}
 		if (currentStatus === "resolved") {
@@ -94,6 +94,7 @@ const IncidentModal = memo(function IncidentModal({
 	onAccept,
 	onConfirmCancel,
 }) {
+	const theme = useTheme();
 	const [showCancelReason, setShowCancelReason] = useState(false);
 	const [cancelReason, setCancelReason] = useState("");
 
@@ -238,19 +239,47 @@ const IncidentModal = memo(function IncidentModal({
 			</DialogContent>
 
 			<DialogActions>
-				<Box sx={{ flexGrow: 1 }}>
-					{incident.status === "open" && (
-						<Button onClick={onAccept}>Aceitar ocorrência</Button>
-					)}
-
-					{incident.status === "review" && !showCancelReason && (
+				<Box
+					sx={{
+						flexGrow: 1,
+						display: "flex",
+						justifyContent: "center",
+						gap: 2,
+					}}
+				>
+					{incident.status === "pending_review" && (
 						<Button
-							color="error"
-							onClick={() => setShowCancelReason(true)}
+							variant="contained"
+							sx={{
+								fontWeight: "bold",
+								color: theme.palette.primary.contrastText,
+							}}
+							onClick={onAccept}
 						>
-							Cancelar ocorrência
+							Aceitar ocorrência
 						</Button>
 					)}
+
+					{(incident.status === "pending_review" ||
+						incident.status === "accepted") &&
+						!showCancelReason && (
+							<Button
+								variant="contained"
+								sx={{
+									fontWeight: "bold",
+									backgroundColor: theme.palette.other.error,
+									color: theme.palette.text.primary,
+									"&:hover": {
+										backgroundColor:
+											theme.palette.other.errorDark ??
+											theme.palette.error.dark,
+									},
+								}}
+								onClick={() => setShowCancelReason(true)}
+							>
+								Cancelar ocorrência
+							</Button>
+						)}
 				</Box>
 
 				{showCancelReason && (

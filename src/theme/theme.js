@@ -31,11 +31,18 @@ export const sentinelaTheme = createTheme({
 			disabled: "rgba(255,255,255,0.5)",
 		},
 
-		// OUTRAS CORES
-		error: { main: "#d32f2f" },
-		warning: { main: "#FFC107" },
-		divider: "#ffffff33",
-		tableHover:"#47595c",
+		other: {
+			// OUTRAS CORES
+			error:  "#d32f2f" ,
+			warning:  "#FFC107" ,
+			divider: "#ffffff33",
+			tableHover:"#47595c",
+			pending_review: "#FFC107",
+			cancelled: "#d32f2f",
+			accepted: "#FFFFFF",
+			in_progress: "#1E88E5",
+			resolved: "#A1EC2F",
+		},
 	},
 
 	shape: { borderRadius: 4 },
