@@ -1,0 +1,309 @@
+import {
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+	Button,
+	Typography,
+	Box,
+	TextField,
+	IconButton,
+	Stepper,
+	Step,
+	StepLabel,
+} from "@mui/material";
+import {
+	CheckCircle as CheckCircleIcon,
+	QueryBuilder as QueryBuilderIcon,
+	Pending as PendingIcon,
+	ImageNotSupported as ImageNotSupportedIcon,
+	Close as CloseIcon,
+} from "@mui/icons-material";
+import StepConnector from "@mui/material/StepConnector";
+import { styled, useTheme } from "@mui/material/styles";
+import { memo, useState, useCallback } from "react";
+
+/* =============================
+   STEPPER
+============================= */
+const CustomStepConnector = styled(StepConnector)(({ theme }) => ({
+	"& .MuiStepConnector-line": {
+		borderColor: theme.palette.divider,
+		borderTopWidth: 2,
+	},
+	"&.Mui-active .MuiStepConnector-line": {
+		borderColor: theme.palette.primary.main,
+	},
+	"&.Mui-completed .MuiStepConnector-line": {
+		borderColor: theme.palette.primary.main,
+	},
+}));
+
+function CustomStepIcon({ ownerState }) {
+	const { currentStatus, stepKey } = ownerState;
+
+	if (stepKey === "pending_review") {
+		return <CheckCircleIcon color="primary" />;
+	}
+
+	if (stepKey === "accepted") {
+		if (["accepted", "in_progress"].includes(currentStatus)) {
+			return <QueryBuilderIcon color="primary" />;
+		}
+		if (currentStatus === "resolved") {
+			return <CheckCircleIcon color="primary" />;
+		}
+		return <PendingIcon color="disabled" />;
+	}
+
+	if (stepKey === "in_progress") {
+		if (currentStatus === "in_progress") {
+			return <QueryBuilderIcon color="primary" />;
+		}
+		if (currentStatus === "resolved") {
+			return <CheckCircleIcon color="primary" />;
+		}
+		return <PendingIcon color="disabled" />;
+	}
+
+	if (stepKey === "resolved") {
+		return currentStatus === "resolved" ? (
+			<CheckCircleIcon color="primary" />
+		) : (
+			<PendingIcon color="disabled" />
+		);
+	}
+
+	if (stepKey === "cancelled") {
+		return <CloseIcon color="error" />;
+	}
+
+	return <PendingIcon color="disabled" />;
+}
+
+/* =============================
+   COMPONENTE
+============================= */
+const IncidentModal = memo(function IncidentModal({
+	open,
+	onClose,
+	incident,
+	stepsToRender,
+	activeStep,
+	onStepClick,
+	onAccept,
+	onConfirmCancel,
+}) {
+	const theme = useTheme();
+	const [showCancelReason, setShowCancelReason] = useState(false);
+	const [cancelReason, setCancelReason] = useState("");
+
+	const handleReasonChange = useCallback((e) => {
+		setCancelReason(e.target.value);
+	}, []);
+
+	const handleClose = () => {
+		setShowCancelReason(false);
+		setCancelReason("");
+		onClose();
+	};
+
+	if (!incident) return null;
+
+	return (
+		<Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+			<DialogTitle sx={{ fontWeight: "bold" }}>
+				Detalhes da Ocorrência
+				<IconButton
+					onClick={handleClose}
+					sx={{ position: "absolute", right: 8, top: 8 }}
+				>
+					<CloseIcon />
+				</IconButton>
+			</DialogTitle>
+
+			<DialogContent dividers>
+				{/* STEPPER */}
+				<Stepper
+					alternativeLabel
+					sx={{ my: 3 }}
+					connector={<CustomStepConnector />}
+					activeStep={activeStep === -1 ? 0 : activeStep}
+				>
+					{stepsToRender.map((step) => (
+						<Step key={step.key}>
+							<StepLabel
+								StepIconComponent={(props) => (
+									<CustomStepIcon
+										{...props}
+										ownerState={{
+											currentStatus: incident.status,
+											stepKey: step.key,
+										}}
+									/>
+								)}
+								onClick={() =>
+									incident.status === "cancelled"
+										? null
+										: onStepClick(step.key)
+								}
+								sx={{ cursor: "pointer" }}
+							>
+								{step.label}
+							</StepLabel>
+						</Step>
+					))}
+				</Stepper>
+
+				{/* IMAGEM + DADOS */}
+				<Box display="flex" justifyContent="center" gap={4}>
+					{incident.imageUrl ? (
+						<img
+							src={incident.imageUrl}
+							alt="Ocorrência"
+							style={{ width: 300, height: 300, borderRadius: 8 }}
+						/>
+					) : (
+						<Box
+							width={300}
+							height={300}
+							display="flex"
+							alignItems="center"
+							justifyContent="center"
+							flexDirection="column"
+							bgcolor="text.secondary"
+							borderRadius={2}
+						>
+							<ImageNotSupportedIcon sx={{ fontSize: 100 }} />
+							<Typography>Nenhuma imagem</Typography>
+						</Box>
+					)}
+
+					<Box display="flex" flexDirection="column" gap={1}>
+						<Typography>
+							<b>Categoria:</b> {incident.ocorrencia?.categoria}
+						</Typography>
+						<Typography>
+							<b>Tipo:</b> {incident.ocorrencia?.tipo}
+						</Typography>
+						<Typography>
+							<b>Descrição:</b> {incident.desc}
+						</Typography>
+						<Typography>
+							<b>Data:</b> {incident.data} às {incident.hora}
+						</Typography>
+						<Typography>
+							<b>Endereço:</b> {incident.geoloc?.address}
+						</Typography>
+						<Typography>
+							<b>Cidade:</b> {incident.geoloc?.city} -{" "}
+							{incident.geoloc?.state}
+						</Typography>
+						<Typography>
+							<b>CEP:</b> {incident.geoloc?.postalCode}
+						</Typography>
+
+						{incident.status === "cancelled" &&
+							incident.cancelReason && (
+								<Box mt={2}>
+									<Typography
+										fontWeight={600}
+										color="error.main"
+									>
+										Motivo do cancelamento
+									</Typography>
+									<Typography>
+										{incident.cancelReason}
+									</Typography>
+								</Box>
+							)}
+					</Box>
+				</Box>
+
+				{/* CAMPO MOTIVO */}
+				{showCancelReason && (
+					<Box mt={3}>
+						<Typography fontWeight={600} color="error.main" mb={1}>
+							Motivo do cancelamento
+						</Typography>
+						<TextField
+							fullWidth
+							multiline
+							minRows={3}
+							value={cancelReason}
+							onChange={handleReasonChange}
+							autoFocus
+						/>
+					</Box>
+				)}
+			</DialogContent>
+
+			<DialogActions>
+				<Box
+					sx={{
+						flexGrow: 1,
+						display: "flex",
+						justifyContent: "center",
+						gap: 2,
+					}}
+				>
+					{incident.status === "pending_review" && (
+						<Button
+							variant="contained"
+							sx={{
+								fontWeight: "bold",
+								color: theme.palette.primary.contrastText,
+							}}
+							onClick={onAccept}
+						>
+							Aceitar ocorrência
+						</Button>
+					)}
+
+					{(incident.status === "pending_review" ||
+						incident.status === "accepted") &&
+						!showCancelReason && (
+							<Button
+								variant="contained"
+								sx={{
+									fontWeight: "bold",
+									backgroundColor: theme.palette.other.error,
+									color: theme.palette.text.primary,
+									"&:hover": {
+										backgroundColor:
+											theme.palette.other.errorDark ??
+											theme.palette.error.dark,
+									},
+								}}
+								onClick={() => setShowCancelReason(true)}
+							>
+								Cancelar ocorrência
+							</Button>
+						)}
+				</Box>
+
+				{showCancelReason && (
+					<>
+						<Button onClick={() => setShowCancelReason(false)}>
+							Voltar
+						</Button>
+
+						<Button
+							color="error"
+							variant="contained"
+							disabled={!cancelReason.trim()}
+							onClick={() => {
+								onConfirmCancel(cancelReason);
+								handleClose();
+							}}
+						>
+							Confirmar cancelamento
+						</Button>
+					</>
+				)}
+			</DialogActions>
+		</Dialog>
+	);
+});
+
+export default IncidentModal;
