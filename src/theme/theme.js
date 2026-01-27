@@ -39,9 +39,9 @@ export const sentinelaTheme = createTheme({
 			tableHover:"#47595c",
 			pending_review: "#FFC107",
 			cancelled: "#d32f2f",
-			accepted: "#FFFFFF",
+			accepted: "#9e9e9e",
 			in_progress: "#1E88E5",
-			resolved: "#A1EC2F",
+			resolved: "#A1EC2F99",
 		},
 	},
 

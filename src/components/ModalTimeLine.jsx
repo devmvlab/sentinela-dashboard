@@ -1,20 +1,16 @@
-import {
-	Timeline,
-	TimelineItem,
-	TimelineSeparator,
-	TimelineConnector,
-	TimelineContent,
-	TimelineOppositeContent,
-	TimelineDot,
-} from "@mui/lab";
+import Timeline from "@mui/lab/Timeline";
+import TimelineItem, { timelineItemClasses } from "@mui/lab/TimelineItem";
+import TimelineSeparator from "@mui/lab/TimelineSeparator";
+import TimelineConnector from "@mui/lab/TimelineConnector";
+import TimelineContent from "@mui/lab/TimelineContent";
+import TimelineDot from "@mui/lab/TimelineDot";
+import { Box, Typography, useTheme } from "@mui/material";
 import {
 	CheckCircle as CheckCircleIcon,
 	QueryBuilder as QueryBuilderIcon,
 	Close as CloseIcon,
 } from "@mui/icons-material";
-import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
 
 import {
 	collection,
@@ -62,6 +58,7 @@ function formatStatus(status) {
    COMPONENTE
 ============================= */
 export default function IncidentTimeline({ incidentId }) {
+	const theme = useTheme();
 	const [history, setHistory] = useState([]);
 	const [loading, setLoading] = useState(true);
 
@@ -104,31 +101,23 @@ export default function IncidentTimeline({ incidentId }) {
 	}
 
 	return (
-		<Timeline position="left">
+		<Timeline
+			sx={{
+				[`& .${timelineItemClasses.root}:before`]: {
+					flex: 0,
+					padding: 0,
+				},
+			}}
+		>
 			{history.map((item, index) => (
 				<TimelineItem key={item.id}>
-					<TimelineOppositeContent
-						sx={{ m: "auto 0" }}
-						variant="body2"
-						color="text.secondary"
-					>
-						{item.reason && <Typography>{item.reason}</Typography>}
-						{item.createdBy?.name} -{" "}
-						{item.createdAt?.toDate
-							? item.createdAt.toDate().toLocaleString("pt-BR")
-							: ""}
-					</TimelineOppositeContent>
-
 					<TimelineSeparator>
 						{index !== 0 && <TimelineConnector />}
 						<TimelineDot
-							color={
-								item.toStatus === "cancelled"
-									? "error"
-									: item.toStatus === "resolved"
-										? "success"
-										: "primary"
-							}
+							sx={{
+								backgroundColor:
+									theme.palette.other[item.toStatus],
+							}}
 						>
 							{getStatusIcon(item.toStatus)}
 						</TimelineDot>
@@ -137,15 +126,34 @@ export default function IncidentTimeline({ incidentId }) {
 
 					<TimelineContent
 						sx={{
+							py: "14px",
 							px: 2,
-							display: "flex",
-							alignItems: "center", // centro vertical real
-							justifyContent: "flex-start",
 						}}
 					>
+						{/* STATUS — preso ao centro do ícone */}
 						<Typography variant="h6" component="span">
-							{formatStatus(item.fromStatus)} →{" "}
 							{formatStatus(item.toStatus)}
+						</Typography>
+
+						{/* TEXTO — sempre abaixo */}
+
+						{item.reason && (
+							<Typography
+								variant="body2"
+								sx={{
+									fontStyle: "italic",
+								}}
+							>
+								"{item.reason}"
+							</Typography>
+						)}
+						<Typography variant="caption" color="text.secondary">
+							{item.createdBy?.name} –{" "}
+							{item.createdAt?.toDate
+								? item.createdAt
+										.toDate()
+										.toLocaleString("pt-BR")
+								: ""}
 						</Typography>
 					</TimelineContent>
 				</TimelineItem>

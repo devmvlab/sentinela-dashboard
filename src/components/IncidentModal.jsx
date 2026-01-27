@@ -102,6 +102,9 @@ const IncidentModal = memo(function IncidentModal({
 	const theme = useTheme();
 	const [showCancelReason, setShowCancelReason] = useState(false);
 	const [cancelReason, setCancelReason] = useState("");
+	const [textReasonType, setTextReasonType] = useState("cancel");
+	const [nextStatus, setNextStatus] = useState(null);
+
 	const [tab, setTab] = useState(0);
 
 	const handleReasonChange = useCallback((e) => {
@@ -110,6 +113,8 @@ const IncidentModal = memo(function IncidentModal({
 
 	const handleClose = () => {
 		setShowCancelReason(false);
+		setTextReasonType("cancel");
+		setNextStatus(null);
 		setCancelReason("");
 		onClose();
 	};
@@ -134,24 +139,6 @@ const IncidentModal = memo(function IncidentModal({
 							<CloseIcon />
 						</IconButton>
 					</Box>
-
-					<Box display="flex" alignItems="center" gap={1}>
-						<Typography variant="body2" color="text.secondary">
-							Status atual:
-						</Typography>
-
-						<Chip
-							label={incident.status}
-							size="small"
-							color={
-								incident.status === "resolved"
-									? "success"
-									: incident.status === "cancelled"
-										? "error"
-										: "warning"
-							}
-						/>
-					</Box>
 				</Box>
 			</DialogTitle>
 
@@ -175,11 +162,25 @@ const IncidentModal = memo(function IncidentModal({
 										}}
 									/>
 								)}
-								onClick={() =>
-									incident.status === "cancelled"
-										? null
-										: onStepClick(step.key)
-								}
+								onClick={() => {
+									if (incident.status === "cancelled") return;
+
+									if (
+										(incident.status === "pending_review" &&
+											step.key === "accepted") ||
+										(incident.status === "accepted" &&
+											step.key === "in_progress") ||
+										(incident.status === "in_progress" &&
+											step.key === "resolved")
+									) {
+										setTextReasonType("observation");
+										setNextStatus(step.key);
+										setShowCancelReason(true);
+										return;
+									}
+
+									onStepClick(step.key);
+								}}
 								sx={{ cursor: "pointer" }}
 							>
 								{step.label}
@@ -279,10 +280,16 @@ const IncidentModal = memo(function IncidentModal({
 							<Box mt={3}>
 								<Typography
 									fontWeight={600}
-									color="error.main"
+									color={
+										textReasonType === "cancel"
+											? "error.main"
+											: "text.primary"
+									}
 									mb={1}
 								>
-									Motivo do cancelamento
+									{textReasonType === "cancel"
+										? "Motivo do cancelamento"
+										: "Observações"}
 								</Typography>
 								<TextField
 									fullWidth
@@ -312,18 +319,24 @@ const IncidentModal = memo(function IncidentModal({
 						gap: 2,
 					}}
 				>
-					{incident.status === "pending_review" && tab === 0 && (
-						<Button
-							variant="contained"
-							sx={{
-								fontWeight: "bold",
-								color: theme.palette.primary.contrastText,
-							}}
-							onClick={onAccept}
-						>
-							Aceitar ocorrência
-						</Button>
-					)}
+					{incident.status === "pending_review" &&
+						tab === 0 &&
+						!showCancelReason && (
+							<Button
+								variant="contained"
+								sx={{
+									fontWeight: "bold",
+									color: theme.palette.primary.contrastText,
+								}}
+								onClick={() => {
+									setTextReasonType("observation");
+									setNextStatus("accepted");
+									setShowCancelReason(true);
+								}}
+							>
+								Aceitar ocorrência
+							</Button>
+						)}
 
 					{(incident.status === "pending_review" ||
 						incident.status === "accepted") &&
@@ -341,7 +354,10 @@ const IncidentModal = memo(function IncidentModal({
 											theme.palette.error.dark,
 									},
 								}}
-								onClick={() => setShowCancelReason(true)}
+								onClick={() => {
+									setTextReasonType("cancel");
+									setShowCancelReason(true);
+								}}
 							>
 								Cancelar ocorrência
 							</Button>
@@ -350,21 +366,40 @@ const IncidentModal = memo(function IncidentModal({
 
 				{showCancelReason && tab === 0 && (
 					<>
-						<Button onClick={() => setShowCancelReason(false)}>
+						<Button
+							onClick={() => {
+								setShowCancelReason(false);
+								setTextReasonType("cancel");
+								setNextStatus(null);
+							}}
+						>
 							Voltar
 						</Button>
 
-						<Button
-							color="error"
-							variant="contained"
-							disabled={!cancelReason.trim()}
-							onClick={() => {
-								onConfirmCancel(cancelReason);
-								handleClose();
-							}}
-						>
-							Confirmar cancelamento
-						</Button>
+						{textReasonType === "cancel" ? (
+							<Button
+								color="error"
+								variant="contained"
+								disabled={!cancelReason.trim()}
+								onClick={() => {
+									onConfirmCancel(cancelReason);
+									handleClose();
+								}}
+							>
+								Confirmar cancelamento
+							</Button>
+						) : (
+							<Button
+								variant="contained"
+								disabled={!cancelReason.trim()}
+								onClick={() => {
+									onStepClick(nextStatus, cancelReason);
+									handleClose();
+								}}
+							>
+								Confirmar
+							</Button>
+						)}
 					</>
 				)}
 			</DialogActions>

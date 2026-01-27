@@ -81,7 +81,7 @@ export default function Incidents() {
 		setSearch("");
 	}
 
-	async function updateStatusInsideModal(newStatus) {
+	async function updateStatusInsideModal(newStatus, reason) {
 		if (!currentIncident) return;
 
 		const currentStatus = currentIncident.status;
@@ -102,6 +102,7 @@ export default function Incidents() {
 			incident: currentIncident,
 			newStatus,
 			user,
+			reason,
 		});
 
 		updateIncidentStatus(currentIncident.id, newStatus);
