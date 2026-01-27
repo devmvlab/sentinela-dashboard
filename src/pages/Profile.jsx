@@ -183,6 +183,7 @@ export default function ProfilePage() {
 					<Grid container spacing={2}>
 						<Grid item xs={12}>
 							<TextField
+								disabled
 								label="Nome"
 								name="name"
 								value={profile.name}

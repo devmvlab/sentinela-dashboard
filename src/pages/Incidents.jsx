@@ -6,20 +6,18 @@ import Alert from "@mui/material/Alert";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-import { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useState } from "react";
 
 import Filters from "../components/Filters";
 import useIncidentFilters from "../utils/useIncidentFilters";
 import StatusChip from "../components/StatusChip";
 
 import { useLocation, useNavigate } from "react-router-dom";
-import { useTheme, styled } from "@mui/material/styles";
-
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../services/firebase";
-
+import { useTheme } from "@mui/material/styles";
 import { useSentinelaData } from "../utils/SentinelaDataContext";
 import IncidentModal from "../components/IncidentModal";
+
+import { updateIncidentWithHistory } from "../services/incidentStatus";
 
 /* =============================
    FLUXO DE STATUS
@@ -38,6 +36,7 @@ export default function Incidents() {
 	const navigate = useNavigate();
 
 	const { incidents, loading, updateIncidentStatus } = useSentinelaData();
+	const { user } = useSentinelaData();
 
 	const [statusFilter, setStatusFilter] = useState("all");
 	const [category, setCategory] = useState("all");
@@ -82,18 +81,14 @@ export default function Incidents() {
 		setSearch("");
 	}
 
-	async function updateStatusInsideModal(newStatus) {
+	async function updateStatusInsideModal(newStatus, reason) {
 		if (!currentIncident) return;
 
 		const currentStatus = currentIncident.status;
 
-		// Se já está cancelada, não muda mais
 		if (currentStatus === "cancelled") return;
-
-		// Cancelamento só pelo botão
 		if (newStatus === "cancelled") return;
 
-		// Não permitir pular etapas
 		const allowedTransitions = {
 			pending_review: ["accepted"],
 			accepted: ["in_progress"],
@@ -103,19 +98,18 @@ export default function Incidents() {
 
 		if (!allowedTransitions[currentStatus]?.includes(newStatus)) return;
 
-		await updateDoc(doc(db, "incidents", currentIncident.id), {
-			status: newStatus,
+		await updateIncidentWithHistory({
+			incident: currentIncident,
+			newStatus,
+			user,
+			reason,
 		});
 
 		updateIncidentStatus(currentIncident.id, newStatus);
 
-		const statusLabel = INCIDENT_STEPS.find(
-			(step) => step.key === newStatus,
-		)?.label;
-
 		setSnackbar({
 			open: true,
-			message: `Status atualizado para ${statusLabel}`,
+			message: "Status atualizado com sucesso",
 		});
 
 		setOpenModal(false);
@@ -123,16 +117,16 @@ export default function Incidents() {
 
 	async function aceitarOcorrencia() {
 		if (!currentIncident) return;
+		if (currentIncident.status === "accepted") return;
 
-		const newStatus = "accepted";
-
-		if (currentIncident.status === newStatus) return;
-
-		await updateDoc(doc(db, "incidents", currentIncident.id), {
-			status: newStatus,
+		await updateIncidentWithHistory({
+			incident: currentIncident,
+			newStatus: "accepted",
+			reason: "Ocorrência aceita pelo operador",
+			user,
 		});
 
-		updateIncidentStatus(currentIncident.id, newStatus);
+		updateIncidentStatus(currentIncident.id, "accepted");
 
 		setSnackbar({
 			open: true,
@@ -262,13 +256,13 @@ export default function Incidents() {
 					onStepClick={updateStatusInsideModal}
 					onAccept={aceitarOcorrencia}
 					onConfirmCancel={async (reason) => {
-						await updateDoc(
-							doc(db, "incidents", currentIncident.id),
-							{
-								status: "cancelled",
-								cancelReason: reason,
-							},
-						);
+						await updateIncidentWithHistory({
+							incident: currentIncident,
+							newStatus: "cancelled",
+							reason,
+							user,
+						});
+
 						updateIncidentStatus(currentIncident.id, "cancelled");
 						setOpenModal(false);
 					}}

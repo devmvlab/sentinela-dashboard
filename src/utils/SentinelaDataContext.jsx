@@ -33,8 +33,8 @@ export function SentinelaDataProvider({ children }) {
 	function updateIncidentStatus(id, newStatus) {
 		setIncidents((prev) =>
 			prev.map((inc) =>
-				inc.id === id ? { ...inc, status: newStatus } : inc
-			)
+				inc.id === id ? { ...inc, status: newStatus } : inc,
+			),
 		);
 	}
 
@@ -79,7 +79,7 @@ export function SentinelaDataProvider({ children }) {
 
 					const userData = userSnap.data();
 
-					setUser(userData);
+					setUser({ ...userData, uid: currentUser.uid });
 					setUserCity(userData.cityId || null);
 
 					if (
@@ -111,7 +111,7 @@ export function SentinelaDataProvider({ children }) {
 					} else {
 						q = query(
 							collection(db, "incidents"),
-							where("geoloc.cityId", "==", userData.cityId)
+							where("geoloc.cityId", "==", userData.cityId),
 						);
 					}
 
@@ -129,12 +129,12 @@ export function SentinelaDataProvider({ children }) {
 				} catch (error) {
 					console.error(
 						"Erro ao carregar dados do Sentinela:",
-						error
+						error,
 					);
 					setIncidents([]);
 					setLoading(false);
 				}
-			}
+			},
 		);
 
 		return () => {
@@ -170,7 +170,7 @@ export function useSentinelaData() {
 
 	if (!context) {
 		throw new Error(
-			"useSentinelaData deve ser usado dentro de SentinelaDataProvider"
+			"useSentinelaData deve ser usado dentro de SentinelaDataProvider",
 		);
 	}
 

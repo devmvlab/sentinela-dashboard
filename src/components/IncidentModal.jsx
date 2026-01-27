@@ -11,6 +11,10 @@ import {
 	Stepper,
 	Step,
 	StepLabel,
+	Tabs,
+	Tab,
+	Chip,
+	Divider,
 } from "@mui/material";
 import {
 	CheckCircle as CheckCircleIcon,
@@ -22,6 +26,7 @@ import {
 import StepConnector from "@mui/material/StepConnector";
 import { styled, useTheme } from "@mui/material/styles";
 import { memo, useState, useCallback } from "react";
+import IncidentTimeline from "../components/ModalTimeLine";
 
 /* =============================
    STEPPER
@@ -97,6 +102,10 @@ const IncidentModal = memo(function IncidentModal({
 	const theme = useTheme();
 	const [showCancelReason, setShowCancelReason] = useState(false);
 	const [cancelReason, setCancelReason] = useState("");
+	const [textReasonType, setTextReasonType] = useState("cancel");
+	const [nextStatus, setNextStatus] = useState(null);
+
+	const [tab, setTab] = useState(0);
 
 	const handleReasonChange = useCallback((e) => {
 		setCancelReason(e.target.value);
@@ -104,6 +113,8 @@ const IncidentModal = memo(function IncidentModal({
 
 	const handleClose = () => {
 		setShowCancelReason(false);
+		setTextReasonType("cancel");
+		setNextStatus(null);
 		setCancelReason("");
 		onClose();
 	};
@@ -112,18 +123,27 @@ const IncidentModal = memo(function IncidentModal({
 
 	return (
 		<Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+			{/* HEADER */}
 			<DialogTitle sx={{ fontWeight: "bold" }}>
-				Detalhes da Ocorrência
-				<IconButton
-					onClick={handleClose}
-					sx={{ position: "absolute", right: 8, top: 8 }}
-				>
-					<CloseIcon />
-				</IconButton>
+				<Box display="flex" flexDirection="column" gap={1}>
+					<Box
+						display="flex"
+						justifyContent="space-between"
+						alignItems="center"
+					>
+						<Typography fontWeight={700}>
+							Ocorrência #{incident.id}
+						</Typography>
+
+						<IconButton onClick={handleClose}>
+							<CloseIcon />
+						</IconButton>
+					</Box>
+				</Box>
 			</DialogTitle>
 
 			<DialogContent dividers>
-				{/* STEPPER */}
+				{/* STEPPER (sempre visível) */}
 				<Stepper
 					alternativeLabel
 					sx={{ my: 3 }}
@@ -142,11 +162,25 @@ const IncidentModal = memo(function IncidentModal({
 										}}
 									/>
 								)}
-								onClick={() =>
-									incident.status === "cancelled"
-										? null
-										: onStepClick(step.key)
-								}
+								onClick={() => {
+									if (incident.status === "cancelled") return;
+
+									if (
+										(incident.status === "pending_review" &&
+											step.key === "accepted") ||
+										(incident.status === "accepted" &&
+											step.key === "in_progress") ||
+										(incident.status === "in_progress" &&
+											step.key === "resolved")
+									) {
+										setTextReasonType("observation");
+										setNextStatus(step.key);
+										setShowCancelReason(true);
+										return;
+									}
+
+									onStepClick(step.key);
+								}}
 								sx={{ cursor: "pointer" }}
 							>
 								{step.label}
@@ -155,87 +189,125 @@ const IncidentModal = memo(function IncidentModal({
 					))}
 				</Stepper>
 
-				{/* IMAGEM + DADOS */}
-				<Box display="flex" justifyContent="center" gap={4}>
-					{incident.imageUrl ? (
-						<img
-							src={incident.imageUrl}
-							alt="Ocorrência"
-							style={{ width: 300, height: 300, borderRadius: 8 }}
-						/>
-					) : (
-						<Box
-							width={300}
-							height={300}
-							display="flex"
-							alignItems="center"
-							justifyContent="center"
-							flexDirection="column"
-							bgcolor="text.secondary"
-							borderRadius={2}
-						>
-							<ImageNotSupportedIcon sx={{ fontSize: 100 }} />
-							<Typography>Nenhuma imagem</Typography>
-						</Box>
-					)}
+				{/* TABS */}
+				<Tabs
+					value={tab}
+					onChange={(_, value) => setTab(value)}
+					sx={{ mb: 3, borderBottom: 1, borderColor: "divider" }}
+				>
+					<Tab label="Detalhes" />
+					<Tab label="Histórico" />
+				</Tabs>
 
-					<Box display="flex" flexDirection="column" gap={1}>
-						<Typography>
-							<b>Categoria:</b> {incident.ocorrencia?.categoria}
-						</Typography>
-						<Typography>
-							<b>Tipo:</b> {incident.ocorrencia?.tipo}
-						</Typography>
-						<Typography>
-							<b>Descrição:</b> {incident.desc}
-						</Typography>
-						<Typography>
-							<b>Data:</b> {incident.data} às {incident.hora}
-						</Typography>
-						<Typography>
-							<b>Endereço:</b> {incident.geoloc?.address}
-						</Typography>
-						<Typography>
-							<b>Cidade:</b> {incident.geoloc?.city} -{" "}
-							{incident.geoloc?.state}
-						</Typography>
-						<Typography>
-							<b>CEP:</b> {incident.geoloc?.postalCode}
-						</Typography>
-
-						{incident.status === "cancelled" &&
-							incident.cancelReason && (
-								<Box mt={2}>
-									<Typography
-										fontWeight={600}
-										color="error.main"
-									>
-										Motivo do cancelamento
-									</Typography>
-									<Typography>
-										{incident.cancelReason}
-									</Typography>
+				{/* =====================
+				    ABA DETALHES
+				===================== */}
+				{tab === 0 && (
+					<>
+						<Box display="flex" justifyContent="center" gap={4}>
+							{incident.imageUrl ? (
+								<img
+									src={incident.imageUrl}
+									alt="Ocorrência"
+									style={{
+										width: 300,
+										height: 300,
+										borderRadius: 8,
+									}}
+								/>
+							) : (
+								<Box
+									width={300}
+									height={300}
+									display="flex"
+									alignItems="center"
+									justifyContent="center"
+									flexDirection="column"
+									bgcolor="text.secondary"
+									borderRadius={2}
+								>
+									<ImageNotSupportedIcon
+										sx={{ fontSize: 100 }}
+									/>
+									<Typography>Nenhuma imagem</Typography>
 								</Box>
 							)}
-					</Box>
-				</Box>
 
-				{/* CAMPO MOTIVO */}
-				{showCancelReason && (
-					<Box mt={3}>
-						<Typography fontWeight={600} color="error.main" mb={1}>
-							Motivo do cancelamento
-						</Typography>
-						<TextField
-							fullWidth
-							multiline
-							minRows={3}
-							value={cancelReason}
-							onChange={handleReasonChange}
-							autoFocus
-						/>
-					</Box>
+							<Box display="flex" flexDirection="column" gap={1}>
+								<Typography>
+									<b>Categoria:</b>{" "}
+									{incident.ocorrencia?.categoria}
+								</Typography>
+								<Typography>
+									<b>Tipo:</b> {incident.ocorrencia?.tipo}
+								</Typography>
+								<Typography>
+									<b>Descrição:</b> {incident.desc}
+								</Typography>
+								<Typography>
+									<b>Data:</b> {incident.data} às{" "}
+									{incident.hora}
+								</Typography>
+								<Typography>
+									<b>Endereço:</b> {incident.geoloc?.address}
+								</Typography>
+								<Typography>
+									<b>Cidade:</b> {incident.geoloc?.city} -{" "}
+									{incident.geoloc?.state}
+								</Typography>
+								<Typography>
+									<b>CEP:</b> {incident.geoloc?.postalCode}
+								</Typography>
+
+								{incident.status === "cancelled" &&
+									incident.cancelReason && (
+										<Box mt={2}>
+											<Typography
+												fontWeight={600}
+												color="error.main"
+											>
+												Motivo do cancelamento
+											</Typography>
+											<Typography>
+												{incident.cancelReason}
+											</Typography>
+										</Box>
+									)}
+							</Box>
+						</Box>
+
+						{showCancelReason && (
+							<Box mt={3}>
+								<Typography
+									fontWeight={600}
+									color={
+										textReasonType === "cancel"
+											? "error.main"
+											: "text.primary"
+									}
+									mb={1}
+								>
+									{textReasonType === "cancel"
+										? "Motivo do cancelamento"
+										: "Observações"}
+								</Typography>
+								<TextField
+									fullWidth
+									multiline
+									minRows={3}
+									value={cancelReason}
+									onChange={handleReasonChange}
+									autoFocus
+								/>
+							</Box>
+						)}
+					</>
 				)}
+
+				{/* =====================
+				    ABA HISTÓRICO
+				===================== */}
+				{tab === 1 && <IncidentTimeline incidentId={incident.id} />}
 			</DialogContent>
 
 			<DialogActions>
@@ -247,22 +319,29 @@ const IncidentModal = memo(function IncidentModal({
 						gap: 2,
 					}}
 				>
-					{incident.status === "pending_review" && (
-						<Button
-							variant="contained"
-							sx={{
-								fontWeight: "bold",
-								color: theme.palette.primary.contrastText,
-							}}
-							onClick={onAccept}
-						>
-							Aceitar ocorrência
-						</Button>
-					)}
+					{incident.status === "pending_review" &&
+						tab === 0 &&
+						!showCancelReason && (
+							<Button
+								variant="contained"
+								sx={{
+									fontWeight: "bold",
+									color: theme.palette.primary.contrastText,
+								}}
+								onClick={() => {
+									setTextReasonType("observation");
+									setNextStatus("accepted");
+									setShowCancelReason(true);
+								}}
+							>
+								Aceitar ocorrência
+							</Button>
+						)}
 
 					{(incident.status === "pending_review" ||
 						incident.status === "accepted") &&
-						!showCancelReason && (
+						!showCancelReason &&
+						tab === 0 && (
 							<Button
 								variant="contained"
 								sx={{
@@ -275,30 +354,52 @@ const IncidentModal = memo(function IncidentModal({
 											theme.palette.error.dark,
 									},
 								}}
-								onClick={() => setShowCancelReason(true)}
+								onClick={() => {
+									setTextReasonType("cancel");
+									setShowCancelReason(true);
+								}}
 							>
 								Cancelar ocorrência
 							</Button>
 						)}
 				</Box>
 
-				{showCancelReason && (
+				{showCancelReason && tab === 0 && (
 					<>
-						<Button onClick={() => setShowCancelReason(false)}>
+						<Button
+							onClick={() => {
+								setShowCancelReason(false);
+								setTextReasonType("cancel");
+								setNextStatus(null);
+							}}
+						>
 							Voltar
 						</Button>
 
-						<Button
-							color="error"
-							variant="contained"
-							disabled={!cancelReason.trim()}
-							onClick={() => {
-								onConfirmCancel(cancelReason);
-								handleClose();
-							}}
-						>
-							Confirmar cancelamento
-						</Button>
+						{textReasonType === "cancel" ? (
+							<Button
+								color="error"
+								variant="contained"
+								disabled={!cancelReason.trim()}
+								onClick={() => {
+									onConfirmCancel(cancelReason);
+									handleClose();
+								}}
+							>
+								Confirmar cancelamento
+							</Button>
+						) : (
+							<Button
+								variant="contained"
+								disabled={!cancelReason.trim()}
+								onClick={() => {
+									onStepClick(nextStatus, cancelReason);
+									handleClose();
+								}}
+							>
+								Confirmar
+							</Button>
+						)}
 					</>
 				)}
 			</DialogActions>
