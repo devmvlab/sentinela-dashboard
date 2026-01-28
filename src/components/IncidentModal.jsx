@@ -25,7 +25,7 @@ import {
 } from "@mui/icons-material";
 import StepConnector from "@mui/material/StepConnector";
 import { styled, useTheme } from "@mui/material/styles";
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useRef } from "react";
 import IncidentTimeline from "../components/ModalTimeLine";
 
 /* =============================
@@ -100,22 +100,26 @@ const IncidentModal = memo(function IncidentModal({
 	onConfirmCancel,
 }) {
 	const theme = useTheme();
-	const [showCancelReason, setShowCancelReason] = useState(false);
-	const [cancelReason, setCancelReason] = useState("");
+
+	// 🔹 substitui showCancelReason
+	const [actionOpen, setActionOpen] = useState(false);
+
+	// 🔹 mantém o que já existia
 	const [textReasonType, setTextReasonType] = useState("cancel");
 	const [nextStatus, setNextStatus] = useState(null);
+	const [hasReason, setHasReason] = useState(false);
+
+	// 🔹 substitui cancelReason
+	const reasonRef = useRef("");
 
 	const [tab, setTab] = useState(0);
 
-	const handleReasonChange = useCallback((e) => {
-		setCancelReason(e.target.value);
-	}, []);
-
 	const handleClose = () => {
-		setShowCancelReason(false);
+		setActionOpen(false);
 		setTextReasonType("cancel");
 		setNextStatus(null);
-		setCancelReason("");
+		setHasReason(false);
+		reasonRef.current = "";
 		onClose();
 	};
 
@@ -143,7 +147,7 @@ const IncidentModal = memo(function IncidentModal({
 			</DialogTitle>
 
 			<DialogContent dividers>
-				{/* STEPPER (sempre visível) */}
+				{/* STEPPER */}
 				<Stepper
 					alternativeLabel
 					sx={{ my: 3 }}
@@ -175,7 +179,7 @@ const IncidentModal = memo(function IncidentModal({
 									) {
 										setTextReasonType("observation");
 										setNextStatus(step.key);
-										setShowCancelReason(true);
+										setActionOpen(true);
 										return;
 									}
 
@@ -199,9 +203,7 @@ const IncidentModal = memo(function IncidentModal({
 					<Tab label="Histórico" />
 				</Tabs>
 
-				{/* =====================
-				    ABA DETALHES
-				===================== */}
+				{/* ABA DETALHES */}
 				{tab === 0 && (
 					<>
 						<Box display="flex" justifyContent="center" gap={4}>
@@ -258,25 +260,10 @@ const IncidentModal = memo(function IncidentModal({
 								<Typography>
 									<b>CEP:</b> {incident.geoloc?.postalCode}
 								</Typography>
-
-								{incident.status === "cancelled" &&
-									incident.cancelReason && (
-										<Box mt={2}>
-											<Typography
-												fontWeight={600}
-												color="error.main"
-											>
-												Motivo do cancelamento
-											</Typography>
-											<Typography>
-												{incident.cancelReason}
-											</Typography>
-										</Box>
-									)}
 							</Box>
 						</Box>
 
-						{showCancelReason && (
+						{actionOpen && (
 							<Box mt={3}>
 								<Typography
 									fontWeight={600}
@@ -295,18 +282,18 @@ const IncidentModal = memo(function IncidentModal({
 									fullWidth
 									multiline
 									minRows={3}
-									value={cancelReason}
-									onChange={handleReasonChange}
 									autoFocus
+									onChange={(e) => {
+										reasonRef.current = e.target.value;
+										setHasReason(!!e.target.value.trim());
+									}}
 								/>
 							</Box>
 						)}
 					</>
 				)}
 
-				{/* =====================
-				    ABA HISTÓRICO
-				===================== */}
+				{/* ABA HISTÓRICO */}
 				{tab === 1 && <IncidentTimeline incidentId={incident.id} />}
 			</DialogContent>
 
@@ -321,7 +308,7 @@ const IncidentModal = memo(function IncidentModal({
 				>
 					{incident.status === "pending_review" &&
 						tab === 0 &&
-						!showCancelReason && (
+						!actionOpen && (
 							<Button
 								variant="contained"
 								sx={{
@@ -331,7 +318,7 @@ const IncidentModal = memo(function IncidentModal({
 								onClick={() => {
 									setTextReasonType("observation");
 									setNextStatus("accepted");
-									setShowCancelReason(true);
+									setActionOpen(true);
 								}}
 							>
 								Aceitar ocorrência
@@ -340,7 +327,7 @@ const IncidentModal = memo(function IncidentModal({
 
 					{(incident.status === "pending_review" ||
 						incident.status === "accepted") &&
-						!showCancelReason &&
+						!actionOpen &&
 						tab === 0 && (
 							<Button
 								variant="contained"
@@ -356,7 +343,7 @@ const IncidentModal = memo(function IncidentModal({
 								}}
 								onClick={() => {
 									setTextReasonType("cancel");
-									setShowCancelReason(true);
+									setActionOpen(true);
 								}}
 							>
 								Cancelar ocorrência
@@ -364,13 +351,15 @@ const IncidentModal = memo(function IncidentModal({
 						)}
 				</Box>
 
-				{showCancelReason && tab === 0 && (
+				{actionOpen && tab === 0 && (
 					<>
 						<Button
 							onClick={() => {
-								setShowCancelReason(false);
+								setActionOpen(false);
 								setTextReasonType("cancel");
 								setNextStatus(null);
+								setHasReason(false);
+								reasonRef.current = "";
 							}}
 						>
 							Voltar
@@ -380,9 +369,9 @@ const IncidentModal = memo(function IncidentModal({
 							<Button
 								color="error"
 								variant="contained"
-								disabled={!cancelReason.trim()}
+								disabled={!hasReason}
 								onClick={() => {
-									onConfirmCancel(cancelReason);
+									onConfirmCancel(reasonRef.current);
 									handleClose();
 								}}
 							>
@@ -391,9 +380,9 @@ const IncidentModal = memo(function IncidentModal({
 						) : (
 							<Button
 								variant="contained"
-								disabled={!cancelReason.trim()}
+								disabled={!hasReason}
 								onClick={() => {
-									onStepClick(nextStatus, cancelReason);
+									onStepClick(nextStatus, reasonRef.current);
 									handleClose();
 								}}
 							>

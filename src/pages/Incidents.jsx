@@ -19,17 +19,6 @@ import IncidentModal from "../components/IncidentModal";
 
 import { updateIncidentWithHistory } from "../services/incidentStatus";
 
-/* =============================
-   FLUXO DE STATUS
-============================= */
-const INCIDENT_STEPS = [
-	{ key: "pending_review", label: "Em análise" },
-	{ key: "accepted", label: "Aceita" },
-	{ key: "in_progress", label: "Em andamento" },
-	{ key: "resolved", label: "Resolvida" },
-	{ key: "cancelled", label: "Cancelada" },
-];
-
 export default function Incidents() {
 	const theme = useTheme();
 	const location = useLocation();
@@ -125,6 +114,8 @@ export default function Incidents() {
 			reason: "Ocorrência aceita pelo operador",
 			user,
 		});
+
+
 
 		updateIncidentStatus(currentIncident.id, "accepted");
 
