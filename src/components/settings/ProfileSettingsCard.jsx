@@ -1,8 +1,12 @@
-import { Avatar, Box, Typography } from "@mui/material";
+import { Avatar, Box, Typography, CircularProgress } from "@mui/material";
 import { useRef } from "react";
 import { PhotoCamera } from "@mui/icons-material";
 
-export default function ProfileSettingsCard({ profile, handleAvatarChange }) {
+export default function ProfileSettingsCard({
+	profile,
+	handleAvatarChange,
+	uploadingAvatar,
+}) {
 	const fileInputRef = useRef(null);
 
 	return (
@@ -19,12 +23,12 @@ export default function ProfileSettingsCard({ profile, handleAvatarChange }) {
 					height: 96,
 					mx: "auto",
 					mb: 3,
-					cursor: "pointer",
+					cursor: uploadingAvatar ? "default" : "pointer",
 					"&:hover .avatar-overlay": {
-						opacity: 1,
+						opacity: uploadingAvatar ? 0 : 1,
 					},
 				}}
-				onClick={() => fileInputRef.current.click()}
+				onClick={() => !uploadingAvatar && fileInputRef.current.click()}
 			>
 				<Avatar
 					src={profile.avatar}
@@ -32,6 +36,7 @@ export default function ProfileSettingsCard({ profile, handleAvatarChange }) {
 					sx={{
 						width: 96,
 						height: 96,
+						filter: uploadingAvatar ? "blur(1px)" : "none",
 					}}
 				/>
 
@@ -55,6 +60,23 @@ export default function ProfileSettingsCard({ profile, handleAvatarChange }) {
 				>
 					<PhotoCamera sx={{ color: "#fff" }} />
 				</Box>
+
+				{/* Loading */}
+				{uploadingAvatar && (
+					<Box
+						sx={{
+							position: "absolute",
+							inset: 0,
+							borderRadius: "50%",
+							backgroundColor: "rgba(255,255,255,0.6)",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+						}}
+					>
+						<CircularProgress size={28} />
+					</Box>
+				)}
 
 				<input
 					ref={fileInputRef}
