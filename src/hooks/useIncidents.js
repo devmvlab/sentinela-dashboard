@@ -57,6 +57,7 @@ export function useIncidents({
 			collection(db, "incidents"),
 			where("geoloc.cityId", "==", user?.cityId),
 			where("createdAt", ">=", startDate),
+			where("status", "!=", "cancelled"),
 			orderBy("createdAt", "desc"),
 		);
 

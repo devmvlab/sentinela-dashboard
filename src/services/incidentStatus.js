@@ -23,10 +23,8 @@ export async function updateIncidentWithHistory({
 	// Atualiza a ocorrência
 	batch.update(incidentRef, {
 		status: newStatus,
+		responsible: user.displayName,
 		updatedAt: serverTimestamp(),
-		...(reason && newStatus === "cancelled"
-			? { cancelReason: reason }
-			: {}),
 	});
 
 	// Cria histórico (sempre novo)
@@ -38,7 +36,6 @@ export async function updateIncidentWithHistory({
 		createdBy: {
 			id: user.uid,
 			name: user.displayName,
-			role: user.role,
 		},
 		createdAt: serverTimestamp(),
 	});

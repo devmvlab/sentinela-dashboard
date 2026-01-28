@@ -8,7 +8,6 @@ import {
 	Button,
 	InputAdornment,
 } from "@mui/material";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
 import { categories } from "../utils/Categories";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -46,10 +45,11 @@ export default function Filters({
 					onChange={(e) => setStatus(e.target.value)}
 				>
 					<MenuItem value="all">Todos</MenuItem>
-					<MenuItem value="pending">Pendentes</MenuItem>
-					<MenuItem value="open">Aberto</MenuItem>
-					<MenuItem value="closed">Fechado</MenuItem>
-					<MenuItem value="resolved">Resolvido</MenuItem>
+					<MenuItem value="pending_review">Em análise</MenuItem>
+					<MenuItem value="accepted">Aceitas</MenuItem>
+					<MenuItem value="in_progress">Em andamento</MenuItem>
+					<MenuItem value="cancelled">Canceladas</MenuItem>
+					<MenuItem value="resolved">Resolvidas</MenuItem>
 				</Select>
 			</FormControl>
 

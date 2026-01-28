@@ -126,6 +126,8 @@ export default function Incidents() {
 			user,
 		});
 
+		
+
 		updateIncidentStatus(currentIncident.id, "accepted");
 
 		setSnackbar({
