@@ -301,7 +301,7 @@ export default function Topbar({ handleDrawerOpen }) {
 							color: theme.palette.primary.main,
 						}}
 					>
-						LIMPAR
+						Limpar
 					</Typography>
 				</Box>
 			)}
@@ -470,10 +470,7 @@ export default function Topbar({ handleDrawerOpen }) {
 							horizontal: "right",
 						}}
 					>
-						<MenuItem onClick={() => navigate("/perfil")}>
-							<PersonIcon sx={{ mr: 1 }} /> Meu perfil
-						</MenuItem>
-						<MenuItem onClick={() => navigate("/config")}>
+						<MenuItem onClick={() => navigate("/configuracoes")}>
 							<SettingsIcon sx={{ mr: 1 }} /> Configurações
 						</MenuItem>
 						<Divider />

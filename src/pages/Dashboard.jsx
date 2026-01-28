@@ -282,8 +282,8 @@ export default function Dashboard() {
 	const baseLabel = getBaseLabel(onlyEmergency);
 	const cards = [
 		{
-			key: "open",
-			statusLabel: "abertas",
+			key: "pending_review",
+			statusLabel: "pendentes de análise",
 			value: stats.ocorrenciasAbertas,
 			icon: <TrendingUpIcon sx={{ fontSize: 48 }} />,
 		},
@@ -402,7 +402,7 @@ export default function Dashboard() {
 						<Grid size={{ xs: 12, md: 6, lg: 6 }}>
 							<CustomCard
 								card={{
-									title: `Usuários cadastrados na cidade`,
+									title: `Usuários cadastrados`,
 									value: users.length,
 									icon: <GroupIcon sx={{ fontSize: 48 }} />,
 								}}

@@ -14,7 +14,6 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import WarningIcon from "@mui/icons-material/Warning";
 import DescriptionIcon from "@mui/icons-material/Description";
-import SettingsIcon from "@mui/icons-material/Settings";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const drawerWidth = 240;
@@ -27,11 +26,6 @@ export default function Sidebar({ open, handleDrawerClose, theme }) {
 	const menuItems = [
 		{ text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
 		{ text: "Ocorrências", icon: <WarningIcon />, path: "/ocorrencias" },
-		{
-			text: "Configurações",
-			icon: <SettingsIcon />,
-			path: "/configuracoes",
-		},
 		{
 			text: "Relatórios",
 			icon: <DescriptionIcon />,

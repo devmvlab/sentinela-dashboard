@@ -9,7 +9,7 @@ import {
 	InputAdornment,
 } from "@mui/material";
 
-import { categories } from "../utils/Categories";
+import { categories } from "../utils/categories";
 import ClearIcon from "@mui/icons-material/Clear";
 
 export default function Filters({

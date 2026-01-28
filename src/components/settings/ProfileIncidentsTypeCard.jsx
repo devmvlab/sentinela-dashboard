@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
 	Box,
 	Typography,
-	Paper,
 	FormGroup,
 	FormControlLabel,
 	Checkbox,
@@ -10,14 +9,19 @@ import {
 	Alert,
 	CircularProgress,
 } from "@mui/material";
-import { categories } from "../utils/Categories";
+import { categories } from "../../utils/categories";
 import { useTheme } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import { getAuth } from "firebase/auth";
 import { doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 
-export default function DepartmentConfig() {
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+
+export default function ProfileIncidentsTypeCard() {
 	const [feedback, setFeedback] = useState({
 		open: false,
 		message: "",
@@ -29,8 +33,8 @@ export default function DepartmentConfig() {
 	const [loading, setLoading] = useState(true);
 
 	/* =========================
-	   CARREGA CONFIG DO FIRESTORE
-	   ========================= */
+       CARREGA CONFIG DO FIRESTORE
+       ========================= */
 	useEffect(() => {
 		const loadUserSettings = async () => {
 			const auth = getAuth();
@@ -63,8 +67,8 @@ export default function DepartmentConfig() {
 	}, []);
 
 	/* =========================
-	   TOGGLE DOS CHECKBOXES
-	   ========================= */
+       TOGGLE DOS CHECKBOXES
+       ========================= */
 	const handleToggle = (itemTitle) => {
 		setIncidentTypes((prev) => {
 			const isSelected = prev.includes(itemTitle);
@@ -78,8 +82,8 @@ export default function DepartmentConfig() {
 	};
 
 	/* =========================
-	   SALVA NO FIRESTORE
-	   ========================= */
+       SALVA NO FIRESTORE
+       ========================= */
 	const saveUserSettings = async () => {
 		try {
 			const auth = getAuth();
@@ -112,8 +116,8 @@ export default function DepartmentConfig() {
 	};
 
 	/* =========================
-	   LOADING
-	   ========================= */
+       LOADING
+       ========================= */
 	if (loading) {
 		return (
 			<Box
@@ -130,77 +134,91 @@ export default function DepartmentConfig() {
 	}
 
 	return (
-		<Box>
-			<Typography variant="h4" py={2} fontWeight={700}>
-				Configurações - Notificações por departamento
-			</Typography>
-
-			<Paper elevation={3} sx={{ p: 3 }}>
-				<Box
+		<>
+			<Accordion>
+				<AccordionSummary
+					expandIcon={<ArrowDownwardIcon />}
+					aria-controls="panel1-content"
+					id="panel1-header"
 					sx={{
-						display: "grid",
-						gridTemplateColumns: {
-							xs: "1fr",
-							sm: "repeat(2, 1fr)",
-							md: "repeat(3, 1fr)",
+						backgroundColor: "background.default",
+						color: "#fff",
+						"& .MuiAccordionSummary-expandIconWrapper": {
+							color: "#fff",
 						},
-						gap: 3,
 					}}
 				>
-					{categories.map((category) => (
-						<Box key={category.title} mb={3}>
-							<Typography
-								fontWeight={600}
-								mb={1}
-								color={theme.palette.primary.main}
-							>
-								{category.title}
-							</Typography>
-
-							<FormGroup>
-								{category.items.map((item) => (
-									<FormControlLabel
-										key={item.title}
-										label={item.title}
-										control={
-											<Checkbox
-												checked={incidentTypes.includes(
-													item.title,
-												)}
-												onChange={() =>
-													handleToggle(item.title)
-												}
-											/>
-										}
-									/>
-								))}
-							</FormGroup>
-						</Box>
-					))}
-				</Box>
-
-				<Box
-					sx={{
-						display: "flex",
-						justifyContent: "center",
-						mt: 4,
-					}}
-				>
-					<Button
-						variant="outlined"
-						size="large"
+					<Typography variant="h6" fontWeight={700}>
+						Notificações
+					</Typography>
+				</AccordionSummary>
+				<AccordionDetails>
+					<Box
 						sx={{
-							minWidth: 200,
-							px: 4,
-							py: 1.2,
-							fontWeight: 600,
+							display: "grid",
+							gridTemplateColumns: {
+								xs: "1fr",
+								sm: "repeat(2, 1fr)",
+								md: "repeat(3, 1fr)",
+							},
+							gap: 3,
 						}}
-						onClick={saveUserSettings}
 					>
-						Salvar
-					</Button>
-				</Box>
-			</Paper>
+						{categories.map((category) => (
+							<Box key={category.title} mb={3}>
+								<Typography
+									fontWeight={600}
+									mb={1}
+									color={theme.palette.primary.main}
+								>
+									{category.title}
+								</Typography>
+
+								<FormGroup>
+									{category.items.map((item) => (
+										<FormControlLabel
+											key={item.title}
+											label={item.title}
+											control={
+												<Checkbox
+													checked={incidentTypes.includes(
+														item.title,
+													)}
+													onChange={() =>
+														handleToggle(item.title)
+													}
+												/>
+											}
+										/>
+									))}
+								</FormGroup>
+							</Box>
+						))}
+					</Box>
+
+					<Box
+						sx={{
+							display: "flex",
+							justifyContent: "center",
+							mt: 4,
+						}}
+					>
+						<Button
+							variant="outlined"
+							size="large"
+							sx={{
+								minWidth: 200,
+								px: 4,
+								py: 1.2,
+								fontWeight: 600,
+							}}
+							onClick={saveUserSettings}
+						>
+							Salvar
+						</Button>
+					</Box>
+				</AccordionDetails>
+			</Accordion>
 
 			<Snackbar
 				open={feedback.open}
@@ -220,6 +238,6 @@ export default function DepartmentConfig() {
 					{feedback.message}
 				</Alert>
 			</Snackbar>
-		</Box>
+		</>
 	);
 }
