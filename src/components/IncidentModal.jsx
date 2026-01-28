@@ -260,21 +260,6 @@ const IncidentModal = memo(function IncidentModal({
 								<Typography>
 									<b>CEP:</b> {incident.geoloc?.postalCode}
 								</Typography>
-
-								{incident.status === "cancelled" &&
-									incident.cancelReason && (
-										<Box mt={2}>
-											<Typography
-												fontWeight={600}
-												color="error.main"
-											>
-												Motivo do cancelamento
-											</Typography>
-											<Typography>
-												{incident.cancelReason}
-											</Typography>
-										</Box>
-									)}
 							</Box>
 						</Box>
 
