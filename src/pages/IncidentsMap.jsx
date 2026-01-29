@@ -1,7 +1,7 @@
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import SentinelaMap from "../components/SentinelaMap";
 
-import { categories } from "../utils/Categories";
+import { categories } from "../utils/categories";
 import { getMarkerIconByCategory } from "../utils/markerIcons";
 
 export default function IncidentsMap({

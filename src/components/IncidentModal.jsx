@@ -206,7 +206,12 @@ const IncidentModal = memo(function IncidentModal({
 				{/* ABA DETALHES */}
 				{tab === 0 && (
 					<>
-						<Box display="flex" justifyContent="center" gap={4}>
+						<Box
+							display="flex"
+							justifyContent="center"
+							alignItems={"center"}
+							gap={4}
+						>
 							{incident.imageUrl ? (
 								<img
 									src={incident.imageUrl}
@@ -227,6 +232,8 @@ const IncidentModal = memo(function IncidentModal({
 									flexDirection="column"
 									bgcolor="text.secondary"
 									borderRadius={2}
+									minWidth={300}
+									minHeight={300}
 								>
 									<ImageNotSupportedIcon
 										sx={{ fontSize: 100 }}
@@ -235,7 +242,7 @@ const IncidentModal = memo(function IncidentModal({
 								</Box>
 							)}
 
-							<Box display="flex" flexDirection="column" gap={1}>
+							<Box display="flex" flexDirection="column" gap={2}>
 								<Typography>
 									<b>Categoria:</b>{" "}
 									{incident.ocorrencia?.categoria}
@@ -297,101 +304,111 @@ const IncidentModal = memo(function IncidentModal({
 				{tab === 1 && <IncidentTimeline incidentId={incident.id} />}
 			</DialogContent>
 
-			<DialogActions>
-				<Box
-					sx={{
-						flexGrow: 1,
-						display: "flex",
-						justifyContent: "center",
-						gap: 2,
-					}}
-				>
-					{incident.status === "pending_review" &&
-						tab === 0 &&
-						!actionOpen && (
-							<Button
-								variant="contained"
-								sx={{
-									fontWeight: "bold",
-									color: theme.palette.primary.contrastText,
-								}}
-								onClick={() => {
-									setTextReasonType("observation");
-									setNextStatus("accepted");
-									setActionOpen(true);
-								}}
-							>
-								Aceitar ocorrência
-							</Button>
-						)}
+			{tab === 0 && (
+				<DialogActions>
+					<Box
+						sx={{
+							flexGrow: 1,
+							display: "flex",
+							justifyContent: "center",
+							gap: 2,
+							m: 1,
+						}}
+					>
+						{incident.status === "pending_review" &&
+							tab === 0 &&
+							!actionOpen && (
+								<Button
+									variant="contained"
+									sx={{
+										fontWeight: "bold",
+										color: theme.palette.primary
+											.contrastText,
+									}}
+									onClick={() => {
+										setTextReasonType("observation");
+										setNextStatus("accepted");
+										setActionOpen(true);
+									}}
+								>
+									Aceitar ocorrência
+								</Button>
+							)}
 
-					{(incident.status === "pending_review" ||
-						incident.status === "accepted") &&
-						!actionOpen &&
-						tab === 0 && (
-							<Button
-								variant="contained"
-								sx={{
-									fontWeight: "bold",
-									backgroundColor: theme.palette.other.error,
-									color: theme.palette.text.primary,
-									"&:hover": {
+						{(incident.status === "pending_review" ||
+							incident.status === "accepted") &&
+							!actionOpen &&
+							tab === 0 && (
+								<Button
+									variant="contained"
+									sx={{
+										fontWeight: "bold",
 										backgroundColor:
-											theme.palette.other.errorDark ??
-											theme.palette.error.dark,
-									},
-								}}
+											theme.palette.other.error,
+										color: theme.palette.text.primary,
+										"&:hover": {
+											backgroundColor:
+												theme.palette.other.errorDark ??
+												theme.palette.error.dark,
+										},
+									}}
+									onClick={() => {
+										setTextReasonType("cancel");
+										setActionOpen(true);
+									}}
+								>
+									Cancelar ocorrência
+								</Button>
+							)}
+					</Box>
+
+					{actionOpen && tab === 0 && (
+						<>
+							<Button
 								onClick={() => {
+									setActionOpen(false);
 									setTextReasonType("cancel");
-									setActionOpen(true);
+									setNextStatus(null);
+									setHasReason(false);
+									reasonRef.current = "";
 								}}
 							>
-								Cancelar ocorrência
+								Voltar
 							</Button>
-						)}
-				</Box>
 
-				{actionOpen && tab === 0 && (
-					<>
-						<Button
-							onClick={() => {
-								setActionOpen(false);
-								setTextReasonType("cancel");
-								setNextStatus(null);
-								setHasReason(false);
-								reasonRef.current = "";
-							}}
-						>
-							Voltar
-						</Button>
-
-						{textReasonType === "cancel" ? (
-							<Button
-								color="error"
-								variant="contained"
-								disabled={!hasReason}
-								onClick={() => {
-									onConfirmCancel(reasonRef.current);
-									handleClose();
-								}}
-							>
-								Confirmar cancelamento
-							</Button>
-						) : (
-							<Button
-								variant="contained"
-								disabled={!hasReason}
-								onClick={() => {
-									onStepClick(nextStatus, reasonRef.current);
-									handleClose();
-								}}
-							>
-								Confirmar
-							</Button>
-						)}
-					</>
-				)}
-			</DialogActions>
+							{textReasonType === "cancel" ? (
+								<Button
+									color="error"
+									variant="contained"
+									disabled={!hasReason}
+									onClick={() => {
+										onConfirmCancel(reasonRef.current);
+										handleClose();
+									}}
+									sx={{ mr: 2 }}
+								>
+									Confirmar cancelamento
+								</Button>
+							) : (
+								<Button
+									variant="contained"
+									disabled={!hasReason}
+									onClick={() => {
+										onStepClick(
+											nextStatus,
+											reasonRef.current,
+										);
+										handleClose();
+									}}
+									sx={{ mr: 2 }}
+								>
+									Confirmar
+								</Button>
+							)}
+						</>
+					)}
+				</DialogActions>
+			)}
 		</Dialog>
 	);
 });

@@ -6,7 +6,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import Incidents from "./pages/Incidents";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
-import DepartmentConfig from "./pages/DepartmentConfig";
+import Settings from "./pages/Settings";
 
 const router = createBrowserRouter([
 	// 🔹 Tela de login (sem Layout)
@@ -38,7 +38,7 @@ const router = createBrowserRouter([
 			},
 			{
 				path: "/configuracoes",
-				element: <DepartmentConfig />,
+				element: <Settings />,
 			},
 			{
 				path: "/relatorios",

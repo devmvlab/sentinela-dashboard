@@ -20,7 +20,11 @@ export function useUsersByCity() {
 
 		setLoading(true);
 
-		const q = query(collection(db, "users"), where("cityId", "==", cityId));
+		const q = query(
+			collection(db, "users"),
+			where("cityId", "==", cityId),
+			where("isAdmin", "==", false),
+		);
 
 		const unsubscribe = onSnapshot(
 			q,

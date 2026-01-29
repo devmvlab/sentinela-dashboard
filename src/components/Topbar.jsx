@@ -37,6 +37,7 @@ export default function Topbar({ handleDrawerOpen }) {
 
 	// AJUSTE 1 — trava temporária após salvar config
 	const [configSyncing, setConfigSyncing] = useState(false);
+	const [authUser, setAuthUser] = useState(null);
 
 	// AJUSTE 2 — marco temporal para não notificar histórico
 	const notificationsStartAt = useRef(Date.now());
@@ -60,8 +61,29 @@ export default function Topbar({ handleDrawerOpen }) {
 	const [menuAberto, setMenuAberto] = useState(false);
 	const [historicoNotificacoes, setHistoricoNotificacoes] = useState([]);
 
-	// para detectar IDs já conhecidos
-	const previousIds = useRef(new Set());
+	useEffect(() => {
+		const updateAvatar = async () => {
+			const user = auth.currentUser;
+			if (!user) return;
+
+			await user.reload();
+			setAuthUser({ ...user });
+		};
+
+		window.addEventListener("avatar-updated", updateAvatar);
+
+		return () => {
+			window.removeEventListener("avatar-updated", updateAvatar);
+		};
+	}, []);
+
+	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(auth, (user) => {
+			setAuthUser(user);
+		});
+
+		return unsubscribe;
+	}, []);
 
 	// ref para o container do dropdown (fechar ao clicar fora)
 	const dropdownRef = useRef(null);
@@ -219,6 +241,8 @@ export default function Topbar({ handleDrawerOpen }) {
 			document.removeEventListener("mousedown", handleClickOutside);
 	}, [menuAberto]);
 
+	console.log(authUser);
+
 	// render do dropdown (últimas 10)
 	const NotificacoesDropdown = menuAberto && (
 		<Box
@@ -301,7 +325,7 @@ export default function Topbar({ handleDrawerOpen }) {
 							color: theme.palette.primary.main,
 						}}
 					>
-						LIMPAR
+						Limpar
 					</Typography>
 				</Box>
 			)}
@@ -451,10 +475,10 @@ export default function Topbar({ handleDrawerOpen }) {
 					{/* AVATAR / MENU PERFIL */}
 					<IconButton onClick={openProfileMenu}>
 						<Avatar
-							src={auth.currentUser?.photoURL}
+							src={authUser?.photoURL}
 							sx={{ bgcolor: "primary.main" }}
 						>
-							{auth.currentUser?.displayName?.charAt(0)}
+							{authUser?.displayName?.charAt(0)}
 						</Avatar>
 					</IconButton>
 					<Menu
@@ -470,10 +494,7 @@ export default function Topbar({ handleDrawerOpen }) {
 							horizontal: "right",
 						}}
 					>
-						<MenuItem onClick={() => navigate("/perfil")}>
-							<PersonIcon sx={{ mr: 1 }} /> Meu perfil
-						</MenuItem>
-						<MenuItem onClick={() => navigate("/config")}>
+						<MenuItem onClick={() => navigate("/configuracoes")}>
 							<SettingsIcon sx={{ mr: 1 }} /> Configurações
 						</MenuItem>
 						<Divider />
