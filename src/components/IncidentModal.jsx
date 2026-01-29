@@ -13,8 +13,6 @@ import {
 	StepLabel,
 	Tabs,
 	Tab,
-	Chip,
-	Divider,
 } from "@mui/material";
 import {
 	CheckCircle as CheckCircleIcon,
@@ -25,7 +23,7 @@ import {
 } from "@mui/icons-material";
 import StepConnector from "@mui/material/StepConnector";
 import { styled, useTheme } from "@mui/material/styles";
-import { memo, useState, useCallback, useRef } from "react";
+import { memo, useState, useRef } from "react";
 import IncidentTimeline from "../components/ModalTimeLine";
 
 /* =============================

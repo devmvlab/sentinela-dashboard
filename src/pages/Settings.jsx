@@ -15,7 +15,6 @@ import ProfileSettingsCard from "../components/settings/ProfileSettingsCard";
 import ProfileIncidentsTypeCard from "../components/settings/ProfileIncidentsTypeCard";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
-import { categories } from "../utils/categories";
 
 import { auth, storage } from "../services/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
