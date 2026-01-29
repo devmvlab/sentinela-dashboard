@@ -6,7 +6,6 @@ import {
 	MenuItem,
 	TextField,
 	Button,
-	InputAdornment,
 } from "@mui/material";
 
 import { categories } from "../utils/categories";
