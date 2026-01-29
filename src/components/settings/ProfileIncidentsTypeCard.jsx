@@ -6,7 +6,7 @@ import {
 	Checkbox,
 	CircularProgress,
 } from "@mui/material";
-import { categories } from "../../utils/categories";
+import { categories } from "../../utils/categoriesList";
 import { useTheme } from "@mui/material/styles";
 
 import Accordion from "@mui/material/Accordion";
