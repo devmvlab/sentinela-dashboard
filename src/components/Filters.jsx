@@ -6,10 +6,9 @@ import {
 	MenuItem,
 	TextField,
 	Button,
-	InputAdornment,
 } from "@mui/material";
 
-import { categories } from "../utils/categories";
+import { categories } from "../utils/categoriesList";
 import ClearIcon from "@mui/icons-material/Clear";
 
 export default function Filters({
