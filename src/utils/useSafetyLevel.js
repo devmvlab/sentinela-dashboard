@@ -14,7 +14,7 @@ export function useSafetyLevel({ incidents, userCenter, period = "7d" }) {
 				return new Date(
 					now.getFullYear(),
 					now.getMonth(),
-					now.getDate()
+					now.getDate(),
 				);
 			case "7d":
 				return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -48,7 +48,11 @@ export function useSafetyLevel({ incidents, userCenter, period = "7d" }) {
 			total++;
 
 			const status = item.status?.toLowerCase();
-			const isResolved = ["resolved", "closed"].includes(status);
+			const isResolved = [
+				"resolved",
+				"cancelled",
+				"pending_review",
+			].includes(status);
 
 			if (isResolved) {
 				resolved++;
@@ -62,9 +66,7 @@ export function useSafetyLevel({ incidents, userCenter, period = "7d" }) {
 
 		const unresolved = Math.max(0, total - resolved);
 
-		const raw =
-			unresolved * 1 +
-			emergencyOpen * 4;
+		const raw = unresolved * 1 + emergencyOpen * 4;
 
 		const score = normalize(100 - raw, 100);
 
