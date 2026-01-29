@@ -1,19 +1,19 @@
 import { useEffect, useState, useMemo } from "react";
 import {
 	Grid,
-	Card,
 	Typography,
 	Box,
 	ToggleButton,
 	ToggleButtonGroup,
 	Fade,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../services/firebase";
-
+import TaskIcon from "@mui/icons-material/Task";
+import EngineeringIcon from "@mui/icons-material/Engineering";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
@@ -172,42 +172,23 @@ export default function Dashboard() {
 		return `${base} ${status} ${periodLabelMap[period]}`;
 	};
 
-	/* ================= CARDS ================= */
-	// const stats = useMemo(() => {
-	// 	const ocorrenciasEmAndamento = incidents.filter(
-	// 		(i) => i.status === "in_progress",
-	// 	).length;
-
-	// 	const ocorrenciasResolvidas = incidents.filter(
-	// 		(i) => i.status === "resolved",
-	// 	).length;
-
-	// 	const ocorrenciasAbertas = incidents.filter(
-	// 		(i) => i.status == "open",
-	// 	).length;
-
-	// 	return {
-	// 		ocorrenciasAbertas,
-	// 		ocorrenciasEmAndamento,
-	// 		ocorrenciasResolvidas,
-	// 	};
-	// }, [incidents]);
-
 	const stats = useMemo(() => {
+		const ocorrenciasPendentes = filteredIncidents.filter(
+			(i) => i.status === "pending_review",
+		).length;
+		const ocorrenciasAceitas = filteredIncidents.filter(
+			(i) => i.status === "accepted",
+		).length;
 		const ocorrenciasEmAndamento = filteredIncidents.filter(
 			(i) => i.status === "in_progress",
 		).length;
-
 		const ocorrenciasResolvidas = filteredIncidents.filter(
 			(i) => i.status === "resolved",
 		).length;
 
-		const ocorrenciasAbertas = filteredIncidents.filter(
-			(i) => i.status === "open",
-		).length;
-
 		return {
-			ocorrenciasAbertas,
+			ocorrenciasPendentes,
+			ocorrenciasAceitas,
 			ocorrenciasEmAndamento,
 			ocorrenciasResolvidas,
 		};
@@ -284,14 +265,20 @@ export default function Dashboard() {
 		{
 			key: "pending_review",
 			statusLabel: "pendentes de análise",
-			value: stats.ocorrenciasAbertas,
-			icon: <TrendingUpIcon sx={{ fontSize: 48 }} />,
+			value: stats.ocorrenciasPendentes,
+			icon: <PendingActionsIcon sx={{ fontSize: 48 }} />,
+		},
+		{
+			key: "accepted",
+			statusLabel: "aceitas",
+			value: stats.ocorrenciasAceitas,
+			icon: <TaskIcon sx={{ fontSize: 48 }} />,
 		},
 		{
 			key: "in_progress",
 			statusLabel: "em andamento",
 			value: stats.ocorrenciasEmAndamento,
-			icon: <LocationOnIcon sx={{ fontSize: 48 }} />,
+			icon: <EngineeringIcon sx={{ fontSize: 48 }} />,
 		},
 		{
 			key: "resolved",
@@ -391,7 +378,7 @@ export default function Dashboard() {
 			<Fade in={viewMode === "dashboard"} timeout={300} unmountOnExit>
 				<Box>
 					<Grid container spacing={3}>
-						<Grid size={{ xs: 12, md: 6, lg: 6 }}>
+						<Grid size={{ xs: 12, md: 6, lg: 4 }}>
 							<SafetyCard
 								incidents={filteredIncidents}
 								period={period}
@@ -399,7 +386,7 @@ export default function Dashboard() {
 							/>
 						</Grid>
 
-						<Grid size={{ xs: 12, md: 6, lg: 6 }}>
+						<Grid size={{ xs: 12, md: 6, lg: 4 }}>
 							<CustomCard
 								card={{
 									title: `Usuários cadastrados`,

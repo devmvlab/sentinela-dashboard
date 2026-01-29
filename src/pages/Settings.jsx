@@ -8,9 +8,14 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogActions,
+	Snackbar,
+	Alert,
 } from "@mui/material";
 import ProfileSettingsCard from "../components/settings/ProfileSettingsCard";
 import ProfileIncidentsTypeCard from "../components/settings/ProfileIncidentsTypeCard";
+import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../services/firebase";
+import { categories } from "../utils/categories";
 
 import { auth, storage } from "../services/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -35,6 +40,13 @@ export default function SettingsPage() {
 		avatar: "",
 	});
 	const [uploadingAvatar, setUploadingAvatar] = useState(false);
+	const [incidentTypes, setIncidentTypes] = useState([]);
+	const [loadingIncidents, setLoadingIncidents] = useState(true);
+	const [feedback, setFeedback] = useState({
+		open: false,
+		message: "",
+		severity: "success",
+	});
 
 	// =============================
 	// AUTH REATIVO
@@ -60,6 +72,73 @@ export default function SettingsPage() {
 			avatar: prev.avatar || authUser.photoURL || "",
 		}));
 	}, [authUser]);
+
+	useEffect(() => {
+		const loadUserSettings = async () => {
+			if (!authUser) return;
+
+			try {
+				const ref = doc(
+					db,
+					"users",
+					authUser.uid,
+					"settings",
+					"default",
+				);
+				const snap = await getDoc(ref);
+
+				if (snap.exists()) {
+					const data = snap.data();
+					if (Array.isArray(data.incidentTypes)) {
+						setIncidentTypes(data.incidentTypes);
+					}
+				}
+			} catch (err) {
+				console.error("Erro ao carregar configurações:", err);
+			} finally {
+				setLoadingIncidents(false);
+			}
+		};
+
+		loadUserSettings();
+	}, [authUser]);
+
+	const handleToggleIncidentType = (itemTitle) => {
+		setIncidentTypes((prev) =>
+			prev.includes(itemTitle)
+				? prev.filter((i) => i !== itemTitle)
+				: [...prev, itemTitle],
+		);
+	};
+
+	const saveUserSettings = async () => {
+		try {
+			if (!authUser) return;
+
+			await updateDoc(
+				doc(db, "users", authUser.uid, "settings", "default"),
+				{
+					incidentTypes,
+					updatedAt: serverTimestamp(),
+				},
+			);
+
+			// trava temporária da topbar
+			localStorage.setItem("incidentTypesSyncing", "true");
+
+			setFeedback({
+				open: true,
+				message: "Configurações salvas com sucesso!",
+				severity: "success",
+			});
+		} catch (error) {
+			setFeedback({
+				open: true,
+				message: "Erro ao salvar configurações.",
+				severity: "error",
+			});
+		}
+	};
 
 	// =============================
 	// AVATAR: PREVIEW + UPLOAD IMEDIATO
@@ -105,6 +184,9 @@ export default function SettingsPage() {
 				avatar: downloadUrl,
 			}));
 
+			// 🔥 avisa o app inteiro
+			window.dispatchEvent(new Event("avatar-updated"));
+
 			URL.revokeObjectURL(previewUrl);
 		} catch (error) {
 			console.error("Erro ao atualizar avatar:", error);
@@ -139,15 +221,28 @@ export default function SettingsPage() {
 					uploadingAvatar={uploadingAvatar}
 				/>
 
-				<ProfileIncidentsTypeCard />
+				<ProfileIncidentsTypeCard
+					incidentTypes={incidentTypes}
+					onToggle={handleToggleIncidentType}
+					loading={loadingIncidents}
+				/>
 
 				<Box display="flex" justifyContent="center" mt={3}>
 					<Button
 						variant="contained"
 						startIcon={<MailLock />}
 						onClick={handleResetPassword}
+						sx={{ ml: 1 }}
 					>
 						Redefinir senha
+					</Button>
+					<Button
+						variant="contained"
+						size="large"
+						sx={{ ml: 1 }}
+						onClick={saveUserSettings}
+					>
+						Salvar
 					</Button>
 				</Box>
 			</Card>
@@ -168,6 +263,17 @@ export default function SettingsPage() {
 					</Button>
 				</DialogActions>
 			</Dialog>
+
+			<Snackbar
+				open={feedback.open}
+				autoHideDuration={4000}
+				onClose={() => setFeedback({ ...feedback, open: false })}
+				anchorOrigin={{ vertical: "top", horizontal: "right" }}
+			>
+				<Alert severity={feedback.severity} variant="filled">
+					{feedback.message}
+				</Alert>
+			</Snackbar>
 		</Box>
 	);
 }

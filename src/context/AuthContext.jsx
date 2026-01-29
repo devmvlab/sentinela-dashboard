@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
 					if (userSnap.data().isAdmin === true) {
 						await signOut(auth);
 						setAuthError(
-							"Este usuário não tem permissão para acessar o app."
+							"Este usuário não tem permissão para acessar o app.",
 						);
 						setLoading(false);
 						return;
@@ -65,7 +65,7 @@ export function AuthProvider({ children }) {
 						"users",
 						firebaseUser.uid,
 						"settings",
-						"default"
+						"default",
 					);
 
 					unsubscribeSettings = onSnapshot(settingsRef, (snap) => {
@@ -81,7 +81,7 @@ export function AuthProvider({ children }) {
 				} finally {
 					setLoading(false);
 				}
-			}
+			},
 		);
 
 		return () => {
