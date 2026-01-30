@@ -12,6 +12,7 @@ import Filters from "../components/Filters";
 import useIncidentFilters from "../utils/useIncidentFilters";
 import StatusChip from "../components/StatusChip";
 
+import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import { useSentinelaData } from "../utils/SentinelaDataContext";
@@ -144,7 +145,12 @@ export default function Incidents() {
 	);
 
 	const columns = [
-		{ field: "id", headerName: "Identificador", flex: 1 },
+		{
+			field: "id",
+			headerName: "Identificador",
+			//flex: 1,
+			valueGetter: (_, row) => row.id?.slice(0, 5),
+		},
 		{
 			field: "categoria",
 			headerName: "Categoria",
@@ -156,6 +162,29 @@ export default function Incidents() {
 			headerName: "Tipo",
 			flex: 1,
 			valueGetter: (_, row) => row.ocorrencia?.tipo,
+			renderCell: (params) => {
+				const tipo = params.row.ocorrencia?.tipo;
+				const isEmergency = params.row.isEmergency;
+
+				return (
+					<Box
+						sx={{
+							display: "flex",
+							alignItems: "center",
+							height: "100%", // 🔥 chave do alinhamento vertical
+							gap: 1,
+						}}
+					>
+						<Typography variant="body2">{tipo ?? "-"}</Typography>
+						{isEmergency && (
+							<ReportGmailerrorredIcon
+								color="error"
+								fontSize="small"
+							/>
+						)}
+					</Box>
+				);
+			},
 		},
 		{
 			field: "endereco",
