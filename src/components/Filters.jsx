@@ -8,14 +8,11 @@ import {
 	Button,
 } from "@mui/material";
 
-import { categories } from "../utils/categoriesList";
 import ClearIcon from "@mui/icons-material/Clear";
 
 export default function Filters({
 	status,
 	setStatus,
-	category,
-	setCategory,
 	startDate,
 	setStartDate,
 	endDate,
@@ -49,23 +46,6 @@ export default function Filters({
 					<MenuItem value="in_progress">Em andamento</MenuItem>
 					<MenuItem value="cancelled">Canceladas</MenuItem>
 					<MenuItem value="resolved">Resolvidas</MenuItem>
-				</Select>
-			</FormControl>
-
-			{/* CATEGORIA */}
-			<FormControl size="small" sx={{ width: 180 }}>
-				<InputLabel>Categoria</InputLabel>
-				<Select
-					value={category}
-					label="Categoria"
-					onChange={(e) => setCategory(e.target.value)}
-				>
-					<MenuItem value="all">Todas</MenuItem>
-					{categories.map((cat) => (
-						<MenuItem key={cat.title} value={cat.title}>
-							{cat.title}
-						</MenuItem>
-					))}
 				</Select>
 			</FormControl>
 

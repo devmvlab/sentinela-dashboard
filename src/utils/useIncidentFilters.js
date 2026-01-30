@@ -1,14 +1,18 @@
 export default function useIncidentFilters(
 	rows,
-	{ status, category, startDate, endDate, search },
+	{ status, incidentTypes, startDate, endDate, search },
 ) {
 	return rows
 		.filter((row) => {
 			// STATUS
 			if (status !== "all" && row.status !== status) return false;
-
-			// CATEGORIA
-			if (category !== "all" && row.ocorrencia?.categoria !== category) {
+			
+			// TIPO (configurado no perfil)
+			if (
+				Array.isArray(incidentTypes) &&
+				incidentTypes.length > 0 &&
+				!incidentTypes.includes(row.ocorrencia?.tipo)
+			) {
 				return false;
 			}
 
