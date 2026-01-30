@@ -115,8 +115,6 @@ export default function Incidents() {
 			user,
 		});
 
-
-
 		updateIncidentStatus(currentIncident.id, "accepted");
 
 		setSnackbar({
@@ -263,6 +261,7 @@ export default function Incidents() {
 					open={snackbar.open}
 					autoHideDuration={3000}
 					onClose={() => setSnackbar({ open: false, message: "" })}
+					anchorOrigin={{ vertical: "top", horizontal: "right" }}
 				>
 					<Alert severity="success">{snackbar.message}</Alert>
 				</Snackbar>
