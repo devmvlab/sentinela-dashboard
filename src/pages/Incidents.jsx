@@ -24,11 +24,12 @@ export default function Incidents() {
 	const location = useLocation();
 	const navigate = useNavigate();
 
-	const { incidents, loading, updateIncidentStatus } = useSentinelaData();
+	const { incidents, loading, updateIncidentStatus, incidentTypes } =
+		useSentinelaData();
 	const { user } = useSentinelaData();
 
 	const [statusFilter, setStatusFilter] = useState("all");
-	const [category, setCategory] = useState("all");
+	//const [category, setCategory] = useState("all");
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
 	const [search, setSearch] = useState("");
@@ -64,7 +65,7 @@ export default function Incidents() {
 
 	function clearFilters() {
 		setStatusFilter("all");
-		setCategory("all");
+		//setCategory("all");
 		setStartDate("");
 		setEndDate("");
 		setSearch("");
@@ -114,8 +115,6 @@ export default function Incidents() {
 			reason: "Ocorrência aceita pelo operador",
 			user,
 		});
-
-
 
 		updateIncidentStatus(currentIncident.id, "accepted");
 
@@ -180,7 +179,7 @@ export default function Incidents() {
 
 	const filteredRows = useIncidentFilters(incidents || [], {
 		status: statusFilter,
-		category,
+		incidentTypes,
 		startDate,
 		endDate,
 		search,
@@ -206,8 +205,8 @@ export default function Incidents() {
 				<Filters
 					status={statusFilter}
 					setStatus={setStatusFilter}
-					category={category}
-					setCategory={setCategory}
+					//category={category}
+					//setCategory={setCategory}
 					startDate={startDate}
 					setStartDate={setStartDate}
 					endDate={endDate}
@@ -263,6 +262,7 @@ export default function Incidents() {
 					open={snackbar.open}
 					autoHideDuration={3000}
 					onClose={() => setSnackbar({ open: false, message: "" })}
+					anchorOrigin={{ vertical: "top", horizontal: "right" }}
 				>
 					<Alert severity="success">{snackbar.message}</Alert>
 				</Snackbar>

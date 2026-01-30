@@ -29,6 +29,7 @@ export function SentinelaDataProvider({ children }) {
 	const [loading, setLoading] = useState(true);
 
 	const [lastUpdate, setLastUpdate] = useState(null);
+	const [incidentTypes, setIncidentTypes] = useState([]);
 
 	function updateIncidentStatus(id, newStatus) {
 		setIncidents((prev) =>
@@ -37,6 +38,29 @@ export function SentinelaDataProvider({ children }) {
 			),
 		);
 	}
+	useEffect(() => {
+		if (!user?.uid) return;
+
+		const onStorage = (e) => {
+			if (e.key === "incidentTypesSyncing") {
+				getDoc(doc(db, "users", user.uid, "settings", "default")).then(
+					(snap) => {
+						if (snap.exists()) {
+							setIncidentTypes(snap.data().incidentTypes || []);
+						}
+					},
+				);
+
+				localStorage.removeItem("incidentTypesSyncing");
+			}
+		};
+
+		window.addEventListener("storage", onStorage);
+
+		return () => {
+			window.removeEventListener("storage", onStorage);
+		};
+	}, [user]);
 
 	useEffect(() => {
 		let unsubscribeIncidents;
@@ -92,6 +116,25 @@ export function SentinelaDataProvider({ children }) {
 						});
 					} else {
 						setUserCenter(null);
+					}
+					// =============================
+					// BUSCAR SETTINGS DO USUÁRIO
+					// =============================
+					const settingsRef = doc(
+						db,
+						"users",
+						currentUser.uid,
+						"settings",
+						"default",
+					);
+
+					const settingsSnap = await getDoc(settingsRef);
+
+					if (settingsSnap.exists()) {
+						const settingsData = settingsSnap.data();
+						setIncidentTypes(settingsData.incidentTypes || []);
+					} else {
+						setIncidentTypes([]);
 					}
 
 					// =============================
@@ -152,6 +195,8 @@ export function SentinelaDataProvider({ children }) {
 				userCity,
 				userCenter,
 				incidents,
+				incidentTypes,
+				setIncidentTypes,
 				loading,
 				lastUpdate,
 				updateIncidentStatus,

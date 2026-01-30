@@ -241,8 +241,6 @@ export default function Topbar({ handleDrawerOpen }) {
 			document.removeEventListener("mousedown", handleClickOutside);
 	}, [menuAberto]);
 
-	console.log(authUser);
-
 	// render do dropdown (últimas 10)
 	const NotificacoesDropdown = menuAberto && (
 		<Box
@@ -494,7 +492,12 @@ export default function Topbar({ handleDrawerOpen }) {
 							horizontal: "right",
 						}}
 					>
-						<MenuItem onClick={() => navigate("/configuracoes")}>
+						<MenuItem
+							onClick={() => {
+								navigate("/configuracoes");
+								closeProfileMenu();
+							}}
+						>
 							<SettingsIcon sx={{ mr: 1 }} /> Configurações
 						</MenuItem>
 						<Divider />

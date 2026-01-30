@@ -134,30 +134,28 @@ export default function Dashboard() {
 	   MAPA
 	======================= */
 	useEffect(() => {
-		if (!mapState && incidents?.length) {
-			const first = incidents.find(
-				(i) => i.geoloc?.latitude && i.geoloc?.longitude,
-			);
+		const first = incidents.find(
+			(i) => i.geoloc?.latitude && i.geoloc?.longitude,
+		);
 
-			if (first) {
-				setMapState({
-					center: {
-						lat: first.geoloc.latitude,
-						lng: first.geoloc.longitude,
-					},
-					zoom: 12,
-				});
-			} else {
-				setMapState({
-					center: {
-						lat: userCenter?.lat,
-						lng: userCenter?.lng,
-					},
-					zoom: 12,
-				});
-			}
+		if (first) {
+			setMapState({
+				center: {
+					lat: first.geoloc.latitude,
+					lng: first.geoloc.longitude,
+				},
+				zoom: 12,
+			});
+		} else {
+			setMapState({
+				center: {
+					lat: userCenter?.lat,
+					lng: userCenter?.lng,
+				},
+				zoom: 12,
+			});
 		}
-	}, [incidents, mapState]);
+	}, [incidents]);
 
 	const periodLabelMap = {
 		today: "hoje",
