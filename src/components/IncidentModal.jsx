@@ -122,6 +122,15 @@ const IncidentModal = memo(function IncidentModal({
 		onClose();
 	};
 
+	const InfoItem = ({ label, value, full }) => (
+		<Box gridColumn={full ? "1 / -1" : "auto"}>
+			<Typography variant="caption" color="text.secondary">
+				{label}
+			</Typography>
+			<Typography variant="body2">{value || "-"}</Typography>
+		</Box>
+	);
+
 	if (!incident) return null;
 
 	return (
@@ -205,82 +214,104 @@ const IncidentModal = memo(function IncidentModal({
 				{/* ABA DETALHES */}
 				{tab === 0 && (
 					<>
-						<Box
-							display="flex"
-							justifyContent="center"
-							alignItems={"center"}
-							gap={4}
-						>
+						<Box display="flex" gap={4} alignItems="center">
+							{/* ================= IMAGEM ================= */}
 							{incident.imageUrl ? (
-								<img
+								<Box
+									component="img"
 									src={incident.imageUrl}
 									alt="Ocorrência"
-									style={{
+									sx={{
 										width: 300,
 										height: 300,
-										borderRadius: 8,
+										borderRadius: 2,
+										objectFit: "cover",
+										flexShrink: 0,
 									}}
 								/>
 							) : (
 								<Box
 									width={300}
 									height={300}
+									minWidth={300}
+									minHeight={300}
 									display="flex"
 									alignItems="center"
 									justifyContent="center"
 									flexDirection="column"
-									bgcolor="text.secondary"
+									bgcolor="grey.200"
 									borderRadius={2}
-									minWidth={300}
-									minHeight={300}
+									color="text.secondary"
+									flexShrink={0}
 								>
 									<ImageNotSupportedIcon
-										sx={{ fontSize: 100 }}
+										sx={{ fontSize: 80 }}
 									/>
-									<Typography>Nenhuma imagem</Typography>
+									<Typography variant="body2">
+										Nenhuma imagem
+									</Typography>
 								</Box>
 							)}
 
-							<Box display="flex" flexDirection="column" gap={2}>
-								<Typography>
-									<b>Categoria:</b>{" "}
-									{incident.ocorrencia?.categoria}
-								</Typography>
-								<Typography
-									sx={{
-										display: "flex",
-										alignItems: "center",
-										gap: 1,
-									}}
-								>
-									<b>Tipo:</b> {incident.ocorrencia?.tipo}
-									{incident.isEmergency && (
-										<ReportGmailerrorred
-											color="error"
-											fontSize="small"
-										/>
-									)}
-								</Typography>
-								<Typography>
-									<b>Descrição:</b> {incident.desc}
-								</Typography>
-								<Typography>
-									<b>Data:</b> {incident.data} às{" "}
-									{incident.hora}
-								</Typography>
-								<Typography>
-									<b>Endereço:</b> {incident.geoloc?.address}
-								</Typography>
-								<Typography>
-									<b>Cidade:</b> {incident.geoloc?.city} -{" "}
-									{incident.geoloc?.state}
-								</Typography>
-								<Typography>
-									<b>CEP:</b> {incident.geoloc?.postalCode}
-								</Typography>
+							{/* ================= INFORMAÇÕES ================= */}
+							<Box
+								display="grid"
+								gridTemplateColumns="repeat(2, minmax(0, 1fr))"
+								gap={2}
+								width="100%"
+							>
+								<InfoItem
+									label="Categoria"
+									value={incident.ocorrencia?.categoria}
+								/>
+
+								<InfoItem
+									label="Tipo"
+									value={
+										<Box
+											display="flex"
+											alignItems="center"
+											gap={1}
+										>
+											{incident.ocorrencia?.tipo}
+											{incident.isEmergency && (
+												<ReportGmailerrorred
+													color="error"
+													fontSize="small"
+												/>
+											)}
+										</Box>
+									}
+								/>
+
+								<InfoItem
+									label="Data"
+									value={`${incident.data} às ${incident.hora}`}
+								/>
+
+								<InfoItem
+									label="Cidade"
+									value={`${incident.geoloc?.city} - ${incident.geoloc?.state}`}
+								/>
+
+								<InfoItem
+									label="CEP"
+									value={incident.geoloc?.postalCode}
+								/>
+
+								<InfoItem
+									label="Endereço"
+									value={incident.geoloc?.address}
+									full
+								/>
+
+								<InfoItem
+									label="Descrição"
+									value={incident.desc}
+									full
+								/>
 							</Box>
 						</Box>
-
 						{actionOpen && (
 							<Box mt={3}>
 								<Typography
