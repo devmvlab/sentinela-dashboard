@@ -48,11 +48,7 @@ export function useSafetyLevel({ incidents, userCenter, period = "7d" }) {
 			total++;
 
 			const status = item.status?.toLowerCase();
-			const isResolved = [
-				"resolved",
-				"cancelled",
-				"pending_review",
-			].includes(status);
+			const isResolved = ["resolved"].includes(status);
 
 			if (isResolved) {
 				resolved++;
