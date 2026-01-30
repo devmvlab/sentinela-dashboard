@@ -20,6 +20,7 @@ import {
 	Pending as PendingIcon,
 	ImageNotSupported as ImageNotSupportedIcon,
 	Close as CloseIcon,
+	ReportGmailerrorred,
 } from "@mui/icons-material";
 import StepConnector from "@mui/material/StepConnector";
 import { styled, useTheme } from "@mui/material/styles";
@@ -245,8 +246,20 @@ const IncidentModal = memo(function IncidentModal({
 									<b>Categoria:</b>{" "}
 									{incident.ocorrencia?.categoria}
 								</Typography>
-								<Typography>
+								<Typography
+									sx={{
+										display: "flex",
+										alignItems: "center",
+										gap: 1,
+									}}
+								>
 									<b>Tipo:</b> {incident.ocorrencia?.tipo}
+									{incident.isEmergency && (
+										<ReportGmailerrorred
+											color="error"
+											fontSize="small"
+										/>
+									)}
 								</Typography>
 								<Typography>
 									<b>Descrição:</b> {incident.desc}
