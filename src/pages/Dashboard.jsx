@@ -14,8 +14,6 @@ import { auth, db } from "../services/firebase";
 import TaskIcon from "@mui/icons-material/Task";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import GroupIcon from "@mui/icons-material/Group";
@@ -28,11 +26,13 @@ import PeakHourChart from "../components/PeakHourChart";
 import IncidentsMap from "./IncidentsMap";
 import SafetyCard from "../components/SafetyCard";
 import EmergencyPieChart from "../components/EmergencyPieChart";
+import { buildAverageResponseTimeData } from "../utils/utils";
 
 import { useIncidents } from "../hooks/useIncidents";
 import { useUsersByCity } from "../hooks/useUsersByCity";
 import { useSentinelaData } from "../utils/SentinelaDataContext";
 import CustomCard from "../components/CustomCard";
+import AverageResponseTimeChart from "../components/AverageResponseTimeChart";
 
 /* =======================
    FAIXAS DE HORÁRIO
@@ -81,7 +81,7 @@ export default function Dashboard() {
 	const [onlyEmergency, setOnlyEmergency] = useState(false);
 
 	/* 🔹 INCIDENTS (FIREBASE JÁ FILTRADO) */
-	const { incidents, loading, lastUpdate } = useIncidents({
+	const { incidents, loading, lastUpdate, incidentHistory } = useIncidents({
 		period,
 		onlyEmergency,
 		realtime: true,
@@ -196,23 +196,25 @@ export default function Dashboard() {
 	   GRÁFICOS
 	======================= */
 	const {
-		categoryData,
+		typeData,
 		statusData,
 		districtData,
 		peakHourData,
 		emergencyPieData,
+		averageResponseTimeData,
 	} = useMemo(() => {
 		if (!filteredIncidents.length) {
 			return {
-				categoryData: [],
+				typeData: [],
 				statusData: [],
 				districtData: [],
 				peakHourData: [],
 				emergencyPieData: [],
+				averageResponseTimeData: [],
 			};
 		}
 
-		const categorias = {};
+		const types = {};
 		const status = {};
 		const district = {};
 		let emergencias = 0;
@@ -220,9 +222,8 @@ export default function Dashboard() {
 		filteredIncidents.forEach((item) => {
 			if (item.isEmergency) emergencias++;
 
-			categorias[item.ocorrencia?.categoria || "Sem categoria"] =
-				(categorias[item.ocorrencia?.categoria || "Sem categoria"] ||
-					0) + 1;
+			types[item.ocorrencia?.tipo || "Sem tipo"] =
+				(types[item.ocorrencia?.tipo || "Sem tipo"] || 0) + 1;
 
 			status[item.status || "unknown"] =
 				(status[item.status || "unknown"] || 0) + 1;
@@ -232,12 +233,10 @@ export default function Dashboard() {
 		});
 
 		return {
-			categoryData: Object.entries(categorias).map(
-				([categoria, quantidade]) => ({
-					categoria,
-					quantidade,
-				}),
-			),
+			typeData: Object.entries(types).map(([tipo, quantidade]) => ({
+				tipo,
+				quantidade,
+			})),
 			statusData: Object.entries(status).map(([status, quantidade]) => ({
 				status,
 				quantidade,
@@ -256,8 +255,11 @@ export default function Dashboard() {
 					value: filteredIncidents.length - emergencias,
 				},
 			],
+			averageResponseTimeData:
+				buildAverageResponseTimeData(incidentHistory),
 		};
-	}, [filteredIncidents]);
+	}, [filteredIncidents, incidentHistory]);
+
 	const baseLabel = getBaseLabel(onlyEmergency);
 	const cards = [
 		{
@@ -410,13 +412,18 @@ export default function Dashboard() {
 							<PeakHourChart data={peakHourData} />
 						</Grid>
 						<Grid size={{ xs: 12, md: 6 }}>
+							<AverageResponseTimeChart
+								data={averageResponseTimeData}
+							/>
+						</Grid>
+						<Grid size={{ xs: 12, md: 6 }}>
 							<EmergencyPieChart data={emergencyPieData} />
 						</Grid>
 						<Grid size={{ xs: 12, md: 6 }}>
-							<CategoryChart data={categoryData} />
-						</Grid>
-						<Grid size={{ xs: 12, md: 6 }}>
 							<StatusChart data={statusData} />
+						</Grid>
+						<Grid size={{ xs: 12 }}>
+							<CategoryChart data={typeData} />
 						</Grid>
 						<Grid size={{ xs: 12 }}>
 							<DistrictChart data={districtData} />

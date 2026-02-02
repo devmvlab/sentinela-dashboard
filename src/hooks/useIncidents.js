@@ -41,21 +41,26 @@ export function useIncidents({
 	realtime = false,
 }) {
 	const [incidents, setIncidents] = useState([]);
-	const [loading, setLoading] = useState(true);
+	const [incidentHistory, setIncidentHistory] = useState([]);
+	const [loadingIncidents, setLoadingIncidents] = useState(true);
+	const [loadingHistory, setLoadingHistory] = useState(true);
 	const [lastUpdate, setLastUpdate] = useState(null);
 
 	const startDate = useMemo(() => getStartDate(period), [period]);
 
 	const { user } = useSentinelaData();
 
+	/* =========================
+	   INCIDENTS
+	========================= */
 	useEffect(() => {
 		if (!user?.cityId) return;
 
-		setLoading(true);
+		setLoadingIncidents(true);
 
 		let q = query(
 			collection(db, "incidents"),
-			where("geoloc.cityId", "==", user?.cityId),
+			where("geoloc.cityId", "==", user.cityId),
 			where("createdAt", ">=", startDate),
 			where("status", "!=", "cancelled"),
 			orderBy("createdAt", "desc"),
@@ -74,7 +79,7 @@ export function useIncidents({
 
 				setIncidents(docs);
 				setLastUpdate(new Date());
-				setLoading(false);
+				setLoadingIncidents(false);
 			});
 
 			return unsub;
@@ -88,12 +93,58 @@ export function useIncidents({
 
 			setIncidents(docs);
 			setLastUpdate(new Date());
-			setLoading(false);
+			setLoadingIncidents(false);
 		});
 	}, [user, startDate, onlyEmergency, realtime]);
 
+	/* =========================
+	   INCIDENT HISTORY
+	========================= */
+	useEffect(() => {
+		if (!user?.cityId) return;
+
+		setLoadingHistory(true);
+
+		const q = query(
+			collection(db, "incident_history"),
+			where("cityId", "==", user.cityId),
+			where("createdAt", ">=", startDate),
+			orderBy("createdAt", "desc"),
+		);
+
+		if (realtime) {
+			const unsub = onSnapshot(q, (snap) => {
+				const docs = snap.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
+
+				setIncidentHistory(docs);
+				setLoadingHistory(false);
+			});
+
+			return unsub;
+		}
+
+		getDocs(q).then((snap) => {
+			const docs = snap.docs.map((doc) => ({
+				id: doc.id,
+				...doc.data(),
+			}));
+
+			setIncidentHistory(docs);
+			setLoadingHistory(false);
+		});
+	}, [user, startDate, realtime]);
+
+	/* =========================
+	   LOADING FINAL
+	========================= */
+	const loading = loadingIncidents || loadingHistory;
+
 	return {
 		incidents,
+		incidentHistory,
 		loading,
 		lastUpdate,
 	};

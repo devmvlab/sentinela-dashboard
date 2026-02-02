@@ -1,18 +1,12 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { typesList } from "./typesList";
 
 export async function exportIncidentsToExcel(rows) {
 	if (!rows || rows.length === 0) {
 		alert("Nenhum dado para gerar o relatório");
 		return;
 	}
-
-	const statusLabels = {
-		pending: "Pendente",
-		open: "Em Aberto",
-		closed: "Fechado",
-		resolved: "Resolvido",
-	};
 
 	const workbook = new ExcelJS.Workbook();
 	const worksheet = workbook.addWorksheet("Incidentes");
@@ -68,7 +62,7 @@ export async function exportIncidentsToExcel(rows) {
 	rows.forEach((item) => {
 		worksheet.getRow(rowIndex).values = [
 			item.id,
-			statusLabels[item.status] || item.status,
+			typesList[item.status]?.label || item.status,
 			item.ocorrencia?.categoria || "",
 			item.ocorrencia?.tipo || "",
 			item.desc,
@@ -107,8 +101,6 @@ export async function exportIncidentsToExcel(rows) {
 	const buffer = await workbook.xlsx.writeBuffer();
 	saveAs(
 		new Blob([buffer]),
-		`relatorio-incidentes-${new Date()
-			.toISOString()
-			.slice(0, 10)}.xlsx`
+		`relatorio-incidentes-${new Date().toISOString().slice(0, 10)}.xlsx`,
 	);
 }

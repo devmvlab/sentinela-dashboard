@@ -14,6 +14,7 @@ export async function updateIncidentWithHistory({
 	newStatus,
 	reason,
 	user,
+	cityId,
 }) {
 	const batch = writeBatch(db);
 
@@ -37,6 +38,7 @@ export async function updateIncidentWithHistory({
 			id: user.uid,
 			name: user.displayName,
 		},
+		cityId,
 		createdAt: serverTimestamp(),
 	});
 

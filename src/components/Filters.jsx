@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 
 import ClearIcon from "@mui/icons-material/Clear";
+import { typesList } from "../utils/typesList";
 
 export default function Filters({
 	status,
@@ -41,11 +42,9 @@ export default function Filters({
 					onChange={(e) => setStatus(e.target.value)}
 				>
 					<MenuItem value="all">Todos</MenuItem>
-					<MenuItem value="pending_review">Em análise</MenuItem>
-					<MenuItem value="accepted">Aceitas</MenuItem>
-					<MenuItem value="in_progress">Em andamento</MenuItem>
-					<MenuItem value="cancelled">Canceladas</MenuItem>
-					<MenuItem value="resolved">Resolvidas</MenuItem>
+					{Object.values(typesList).map(({ id, label }) => (
+						<MenuItem value={id}>{label}</MenuItem>
+					))}
 				</Select>
 			</FormControl>
 

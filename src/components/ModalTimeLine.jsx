@@ -21,6 +21,7 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../services/firebase";
+import { typesList } from "../utils/typesList";
 
 /* =============================
    ICONES POR STATUS
@@ -43,15 +44,7 @@ function getStatusIcon(status) {
    LABELS DE STATUS
 ============================= */
 function formatStatus(status) {
-	const map = {
-		pending_review: "Em análise",
-		accepted: "Aceita",
-		in_progress: "Em andamento",
-		resolved: "Resolvida",
-		cancelled: "Cancelada",
-	};
-
-	return map[status] || status;
+	return typesList[status]?.label || status;
 }
 
 /* =============================

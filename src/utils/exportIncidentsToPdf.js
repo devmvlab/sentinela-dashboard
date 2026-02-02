@@ -1,18 +1,12 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { typesList } from "./typesList";
 
 export async function exportIncidentsToPdf(rows) {
 	if (!rows || rows.length === 0) {
 		alert("Nenhum dado para gerar o relatório");
 		return;
 	}
-
-	const statusLabels = {
-		pending: "Pendente",
-		open: "Em Aberto",
-		closed: "Fechado",
-		resolved: "Resolvido",
-	};
 
 	const doc = new jsPDF({
 		orientation: "landscape", // melhor pra tabelas largas
@@ -23,11 +17,11 @@ export async function exportIncidentsToPdf(rows) {
 	/* ================= LOGO ================= */
 	const logo = await loadImage("/logo.png");
 
-    const logoWidth = 30;
-    const logoHeight = logoWidth;
-    const tableStartY = 8 + logoHeight + 10;
+	const logoWidth = 30;
+	const logoHeight = logoWidth;
+	const tableStartY = 8 + logoHeight + 10;
 
-    doc.addImage(logo, "PNG", 10, 8, logoWidth, logoHeight);
+	doc.addImage(logo, "PNG", 10, 8, logoWidth, logoHeight);
 
 	/* ================= TÍTULO ================= */
 	doc.setFontSize(16);
@@ -36,17 +30,14 @@ export async function exportIncidentsToPdf(rows) {
 
 	doc.setFontSize(10);
 	doc.setFont("Montserrat", "normal");
-	doc.text(
-		`Gerado em ${new Date().toLocaleDateString("pt-BR")}`,
-		148,
-		24,
-		{ align: "center" }
-	);
+	doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")}`, 148, 24, {
+		align: "center",
+	});
 
 	/* ================= DADOS ================= */
 	const tableBody = rows.map((item) => [
 		item.id,
-		statusLabels[item.status] || item.status,
+		typesList[item.status]?.label || item.status,
 		item.ocorrencia?.categoria || "",
 		item.ocorrencia?.tipo || "",
 		item.desc || "",
@@ -59,20 +50,22 @@ export async function exportIncidentsToPdf(rows) {
 	/* ================= TABELA ================= */
 	autoTable(doc, {
 		startY: tableStartY,
-		head: [[
-			"ID",
-			"Status",
-			"Categoria",
-			"Tipo",
-			"Descrição",
-			"Data",
-			"Local",
-			"CEP",
-			"Emergência",
-		]],
+		head: [
+			[
+				"ID",
+				"Status",
+				"Categoria",
+				"Tipo",
+				"Descrição",
+				"Data",
+				"Local",
+				"CEP",
+				"Emergência",
+			],
+		],
 		body: tableBody,
 		styles: {
-            font: "Montserrat",
+			font: "Montserrat",
 			fontSize: 8,
 			cellPadding: 2,
 			valign: "middle",
@@ -101,20 +94,15 @@ export async function exportIncidentsToPdf(rows) {
 			// Footer
 			const pageCount = doc.getNumberOfPages();
 			doc.setFontSize(8);
-			doc.text(
-				`Página ${data.pageNumber} de ${pageCount}`,
-				148,
-				200,
-				{ align: "center" }
-			);
+			doc.text(`Página ${data.pageNumber} de ${pageCount}`, 148, 200, {
+				align: "center",
+			});
 		},
 	});
 
 	/* ================= EXPORT ================= */
 	doc.save(
-		`relatorio-incidentes-${new Date()
-			.toISOString()
-			.slice(0, 10)}.pdf`
+		`relatorio-incidentes-${new Date().toISOString().slice(0, 10)}.pdf`,
 	);
 }
 

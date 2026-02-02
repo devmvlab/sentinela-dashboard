@@ -25,9 +25,8 @@ export default function Incidents() {
 	const location = useLocation();
 	const navigate = useNavigate();
 
-	const { incidents, loading, updateIncidentStatus, incidentTypes } =
+	const { incidents, loading, updateIncidentStatus, incidentTypes, user } =
 		useSentinelaData();
-	const { user } = useSentinelaData();
 
 	const [statusFilter, setStatusFilter] = useState("all");
 	//const [category, setCategory] = useState("all");
@@ -94,6 +93,7 @@ export default function Incidents() {
 			newStatus,
 			user,
 			reason,
+			cityId: user?.cityId,
 		});
 
 		updateIncidentStatus(currentIncident.id, newStatus);
