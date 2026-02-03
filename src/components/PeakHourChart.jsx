@@ -1,5 +1,4 @@
-import { Card, CardContent, Typography, Box } from "@mui/material";
-import BarChartIcon from "@mui/icons-material/BarChart";
+import { Card, CardContent, Typography } from "@mui/material";
 import {
 	BarChart,
 	Bar,
@@ -18,7 +17,11 @@ export default function PeakHourChart({ data = [] }) {
 	const theme = useTheme();
 	const [activeIndex, setActiveIndex] = useState(null);
 
-	const hasData = data.length > 0;
+	const filteredData = Array.isArray(data)
+		? data.filter((item) => item.total > 0)
+		: [];
+
+	const hasData = filteredData.length > 0;
 
 	return (
 		<Card sx={{ borderRadius: "8px" }}>
@@ -32,7 +35,7 @@ export default function PeakHourChart({ data = [] }) {
 				) : (
 					<ResponsiveContainer width="100%" height={300}>
 						<BarChart
-							data={data}
+							data={filteredData}
 							margin={{ top: 40, right: 20, left: 0, bottom: 20 }}
 							onMouseMove={(state) =>
 								state?.activeTooltipIndex !== undefined &&
@@ -65,7 +68,7 @@ export default function PeakHourChart({ data = [] }) {
 									fontWeight={700}
 								/>
 
-								{data.map((_, index) => (
+								{filteredData.map((_, index) => (
 									<Cell
 										key={index}
 										fill={
