@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, Box } from "@mui/material";
+import { Card, CardContent, Typography } from "@mui/material";
 import {
 	ResponsiveContainer,
 	LineChart,
@@ -8,8 +8,35 @@ import {
 	Tooltip,
 } from "recharts";
 import { useTheme } from "@mui/material/styles";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ChartEmptyState from "./ChartEmptyState";
+
+const formatResolutionTime = (minutes) => {
+	if (minutes == null || isNaN(minutes)) return "-";
+
+	if (minutes < 60) {
+		return `${Math.round(minutes)} min`;
+	}
+
+	if (minutes < 1440) {
+		const hours = Math.floor(minutes / 60);
+		const remainingMinutes = Math.round(minutes % 60);
+
+		if (remainingMinutes === 0) {
+			return `${hours}h`;
+		}
+
+		return `${hours}h ${remainingMinutes}min`;
+	}
+
+	const days = Math.floor(minutes / 1440);
+	const remainingHours = Math.floor((minutes % 1440) / 60);
+
+	if (remainingHours === 0) {
+		return `${days}d`;
+	}
+
+	return `${days}d ${remainingHours}h`;
+};
 
 export default function AverageResponseTimeChart({ data = [] }) {
 	const theme = useTheme();
@@ -32,15 +59,16 @@ export default function AverageResponseTimeChart({ data = [] }) {
 								stroke="#ccc"
 								fontSize={13}
 							/>
+
 							<YAxis
 								stroke="#ccc"
 								fontSize={13}
-								tickFormatter={(v) => `${v} min`}
+								tickFormatter={formatResolutionTime}
 							/>
 
 							<Tooltip
 								formatter={(value) => [
-									`${value} min`,
+									formatResolutionTime(value),
 									"Tempo médio",
 								]}
 								contentStyle={{

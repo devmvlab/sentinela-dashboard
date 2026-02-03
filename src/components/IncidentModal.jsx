@@ -127,7 +127,12 @@ const IncidentModal = memo(function IncidentModal({
 			<Typography variant="caption" color="text.secondary">
 				{label}
 			</Typography>
-			<Typography variant="body2">{value || "-"}</Typography>
+
+			<Box display="flex" alignItems="center" gap={1}>
+				<Typography variant="body2" component="span">
+					{value || "-"}
+				</Typography>
+			</Box>
 		</Box>
 	);
 
