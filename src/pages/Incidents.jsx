@@ -33,10 +33,6 @@ export default function Incidents() {
 	/* =====================
 	   FILTROS (SERVER)
 	===================== */
-	const [statusFilter, setStatusFilter] = useState("all");
-	const [startDate, setStartDate] = useState("");
-	const [endDate, setEndDate] = useState("");
-	const [search, setSearch] = useState("");
 
 	const [paginationModel, setPaginationModel] = useState({
 		page: 0,
@@ -44,10 +40,10 @@ export default function Incidents() {
 	});
 
 	const [filters, setFilters] = useState({
-		status: "all",
+		status: "",
 		category: "",
 		type: "",
-		emergency: "", // "yes" | "no" | ""
+		isEmergency: "",
 		startDate: "",
 		endDate: "",
 	});
@@ -65,7 +61,7 @@ export default function Incidents() {
 		status: filters.status,
 		category: filters.category,
 		type: filters.type,
-		emergency: filters.emergency,
+		isEmergency: filters.isEmergency,
 		startDate: filters.startDate,
 		endDate: filters.endDate,
 		page: paginationModel.page,
@@ -102,17 +98,6 @@ export default function Incidents() {
 			navigate(location.pathname, { replace: true });
 		}
 	}, [location.state, openModal, navigate, location.pathname]);
-
-	/* =====================
-	   HELPERS
-	===================== */
-	function clearFilters() {
-		setStatusFilter("all");
-		setStartDate("");
-		setEndDate("");
-		setSearch("");
-		setPaginationModel((prev) => ({ ...prev, page: 0 }));
-	}
 
 	/* =====================
 	   MODAL ACTIONS (INALTERADAS)

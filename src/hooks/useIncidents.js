@@ -9,13 +9,27 @@ import {
 	getDocs,
 	getCountFromServer,
 	onSnapshot,
+	Timestamp,
 } from "firebase/firestore";
+
 import { db } from "../services/firebase";
 import { useSentinelaData } from "../utils/SentinelaDataContext";
 
 /* =========================
    HELPERS
 ========================= */
+
+function getDayRange(dateString) {
+	if (!dateString) return null;
+
+	const start = new Date(`${dateString}T00:00:00`);
+	const end = new Date(`${dateString}T23:59:59`);
+
+	return {
+		start: Timestamp.fromDate(start),
+		end: Timestamp.fromDate(end),
+	};
+}
 
 function getStartDate(period) {
 	const now = new Date();
@@ -42,7 +56,7 @@ export function useIncidents({
 	status = "all",
 	category = "",
 	type = "",
-	emergency = "",
+	isEmergency = "",
 	startDate = null,
 	endDate = null,
 	period = "today",
@@ -65,10 +79,14 @@ export function useIncidents({
 
 	const pageCursors = useRef({});
 
-	const incidentStartDate = useMemo(() => {
-		if (startDate) return startDate;
-		return getStartDate(period);
-	}, [startDate, period]);
+	const dateRange = useMemo(() => {
+		if (!startDate && !endDate) return null;
+
+		return {
+			start: startDate ? getDayRange(startDate)?.start : null,
+			end: endDate ? getDayRange(endDate)?.end : null,
+		};
+	}, [startDate, endDate]);
 
 	const historyStartDate = useMemo(() => getStartDate(period), [period]);
 
@@ -99,21 +117,21 @@ export function useIncidents({
 		}
 
 		/* EMERGÊNCIA */
-		if (emergency === "yes") {
+		if (isEmergency === "true") {
 			constraints.push(where("isEmergency", "==", true));
 		}
 
-		if (emergency === "no") {
+		if (isEmergency === "false") {
 			constraints.push(where("isEmergency", "==", false));
 		}
 
 		/* DATA (period como fallback) */
-		if (incidentStartDate) {
-			constraints.push(where("createdAt", ">=", incidentStartDate));
+		if (dateRange?.start) {
+			constraints.push(where("createdAt", ">=", dateRange.start));
 		}
 
-		if (endDate) {
-			constraints.push(where("createdAt", "<=", endDate));
+		if (dateRange?.end) {
+			constraints.push(where("createdAt", "<=", dateRange.end));
 		}
 
 		return query(collection(db, "incidents"), ...constraints);
@@ -136,7 +154,7 @@ export function useIncidents({
 		status,
 		category,
 		type,
-		emergency,
+		isEmergency,
 		startDate,
 		endDate,
 		period,
@@ -204,7 +222,7 @@ export function useIncidents({
 		status,
 		category,
 		type,
-		emergency,
+		isEmergency,
 		startDate,
 		endDate,
 		period,
@@ -223,14 +241,11 @@ export function useIncidents({
 		status,
 		category,
 		type,
-		emergency,
+		isEmergency,
 		startDate,
 		endDate,
 		period,
-		page,
-		pageSize,
 		resolvedCityId,
-		realtime,
 	]);
 
 	/* =========================
@@ -275,7 +290,7 @@ export function useIncidents({
 		status,
 		category,
 		type,
-		emergency,
+		isEmergency,
 		startDate,
 		endDate,
 		period,

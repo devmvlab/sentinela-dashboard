@@ -14,7 +14,7 @@ export default function FilterButton({ activeCount, onClick }) {
 				onClick={onClick}
 				size="small"
 			>
-				Filtros
+				Filtro
 			</Button>
 		</Badge>
 	);
