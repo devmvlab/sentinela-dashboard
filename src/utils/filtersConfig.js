@@ -33,7 +33,7 @@ export const filtersConfig = {
 	},
 
 	isEmergency: {
-		label: "Tipo de ocorrência",
+		label: "Tipo de registro",
 		isActive: (v) => v !== "",
 		formatValue: (v) =>
 			v === "true"

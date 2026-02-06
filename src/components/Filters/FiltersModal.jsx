@@ -72,9 +72,9 @@ export default function FiltersModal({
 
 						{/* EMERGÊNCIA */}
 						<FormControl size="small" fullWidth>
-							<InputLabel>Tipo de ocorrência</InputLabel>
+							<InputLabel>Tipo de registro</InputLabel>
 							<Select
-								label="Tipo de ocorrência"
+								label="Tipo de registro"
 								value={localFilters.isEmergency}
 								onChange={(e) =>
 									update("isEmergency", e.target.value)
