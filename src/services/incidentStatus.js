@@ -24,7 +24,7 @@ export async function updateIncidentWithHistory({
 	// Atualiza a ocorrência
 	batch.update(incidentRef, {
 		status: newStatus,
-		responsible: user.displayName,
+		responsible: user.name,
 		updatedAt: serverTimestamp(),
 	});
 
@@ -36,7 +36,7 @@ export async function updateIncidentWithHistory({
 		reason: reason || null,
 		createdBy: {
 			id: user.uid,
-			name: user.displayName,
+			name: user.name,
 		},
 		cityId,
 		createdAt: serverTimestamp(),

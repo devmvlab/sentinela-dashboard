@@ -16,7 +16,7 @@ import FiltersModal from "../components/Filters/FiltersModal";
 import ActiveFiltersBar from "../components/Filters/ActiveFiltersBar";
 
 import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
-import { useSentinelaData } from "../utils/SentinelaDataContext";
+
 import { updateIncidentWithHistory } from "../services/incidentStatus";
 import { useIncidents } from "../hooks/useIncidents";
 import { useAuth } from "../hooks/useAuth";
@@ -29,11 +29,7 @@ export default function Incidents() {
 	const location = useLocation();
 	const navigate = useNavigate();
 
-	const { name } = useAuth();
-
-	console.log(name);
-
-	//const { user, incidentTypes } = useSentinelaData();
+	const { name, cityId, uid } = useAuth();
 
 	/* =====================
 	   FILTROS (SERVER)
@@ -71,7 +67,7 @@ export default function Incidents() {
 		endDate: filters.endDate,
 		page: paginationModel.page,
 		pageSize: paginationModel.pageSize,
-		cityId: user?.cityId,
+		cityId,
 	});
 
 	/* =====================
@@ -127,9 +123,12 @@ export default function Incidents() {
 		await updateIncidentWithHistory({
 			incident: currentIncident,
 			newStatus,
-			user,
+			user: {
+				id: uid,
+				name,
+			},
 			reason,
-			cityId: user?.cityId,
+			cityId,
 		});
 
 		updateIncidentStatus(currentIncident.id, newStatus);
@@ -150,7 +149,10 @@ export default function Incidents() {
 			incident: currentIncident,
 			newStatus: "accepted",
 			reason: "Ocorrência aceita pelo operador",
-			user,
+			user: {
+				id: uid,
+				name,
+			},
 		});
 
 		updateIncidentStatus(currentIncident.id, "accepted");
@@ -326,7 +328,10 @@ export default function Incidents() {
 							incident: currentIncident,
 							newStatus: "cancelled",
 							reason,
-							user,
+							user: {
+								id: uid,
+								name,
+							},
 						});
 
 						updateIncidentStatus(currentIncident.id, "cancelled");

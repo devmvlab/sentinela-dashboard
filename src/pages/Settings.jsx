@@ -26,7 +26,7 @@ import {
 
 import { useEffect, useState } from "react";
 import { MailLock } from "@mui/icons-material";
-import { useSentinelaData } from "../utils/SentinelaDataContext";
+import { useAuth } from "../hooks/useAuth";
 
 export default function SettingsPage() {
 	// =============================
@@ -47,7 +47,7 @@ export default function SettingsPage() {
 		message: "",
 		severity: "success",
 	});
-	const { setIncidentTypes: setGlobalIncidentTypes } = useSentinelaData();
+	const { updateIncidentTypes } = useAuth();
 
 	// =============================
 	// AUTH REATIVO
@@ -125,10 +125,7 @@ export default function SettingsPage() {
 			);
 
 			//  atualiza o app inteiro na mesma aba
-			setGlobalIncidentTypes(incidentTypes);
-
-			// trava temporária da topbar
-			localStorage.setItem("incidentTypesSyncing", "true");
+			updateIncidentTypes(incidentTypes);
 
 			setFeedback({
 				open: true,

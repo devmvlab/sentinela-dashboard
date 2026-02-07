@@ -57,6 +57,7 @@ export function AuthProvider({ children }) {
 					uid: firebaseUser.uid,
 					name: userData.displayName,
 					email: userData.email,
+					photoURL: firebaseUser.photoURL,
 					role: userData.role,
 					cityId: userData.cityId || null,
 					center:
