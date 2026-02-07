@@ -91,7 +91,7 @@ export function useIncidents({
 	const historyStartDate = useMemo(() => getStartDate(period), [period]);
 
 	const resolvedCityId = cityId ?? userCityId;
-	console.log(dateRange);
+
 	/* =========================
 	   BUILD INCIDENT QUERY
 	========================= */
@@ -319,7 +319,7 @@ export function useIncidents({
 	}, [incidents, incidentTypes]);
 
 	const totalVisible = filteredByPermission.length;
-	console.log(filteredByPermission);
+
 	/* =========================	
 	   FINAL
 	========================= */
