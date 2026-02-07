@@ -58,17 +58,18 @@ export default function Incidents() {
 	/* =====================
 	   BUSCA SERVER-SIDE
 	===================== */
-	const { incidents, total, loading, updateIncidentStatus } = useIncidents({
-		status: filters.status,
-		category: filters.category,
-		type: filters.type,
-		isEmergency: filters.isEmergency,
-		startDate: filters.startDate,
-		endDate: filters.endDate,
-		page: paginationModel.page,
-		pageSize: paginationModel.pageSize,
-		cityId,
-	});
+	const { incidents, totalVisible, loading, updateIncidentStatus } =
+		useIncidents({
+			status: filters.status,
+			category: filters.category,
+			type: filters.type,
+			isEmergency: filters.isEmergency,
+			startDate: filters.startDate,
+			endDate: filters.endDate,
+			page: paginationModel.page,
+			pageSize: paginationModel.pageSize,
+			cityId,
+		});
 
 	/* =====================
 	   MODAL STATE
@@ -295,7 +296,7 @@ export default function Incidents() {
 					rows={incidents}
 					columns={columns}
 					getRowId={(row) => row.id}
-					rowCount={total}
+					rowCount={totalVisible}
 					loading={loading}
 					paginationMode="server"
 					paginationModel={paginationModel}

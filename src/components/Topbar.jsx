@@ -16,14 +16,14 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
+
 import { useTheme } from "@mui/material/styles";
 
 import logo from "../assets/logo1.png";
 
 /* Firebase imports */
 import { db } from "../services/firebase";
-import { collection, onSnapshot, query, where, doc } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Topbar({ handleDrawerOpen }) {
@@ -33,7 +33,8 @@ export default function Topbar({ handleDrawerOpen }) {
 	// AJUSTE 2 — marco temporal para não notificar histórico
 	const notificationsStartAt = useRef(Date.now());
 
-	const { cityId, loading, name, photoURL, incidentTypes } = useAuth();
+	const { cityId, loading, name, photoURL, incidentTypes, logout } =
+		useAuth();
 
 	// profile menu
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -41,7 +42,7 @@ export default function Topbar({ handleDrawerOpen }) {
 	const closeProfileMenu = () => setAnchorEl(null);
 
 	const handleLogout = async () => {
-		await signOut(auth);
+		await logout();
 		navigate("/");
 	};
 

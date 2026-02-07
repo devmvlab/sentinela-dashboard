@@ -35,7 +35,7 @@ export async function updateIncidentWithHistory({
 		toStatus: newStatus,
 		reason: reason || null,
 		createdBy: {
-			id: user.uid,
+			id: user.id,
 			name: user.name,
 		},
 		cityId,

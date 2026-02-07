@@ -15,6 +15,7 @@ import ProfileSettingsCard from "../components/settings/ProfileSettingsCard";
 import ProfileIncidentsTypeCard from "../components/settings/ProfileIncidentsTypeCard";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
+import { useNavigate } from "react-router-dom";
 
 import { auth, storage } from "../services/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -48,6 +49,7 @@ export default function SettingsPage() {
 		severity: "success",
 	});
 	const { updateIncidentTypes } = useAuth();
+	const navigate = useNavigate();
 
 	// =============================
 	// AUTH REATIVO
@@ -138,6 +140,8 @@ export default function SettingsPage() {
 				message: "Erro ao salvar configurações.",
 				severity: "error",
 			});
+		} finally {
+			navigate("/dashboard");
 		}
 	};
 

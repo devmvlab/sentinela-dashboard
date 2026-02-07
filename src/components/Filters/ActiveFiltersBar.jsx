@@ -18,7 +18,7 @@ export default function ActiveFiltersBar({ filters, onRemove }) {
 	if (activeFilters.length === 0) return null;
 
 	return (
-		<Box display="flex" gap={1} flexWrap="wrap" px={2}>
+		<Box display="flex" gap={1} flexWrap="wrap" px={1}>
 			{activeFilters.map(({ key, label }) => (
 				<Chip
 					key={key}

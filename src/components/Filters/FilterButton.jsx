@@ -12,7 +12,7 @@ export default function FilterButton({ activeCount, onClick }) {
 				variant="outlined"
 				startIcon={<FilterAltIcon />}
 				onClick={onClick}
-				size="small"
+				//size="small"
 			>
 				Filtro
 			</Button>

@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { auth, db } from "../services/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
 import { categories } from "../utils/categoriesList";
@@ -114,11 +114,26 @@ export function AuthProvider({ children }) {
 		}));
 	};
 
+	const logout = async () => {
+		try {
+			await signOut(auth);
+
+			// limpa estado local
+			setState({
+				loading: false,
+				isAuthenticated: false,
+			});
+		} catch (error) {
+			console.error("Erro ao fazer logout:", error);
+		}
+	};
+
 	return (
 		<AuthContext.Provider
 			value={{
 				...state,
 				updateIncidentTypes,
+				logout,
 			}}
 		>
 			{children}

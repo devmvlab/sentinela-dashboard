@@ -65,7 +65,7 @@ export function useIncidents({
 	cityId,
 	realtime = false,
 } = {}) {
-	const { cityId: userCityId } = useAuth();
+	const { cityId: userCityId, incidentTypes } = useAuth();
 
 	/* =========================
 	   STATE
@@ -91,7 +91,7 @@ export function useIncidents({
 	const historyStartDate = useMemo(() => getStartDate(period), [period]);
 
 	const resolvedCityId = cityId ?? userCityId;
-
+	console.log(dateRange);
 	/* =========================
 	   BUILD INCIDENT QUERY
 	========================= */
@@ -308,13 +308,26 @@ export function useIncidents({
 		);
 	}
 
-	/* =========================
+	const filteredByPermission = useMemo(() => {
+		if (!Array.isArray(incidentTypes) || incidentTypes.length === 0) {
+			return [];
+		}
+
+		return incidents.filter((inc) =>
+			incidentTypes.includes(inc.ocorrencia?.tipo),
+		);
+	}, [incidents, incidentTypes]);
+
+	const totalVisible = filteredByPermission.length;
+	console.log(filteredByPermission);
+	/* =========================	
 	   FINAL
 	========================= */
 	return {
-		incidents,
+		incidents: filteredByPermission,
 		incidentHistory,
 		total,
+		totalVisible,
 		loading: loadingIncidents || loadingHistory,
 		lastUpdate,
 		updateIncidentStatus,
