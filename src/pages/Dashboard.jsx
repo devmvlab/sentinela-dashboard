@@ -30,9 +30,10 @@ import { buildAverageResponseTimeData } from "../utils/utils";
 
 import { useIncidents } from "../hooks/useIncidents";
 import { useUsersByCity } from "../hooks/useUsersByCity";
-import { useSentinelaData } from "../utils/SentinelaDataContext";
+
 import CustomCard from "../components/CustomCard";
 import AverageResponseTimeChart from "../components/AverageResponseTimeChart";
+import { useAuth } from "../hooks/useAuth";
 
 /* =======================
    FAIXAS DE HORÁRIO
@@ -95,7 +96,7 @@ export default function Dashboard() {
 		);
 	}, [incidents, incidentTypes]);
 
-	const { userCenter } = useSentinelaData();
+	const { center } = useAuth();
 	const { users } = useUsersByCity();
 
 	/* =======================
@@ -149,8 +150,8 @@ export default function Dashboard() {
 		} else {
 			setMapState({
 				center: {
-					lat: userCenter?.lat,
-					lng: userCenter?.lng,
+					lat: center?.lat,
+					lng: center?.lng,
 				},
 				zoom: 12,
 			});
@@ -382,7 +383,7 @@ export default function Dashboard() {
 							<SafetyCard
 								incidents={filteredIncidents}
 								period={period}
-								userCenter={userCenter}
+								userCenter={center}
 							/>
 						</Grid>
 

@@ -12,7 +12,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 import ChartEmptyState from "./ChartEmptyState";
-import { typesList } from "../utils/typesList";
+import { statusList } from "../utils/statusList";
 
 export default function StatusChart({ data }) {
 	const theme = useTheme();
@@ -20,7 +20,7 @@ export default function StatusChart({ data }) {
 
 	const translatedData = data.map((item) => ({
 		...item,
-		statusLabel: typesList[item.status]?.label || item.status,
+		statusLabel: statusList[item.status]?.label || item.status,
 	}));
 
 	const hasData = data.length > 0;

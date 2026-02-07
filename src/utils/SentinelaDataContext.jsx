@@ -28,16 +28,8 @@ export function SentinelaDataProvider({ children }) {
 	const [incidents, setIncidents] = useState([]);
 	const [loading, setLoading] = useState(true);
 
-	const [lastUpdate, setLastUpdate] = useState(null);
 	const [incidentTypes, setIncidentTypes] = useState([]);
 
-	function updateIncidentStatus(id, newStatus) {
-		setIncidents((prev) =>
-			prev.map((inc) =>
-				inc.id === id ? { ...inc, status: newStatus } : inc,
-			),
-		);
-	}
 	useEffect(() => {
 		if (!user?.uid) return;
 
@@ -75,7 +67,6 @@ export function SentinelaDataProvider({ children }) {
 					setUserCity(null);
 					setUserCenter(null);
 					setIncidents([]);
-					setLastUpdate(null);
 					setLoading(false);
 
 					// encerra listener antigo
@@ -166,7 +157,6 @@ export function SentinelaDataProvider({ children }) {
 						}));
 
 						setIncidents(data);
-						setLastUpdate(new Date());
 						setLoading(false);
 					});
 				} catch (error) {
@@ -194,12 +184,9 @@ export function SentinelaDataProvider({ children }) {
 				user,
 				userCity,
 				userCenter,
-				incidents,
 				incidentTypes,
 				setIncidentTypes,
 				loading,
-				lastUpdate,
-				updateIncidentStatus,
 			}}
 		>
 			{children}

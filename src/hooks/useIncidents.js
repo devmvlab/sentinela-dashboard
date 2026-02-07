@@ -13,7 +13,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../services/firebase";
-import { useSentinelaData } from "../utils/SentinelaDataContext";
+import { useAuth } from "./useAuth";
 
 /* =========================
    HELPERS
@@ -65,7 +65,7 @@ export function useIncidents({
 	cityId,
 	realtime = false,
 } = {}) {
-	const { user } = useSentinelaData();
+	const { cityId: userCityId } = useAuth();
 
 	/* =========================
 	   STATE
@@ -90,7 +90,7 @@ export function useIncidents({
 
 	const historyStartDate = useMemo(() => getStartDate(period), [period]);
 
-	const resolvedCityId = cityId ?? user?.cityId;
+	const resolvedCityId = cityId ?? userCityId;
 
 	/* =========================
 	   BUILD INCIDENT QUERY
@@ -300,6 +300,14 @@ export function useIncidents({
 		realtime,
 	]);
 
+	function updateIncidentStatus(id, newStatus) {
+		setIncidents((prev) =>
+			prev.map((inc) =>
+				inc.id === id ? { ...inc, status: newStatus } : inc,
+			),
+		);
+	}
+
 	/* =========================
 	   FINAL
 	========================= */
@@ -309,5 +317,6 @@ export function useIncidents({
 		total,
 		loading: loadingIncidents || loadingHistory,
 		lastUpdate,
+		updateIncidentStatus,
 	};
 }

@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { typesList } from "./typesList";
+import { statusList } from "./statusList";
 
 export async function exportIncidentsToPdf(rows) {
 	if (!rows || rows.length === 0) {
@@ -37,7 +37,7 @@ export async function exportIncidentsToPdf(rows) {
 	/* ================= DADOS ================= */
 	const tableBody = rows.map((item) => [
 		item.id,
-		typesList[item.status]?.label || item.status,
+		statusList[item.status]?.label || item.status,
 		item.ocorrencia?.categoria || "",
 		item.ocorrencia?.tipo || "",
 		item.desc || "",

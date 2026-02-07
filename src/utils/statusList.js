@@ -1,4 +1,4 @@
-export const typesList = {
+export const statusList = {
 	pending_review: {
 		id: "pending_review",
 		icon: "clock-outline",

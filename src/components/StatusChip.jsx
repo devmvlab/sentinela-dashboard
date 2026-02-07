@@ -6,7 +6,7 @@ import {
 	Close as CloseIcon,
 } from "@mui/icons-material";
 
-import { typesList } from "../utils/typesList";
+import { statusList } from "../utils/statusList";
 
 export default function StatusChip({ status, sx }) {
 	const theme = useTheme();
@@ -37,7 +37,7 @@ export default function StatusChip({ status, sx }) {
 	return (
 		<Chip
 			icon={getStatusIcon(normalizedStatus)}
-			label={typesList[normalizedStatus]?.label || normalizedStatus}
+			label={statusList[normalizedStatus]?.label || normalizedStatus}
 			size="small"
 			variant="outlined"
 			sx={{

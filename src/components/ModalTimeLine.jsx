@@ -21,7 +21,7 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../services/firebase";
-import { typesList } from "../utils/typesList";
+import { statusList } from "../utils/statusList";
 
 /* =============================
    ICONES POR STATUS
@@ -44,7 +44,7 @@ function getStatusIcon(status) {
    LABELS DE STATUS
 ============================= */
 function formatStatus(status) {
-	return typesList[status]?.label || status;
+	return statusList[status]?.label || status;
 }
 
 /* =============================

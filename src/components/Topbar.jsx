@@ -27,7 +27,7 @@ import logo from "../assets/logo1.png";
 /* Firebase imports */
 import { db } from "../services/firebase";
 import { collection, onSnapshot, query, where, doc } from "firebase/firestore";
-import { useSentinelaData } from "../utils/SentinelaDataContext";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Topbar({ handleDrawerOpen }) {
 	const theme = useTheme();
@@ -42,7 +42,7 @@ export default function Topbar({ handleDrawerOpen }) {
 	// AJUSTE 2 — marco temporal para não notificar histórico
 	const notificationsStartAt = useRef(Date.now());
 
-	const { userCity, loading } = useSentinelaData();
+	const { cityId, loading, email } = useAuth();
 
 	// profile menu
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -174,11 +174,11 @@ export default function Topbar({ handleDrawerOpen }) {
 	// listener realtime das ocorrências
 	useEffect(() => {
 		if (loading) return;
-		if (!userCity) return;
+		if (!cityId) return;
 
 		const q = query(
 			collection(db, "incidents"),
-			where("geoloc.cityId", "==", userCity),
+			where("geoloc.cityId", "==", cityId),
 		);
 
 		const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -218,7 +218,7 @@ export default function Topbar({ handleDrawerOpen }) {
 		});
 
 		return () => unsubscribe();
-	}, [userCity, loading, incidentTypes, configSyncing]);
+	}, [cityId, loading, incidentTypes, configSyncing]);
 
 	// fechar dropdown ao clicar fora
 	useEffect(() => {

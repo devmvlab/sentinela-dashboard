@@ -1,6 +1,6 @@
 import { Card, Typography, Box, LinearProgress } from "@mui/material";
 import ShieldIcon from "@mui/icons-material/Shield";
-import { useSafetyLevel } from "../utils/useSafetyLevel";
+import { useSafetyLevel } from "../hooks/useSafetyLevel";
 
 export default function SafetyCard({ incidents, userCenter, period }) {
 	const { data, loading } = useSafetyLevel({

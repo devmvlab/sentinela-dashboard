@@ -13,3 +13,26 @@ export const typesOptions = categories.flatMap((c) =>
 		isEmergency: Boolean(item.isEmergency),
 	})),
 );
+
+export const buildIncidentCategories = (categories, incidentTypes) => {
+	if (!Array.isArray(incidentTypes) || incidentTypes.length === 0) {
+		return [];
+	}
+
+	return categories
+		.map((category) => {
+			const allowedItems = category.items.filter((item) =>
+				incidentTypes.includes(item.title),
+			);
+
+			if (allowedItems.length === 0) {
+				return null;
+			}
+
+			return {
+				...category,
+				items: allowedItems,
+			};
+		})
+		.filter(Boolean);
+};

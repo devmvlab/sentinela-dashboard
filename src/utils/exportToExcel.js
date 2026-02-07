@@ -1,6 +1,6 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { typesList } from "./typesList";
+import { statusList } from "./statusList";
 
 export async function exportIncidentsToExcel(rows) {
 	if (!rows || rows.length === 0) {
@@ -62,7 +62,7 @@ export async function exportIncidentsToExcel(rows) {
 	rows.forEach((item) => {
 		worksheet.getRow(rowIndex).values = [
 			item.id,
-			typesList[item.status]?.label || item.status,
+			statusList[item.status]?.label || item.status,
 			item.ocorrencia?.categoria || "",
 			item.ocorrencia?.tipo || "",
 			item.desc,

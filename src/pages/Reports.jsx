@@ -2,7 +2,7 @@ import { Box, Typography, Paper } from "@mui/material";
 import Filters from "../components/Filters";
 import useIncidentFilters from "../utils/useIncidentFilters";
 import { useState } from "react";
-import { useSentinelaData } from "../utils/SentinelaDataContext";
+import { useIncidents } from "../hooks/useIncidents";
 
 import Button from "@mui/material/Button";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -18,7 +18,7 @@ export default function Settings() {
 	const [endDate, setEndDate] = useState("");
 	const [search, setSearch] = useState("");
 
-	const { incidents } = useSentinelaData();
+	const { incidents } = useIncidents();
 
 	function clearFilters() {
 		setStatusFilter("all");

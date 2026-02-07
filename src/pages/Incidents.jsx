@@ -19,6 +19,7 @@ import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import { useSentinelaData } from "../utils/SentinelaDataContext";
 import { updateIncidentWithHistory } from "../services/incidentStatus";
 import { useIncidents } from "../hooks/useIncidents";
+import { useAuth } from "../hooks/useAuth";
 
 /* ======================================================
    COMPONENT
@@ -28,7 +29,11 @@ export default function Incidents() {
 	const location = useLocation();
 	const navigate = useNavigate();
 
-	const { user, incidentTypes } = useSentinelaData();
+	const { name } = useAuth();
+
+	console.log(name);
+
+	//const { user, incidentTypes } = useSentinelaData();
 
 	/* =====================
 	   FILTROS (SERVER)
