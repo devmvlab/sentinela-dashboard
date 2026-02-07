@@ -6,6 +6,7 @@ export const statusList = {
 		label: "Em análise",
 		description:
 			"Ocorrência recebida e aguardando avaliação da prefeitura.",
+		buttonLabel: "",
 	},
 	cancelled: {
 		id: "cancelled",
@@ -14,6 +15,7 @@ export const statusList = {
 		label: "Cancelada",
 		description:
 			"Ocorrência analisada e descartada pela prefeitura por inconsistência, duplicidade ou fora da competência do município.",
+		buttonLabel: "Cancelar",
 	},
 	accepted: {
 		id: "accepted",
@@ -22,6 +24,7 @@ export const statusList = {
 		label: "Aceita",
 		description:
 			"Ocorrência validada e aprovada para atendimento pelo município.",
+		buttonLabel: "Aceitar",
 	},
 	in_progress: {
 		id: "in_progress",
@@ -30,6 +33,8 @@ export const statusList = {
 		label: "Em andamento",
 		description:
 			"Equipe ou setor responsável acionado e trabalhando na ocorrência.",
+
+		buttonLabel: "Em andamento",
 	},
 	resolved: {
 		id: "resolved",
@@ -38,5 +43,37 @@ export const statusList = {
 		label: "Resolvida",
 		description:
 			"Problema solucionado com sucesso e finalizado pelo setor responsável.",
+		buttonLabel: "Resolver",
 	},
+};
+
+export const statusTransitions = {
+	pending_review: [
+		{
+			to: "accepted",
+			type: "observation",
+		},
+		{
+			to: "cancelled",
+			type: "cancel",
+		},
+	],
+
+	accepted: [
+		{
+			to: "in_progress",
+			type: "observation",
+		},
+		{
+			to: "cancelled",
+			type: "cancel",
+		},
+	],
+
+	in_progress: [
+		{
+			to: "resolved",
+			type: "observation",
+		},
+	],
 };
