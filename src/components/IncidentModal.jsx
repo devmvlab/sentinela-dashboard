@@ -163,7 +163,12 @@ const IncidentModal = memo(function IncidentModal({
 				{/* STEPPER */}
 				<Stepper
 					alternativeLabel
-					sx={{ my: 3 }}
+					sx={{
+						my: 3,
+						p: 2,
+						background: theme.palette.background.default,
+						borderRadius: "8px",
+					}}
 					connector={<CustomStepConnector />}
 					activeStep={activeStep === -1 ? 0 : activeStep}
 				>
@@ -219,7 +224,7 @@ const IncidentModal = memo(function IncidentModal({
 				{/* ABA DETALHES */}
 				{tab === 0 && (
 					<>
-						<Box display="flex" gap={4} alignItems="center">
+						<Box display="flex" gap={3} alignItems="center">
 							{/* ================= IMAGEM ================= */}
 							{incident.imageUrl ? (
 								<Box
@@ -229,7 +234,7 @@ const IncidentModal = memo(function IncidentModal({
 									sx={{
 										width: 300,
 										height: 300,
-										borderRadius: 2,
+										borderRadius: "8px",
 										objectFit: "cover",
 										flexShrink: 0,
 									}}
@@ -245,7 +250,7 @@ const IncidentModal = memo(function IncidentModal({
 									justifyContent="center"
 									flexDirection="column"
 									bgcolor="grey.200"
-									borderRadius={2}
+									borderRadius={"8px"}
 									color="text.secondary"
 									flexShrink={0}
 								>
@@ -264,6 +269,13 @@ const IncidentModal = memo(function IncidentModal({
 								gridTemplateColumns="repeat(2, minmax(0, 1fr))"
 								gap={2}
 								width="100%"
+								sx={{
+									background:
+										theme.palette.background.default,
+									borderRadius: "8px",
+									padding: 1,
+									paddingLeft: 2,
+								}}
 							>
 								<InfoItem
 									label="Categoria"

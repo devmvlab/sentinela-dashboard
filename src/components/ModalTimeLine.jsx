@@ -100,6 +100,8 @@ export default function IncidentTimeline({ incidentId }) {
 					flex: 0,
 					padding: 0,
 				},
+				background: theme.palette.background.default,
+				borderRadius: "8px",
 			}}
 		>
 			{history.map((item, index) => (

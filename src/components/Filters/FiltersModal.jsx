@@ -11,8 +11,9 @@ import {
 	TextField,
 	Box,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { categoriesOptions, typesOptions } from "../../utils/categoriesHelpers";
+import { useEffect, useState, useMemo } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { categories } from "../../utils/categoriesList";
 
 export default function FiltersModal({
 	open,
@@ -21,6 +22,8 @@ export default function FiltersModal({
 	onApply,
 }) {
 	const [localFilters, setLocalFilters] = useState(initialValues);
+
+	const { incidentCategories, incidentTypes } = useAuth();
 
 	useEffect(() => {
 		setLocalFilters(initialValues);
@@ -35,9 +38,24 @@ export default function FiltersModal({
 		}));
 	}
 
-	const filteredTypes = localFilters.category
-		? typesOptions.filter((t) => t.category === localFilters.category)
-		: typesOptions;
+	const typesByCategory = useMemo(() => {
+		const map = {};
+
+		categories.forEach((category) => {
+			map[category.title] = category.items
+				.map((item) => item.title)
+				// respeita permissões do usuário
+				.filter((title) => incidentTypes.includes(title));
+		});
+
+		return map;
+	}, [incidentTypes]);
+
+	const filteredTypes = useMemo(() => {
+		if (!localFilters.category) return incidentTypes;
+
+		return typesByCategory[localFilters.category] || [];
+	}, [localFilters.category, incidentTypes, typesByCategory]);
 
 	return (
 		<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -100,28 +118,37 @@ export default function FiltersModal({
 								}
 							>
 								{/* <MenuItem value="">Todas</MenuItem> */}
-								{categoriesOptions.map((c) => (
-									<MenuItem key={c.value} value={c.value}>
-										{c.label}
+								{incidentCategories.map((c) => (
+									<MenuItem key={c.title} value={c.title}>
+										{c.title}
 									</MenuItem>
 								))}
 							</Select>
 						</FormControl>
 
 						{/* TIPO */}
-						<FormControl size="small" fullWidth>
+						<FormControl
+							size="small"
+							fullWidth
+							//disabled={!localFilters.category}
+						>
 							<InputLabel>Tipo</InputLabel>
 							<Select
 								label="Tipo"
 								value={localFilters.type}
 								onChange={(e) => update("type", e.target.value)}
 							>
-								{/* <MenuItem value="">Todos</MenuItem> */}
-								{filteredTypes.map((t) => (
-									<MenuItem key={t.value} value={t.value}>
-										{t.label}
+								{!localFilters.category ? (
+									<MenuItem disabled value="">
+										Selecione uma categoria primeiro
 									</MenuItem>
-								))}
+								) : (
+									filteredTypes.map((type) => (
+										<MenuItem key={type} value={type}>
+											{type}
+										</MenuItem>
+									))
+								)}
 							</Select>
 						</FormControl>
 					</Box>
