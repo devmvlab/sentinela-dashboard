@@ -31,21 +31,67 @@ function getDayRange(dateString) {
 	};
 }
 
-function getStartDate(period) {
-	const now = new Date();
+function buildCommonConstraints({
+	cityId,
+	status,
+	category,
+	type,
+	isEmergency,
+	dateRange,
+}) {
+	const constraints = [
+		where("geoloc.cityId", "==", cityId),
+		orderBy("createdAt", "desc"),
+	];
 
-	if (period === "today") {
-		now.setHours(0, 0, 0, 0);
-		return now;
+	if (status && status !== "all") {
+		constraints.push(where("status", "==", status));
 	}
 
-	const daysMap = {
-		"7d": 7,
-		"30d": 30,
-	};
+	if (category) {
+		constraints.push(where("ocorrencia.categoria", "==", category));
+	}
 
-	const days = daysMap[period] || 7;
-	return new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+	if (type) {
+		constraints.push(where("ocorrencia.tipo", "==", type));
+	}
+
+	if (isEmergency === "true") {
+		constraints.push(where("isEmergency", "==", true));
+	}
+
+	if (isEmergency === "false") {
+		constraints.push(where("isEmergency", "==", false));
+	}
+
+	if (dateRange?.start) {
+		constraints.push(where("createdAt", ">=", dateRange.start));
+	}
+
+	if (dateRange?.end) {
+		constraints.push(where("createdAt", "<=", dateRange.end));
+	}
+
+	return constraints;
+}
+
+function buildHistoryConstraints({ cityId, dateRange }) {
+	const constraints = [
+		where("cityId", "==", cityId),
+		where("fromStatus", "in", ["accepted", "in_progress"]), //talvez refatorar no futuro
+		where("toStatus", "in", ["in_progress", "resolved"]), //talvez refatorar no futuro
+		orderBy("createdAt", "desc"),
+	];
+
+	if (dateRange?.start) {
+		constraints.push(where("createdAt", ">=", dateRange.start));
+	}
+
+	if (dateRange?.end) {
+		constraints.push(where("createdAt", "<=", dateRange.end));
+	}
+
+	return constraints;
 }
 
 /* =========================
@@ -78,6 +124,8 @@ export function useIncidents({
 
 	const pageCursors = useRef({});
 
+	const resolvedCityId = cityId ?? userCityId;
+
 	const dateRange = useMemo(() => {
 		if (!startDate && !endDate) return null;
 
@@ -87,51 +135,18 @@ export function useIncidents({
 		};
 	}, [startDate, endDate]);
 
-	const historyStartDate = useMemo(() => getStartDate(period), [period]);
-
-	const resolvedCityId = cityId ?? userCityId;
-
 	/* =========================
 	   BUILD INCIDENT QUERY
 	========================= */
 	const buildIncidentQuery = () => {
-		let constraints = [
-			where("geoloc.cityId", "==", resolvedCityId),
-			orderBy("createdAt", "desc"),
-		];
-
-		/* STATUS */
-		if (status && status !== "all") {
-			constraints.push(where("status", "==", status));
-		}
-
-		/* CATEGORIA */
-		if (category) {
-			constraints.push(where("ocorrencia.categoria", "==", category));
-		}
-
-		/* TIPO */
-		if (type) {
-			constraints.push(where("ocorrencia.tipo", "==", type));
-		}
-
-		/* EMERGÊNCIA */
-		if (isEmergency === "true") {
-			constraints.push(where("isEmergency", "==", true));
-		}
-
-		if (isEmergency === "false") {
-			constraints.push(where("isEmergency", "==", false));
-		}
-
-		/* DATA (period como fallback) */
-		if (dateRange?.start) {
-			constraints.push(where("createdAt", ">=", dateRange.start));
-		}
-
-		if (dateRange?.end) {
-			constraints.push(where("createdAt", "<=", dateRange.end));
-		}
+		const constraints = buildCommonConstraints({
+			cityId: resolvedCityId,
+			status,
+			category,
+			type,
+			isEmergency,
+			dateRange,
+		});
 
 		return query(collection(db, "incidents"), ...constraints);
 	};
@@ -156,10 +171,7 @@ export function useIncidents({
 		isEmergency,
 		startDate,
 		endDate,
-		page,
-		pageSize,
 		resolvedCityId,
-		realtime,
 	]);
 
 	/* =========================
@@ -245,19 +257,19 @@ export function useIncidents({
 	]);
 
 	/* =========================
-	   INCIDENT HISTORY (INALTERADO)
+	   INCIDENT HISTORY (ALINHADO)
 	========================= */
 	useEffect(() => {
 		if (!resolvedCityId) return;
 
 		setLoadingHistory(true);
 
-		const q = query(
-			collection(db, "incident_history"),
-			where("cityId", "==", resolvedCityId),
-			where("createdAt", ">=", historyStartDate),
-			orderBy("createdAt", "desc"),
-		);
+		const constraints = buildHistoryConstraints({
+			cityId: resolvedCityId,
+			dateRange,
+		});
+
+		const q = query(collection(db, "incident_history"), ...constraints);
 
 		if (realtime) {
 			const unsub = onSnapshot(q, (snap) => {
@@ -282,19 +294,11 @@ export function useIncidents({
 			setIncidentHistory(docs);
 			setLoadingHistory(false);
 		});
-	}, [
-		status,
-		category,
-		type,
-		isEmergency,
-		startDate,
-		endDate,
-		page,
-		pageSize,
-		resolvedCityId,
-		realtime,
-	]);
+	}, [startDate, endDate, resolvedCityId, realtime]);
 
+	/* =========================
+	   LOCAL UPDATE
+	========================= */
 	function updateIncidentStatus(id, newStatus) {
 		setIncidents((prev) =>
 			prev.map((inc) =>
@@ -303,6 +307,9 @@ export function useIncidents({
 		);
 	}
 
+	/* =========================
+	   PERMISSION FILTER
+	========================= */
 	const filteredByPermission = useMemo(() => {
 		if (!Array.isArray(incidentTypes) || incidentTypes.length === 0) {
 			return [];
@@ -315,7 +322,7 @@ export function useIncidents({
 
 	const totalVisible = filteredByPermission.length;
 
-	/* =========================	
+	/* =========================
 	   FINAL
 	========================= */
 	return {

@@ -320,7 +320,9 @@ const IncidentModal = memo(function IncidentModal({
 								m: 1,
 							}}
 						>
-							Alterar status para:
+							{availableActions.length
+								? "Alterar status para:"
+								: ""}
 							{availableActions.map((action) => {
 								const meta = statusList[action.to];
 

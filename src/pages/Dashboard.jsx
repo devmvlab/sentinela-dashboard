@@ -74,8 +74,8 @@ export default function Dashboard() {
 		category: "",
 		type: "",
 		isEmergency: "",
-		startDate: "",
-		endDate: "",
+		startDate: new Date().toISOString().slice(0, 10),
+		endDate: new Date().toISOString().slice(0, 10),
 	});
 	const [openFilters, setOpenFilters] = useState(false);
 

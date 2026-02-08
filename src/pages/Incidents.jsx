@@ -45,8 +45,8 @@ export default function Incidents() {
 		category: "",
 		type: "",
 		isEmergency: "",
-		startDate: "",
-		endDate: "",
+		startDate: new Date().toISOString().slice(0, 10),
+		endDate: new Date().toISOString().slice(0, 10),
 	});
 
 	const [openFilters, setOpenFilters] = useState(false);
@@ -312,6 +312,9 @@ export default function Incidents() {
 					onRowClick={(params) => {
 						setCurrentIncident(params.row);
 						setOpenModal(true);
+					}}
+					localeText={{
+						noRowsLabel: "Nenhum registro encontrado",
 					}}
 				/>
 

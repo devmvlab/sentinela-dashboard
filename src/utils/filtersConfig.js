@@ -46,12 +46,14 @@ export const filtersConfig = {
 	startDate: {
 		label: "De",
 		isActive: Boolean,
-		formatValue: (v) => new Date(v).toLocaleDateString("pt-BR"),
+		formatValue: (v) =>
+			new Date(`${v}T00:00:00`).toLocaleDateString("pt-BR"),
 	},
 
 	endDate: {
 		label: "Até",
 		isActive: Boolean,
-		formatValue: (v) => new Date(v).toLocaleDateString("pt-BR"),
+		formatValue: (v) =>
+			new Date(`${v}T00:00:00`).toLocaleDateString("pt-BR"),
 	},
 };
