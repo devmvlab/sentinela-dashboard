@@ -14,6 +14,7 @@ import {
 	Tabs,
 	Tab,
 } from "@mui/material";
+
 import {
 	CheckCircle as CheckCircleIcon,
 	QueryBuilder as QueryBuilderIcon,
@@ -23,7 +24,7 @@ import {
 	ReportGmailerrorred,
 } from "@mui/icons-material";
 import StepConnector from "@mui/material/StepConnector";
-import { styled, useTheme } from "@mui/material/styles";
+import { styled, useTheme, darken } from "@mui/material/styles";
 import { memo, useState, useRef } from "react";
 
 import IncidentTimeline from "../components/ModalTimeLine";
@@ -116,7 +117,9 @@ const IncidentModal = memo(function IncidentModal({
 			<Typography variant="caption" color="text.secondary">
 				{label}
 			</Typography>
-			<Typography variant="body2">{value || "-"}</Typography>
+			<Typography variant="body2" component={"div"}>
+				{value || "-"}
+			</Typography>
 		</Box>
 	);
 
@@ -129,9 +132,14 @@ const IncidentModal = memo(function IncidentModal({
 					justifyContent="space-between"
 					alignItems="center"
 				>
-					<Typography fontWeight={700}>
-						Ocorrência #{incident.id}
-					</Typography>
+					<Box
+						display="flex"
+						justifyContent="flex-start"
+						alignItems="center"
+					>
+						<Typography fontWeight={700}>Ocorrência:</Typography>
+						<Typography sx={{ ml: 1 }}>{incident.id}</Typography>
+					</Box>
 					<IconButton onClick={handleClose}>
 						<CloseIcon />
 					</IconButton>
@@ -307,10 +315,12 @@ const IncidentModal = memo(function IncidentModal({
 								flexGrow: 1,
 								display: "flex",
 								justifyContent: "center",
+								alignItems: "center",
 								gap: 2,
 								m: 1,
 							}}
 						>
+							Alterar status para:
 							{availableActions.map((action) => {
 								const meta = statusList[action.to];
 
@@ -323,9 +333,20 @@ const IncidentModal = memo(function IncidentModal({
 												action.type === "cancel"
 													? theme.palette.error.main
 													: meta.color,
+
 											color: theme.palette.getContrastText(
 												meta.color,
 											),
+
+											"&:hover": {
+												backgroundColor: darken(
+													action.type === "cancel"
+														? theme.palette.error
+																.main
+														: meta.color,
+													0.15, // intensidade (0.1 a 0.2 é o sweet spot)
+												),
+											},
 										}}
 										onClick={() => {
 											setTextReasonType(action.type);
@@ -333,13 +354,12 @@ const IncidentModal = memo(function IncidentModal({
 											setActionOpen(true);
 										}}
 									>
-										{meta.buttonLabel}
+										{meta.label}
 									</Button>
 								);
 							})}
 						</Box>
 					)}
-
 					{actionOpen && (
 						<>
 							<Button
@@ -361,6 +381,7 @@ const IncidentModal = memo(function IncidentModal({
 										? "error"
 										: "primary"
 								}
+								sx={{ mr: 2 }}
 								disabled={!hasReason}
 								onClick={() => {
 									if (textReasonType === "cancel") {

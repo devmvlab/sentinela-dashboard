@@ -243,7 +243,6 @@ export default function SettingsPage() {
 					</Button>
 					<Button
 						variant="contained"
-						size="large"
 						sx={{ ml: 1 }}
 						onClick={saveUserSettings}
 					>

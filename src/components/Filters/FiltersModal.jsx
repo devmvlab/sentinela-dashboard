@@ -10,7 +10,10 @@ import {
 	MenuItem,
 	TextField,
 	Box,
+	Typography,
+	IconButton,
 } from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { categories } from "../../utils/categoriesList";
@@ -59,7 +62,19 @@ export default function FiltersModal({
 
 	return (
 		<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-			<DialogTitle>Filtros</DialogTitle>
+			<DialogTitle>
+				<Box
+					display="flex"
+					justifyContent="space-between"
+					alignItems="center"
+				>
+					<Typography fontWeight={700}>Filtros</Typography>
+
+					<IconButton onClick={onClose}>
+						<CloseIcon />
+					</IconButton>
+				</Box>
+			</DialogTitle>
 
 			<DialogContent>
 				<Box display="flex" flexDirection="column" gap={2} mt={1}>
@@ -196,17 +211,19 @@ export default function FiltersModal({
 				</Box>
 			</DialogContent>
 
-			<DialogActions>
-				<Button onClick={onClose}>Cancelar</Button>
+			<DialogActions sx={{ mb: 1, mx: 2 }}>
+				<Button size="small" onClick={onClose}>
+					Cancelar
+				</Button>
 				<Button
 					variant="contained"
 					onClick={() => {
 						onApply(localFilters);
 						onClose();
 					}}
-					sx={{ mr: 2 }}
+					size="small"
 				>
-					Aplicar filtros
+					Filtrar
 				</Button>
 			</DialogActions>
 		</Dialog>

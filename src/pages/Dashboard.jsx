@@ -13,7 +13,7 @@ import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import GroupIcon from "@mui/icons-material/Group";
-import MapIcon from "@mui/icons-material/Map";
+import RoomIcon from "@mui/icons-material/Room";
 
 import CategoryChart from "../components/CategoryChart";
 import StatusChart from "../components/StatusChart";
@@ -239,7 +239,7 @@ export default function Dashboard() {
 							Resumo
 						</ToggleButton>
 						<ToggleButton size="small" value="map">
-							<MapIcon sx={{ mr: 1 }} />
+							<RoomIcon sx={{ mr: 1 }} />
 							Mapa
 						</ToggleButton>
 					</ToggleButtonGroup>

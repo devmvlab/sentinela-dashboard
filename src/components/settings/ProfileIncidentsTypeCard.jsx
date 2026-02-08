@@ -48,7 +48,7 @@ export default function ProfileIncidentsTypeCard({
 				}}
 			>
 				<Typography variant="h6" fontWeight={700}>
-					Notificações
+					Gerenciar perfil
 				</Typography>
 			</AccordionSummary>
 

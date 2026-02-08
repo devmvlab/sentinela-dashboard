@@ -5,16 +5,11 @@ import { sentinelaTheme } from "./theme/theme";
 import Root from "./root.jsx";
 import { AuthProvider } from "./contexts/AuthProvider.jsx";
 
-//import { SentinelaDataProvider } from "./utils/SentinelaDataContext";
-
 ReactDOM.createRoot(document.getElementById("root")).render(
 	<ThemeProvider theme={sentinelaTheme}>
 		<CssBaseline />
-
-		{/* <SentinelaDataProvider> */}
 		<AuthProvider>
 			<Root />
 		</AuthProvider>
-		{/* </SentinelaDataProvider> */}
 	</ThemeProvider>,
 );
