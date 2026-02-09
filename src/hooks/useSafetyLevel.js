@@ -6,35 +6,14 @@ const normalize = (value, max) =>
 const IGNORED_STATUS = ["cancelled", "pending_review"];
 const RESOLVED_STATUS = ["resolved"];
 
-export function useSafetyLevel({ incidents, userCenter, period = "7d" }) {
+export function useSafetyLevel({ incidents, userCenter }) {
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(true);
-
-	const getDateRange = () => {
-		const now = new Date();
-
-		switch (period) {
-			case "day":
-				return new Date(
-					now.getFullYear(),
-					now.getMonth(),
-					now.getDate(),
-				);
-			case "7d":
-				return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-			case "month":
-				return new Date(now.getFullYear(), now.getMonth(), 1);
-			default:
-				return null;
-		}
-	};
 
 	useEffect(() => {
 		if (!incidents || !userCenter) return;
 
 		setLoading(true);
-
-		const startDate = getDateRange();
 
 		let total = 0;
 		let resolved = 0;
@@ -42,12 +21,6 @@ export function useSafetyLevel({ incidents, userCenter, period = "7d" }) {
 
 		incidents.forEach((item) => {
 			if (!item.createdAt) return;
-
-			const createdAt = item.createdAt.toDate
-				? item.createdAt.toDate()
-				: new Date(item.createdAt);
-
-			if (createdAt < startDate) return;
 
 			const status = item.status?.toLowerCase();
 			if (!status || IGNORED_STATUS.includes(status)) return;
@@ -101,7 +74,7 @@ export function useSafetyLevel({ incidents, userCenter, period = "7d" }) {
 		});
 
 		setLoading(false);
-	}, [incidents, userCenter, period]);
+	}, [incidents, userCenter]);
 
 	return { data, loading };
 }

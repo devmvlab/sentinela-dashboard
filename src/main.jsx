@@ -3,15 +3,13 @@ import ReactDOM from "react-dom/client";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { sentinelaTheme } from "./theme/theme";
 import Root from "./root.jsx";
-
-import { SentinelaDataProvider } from "./utils/SentinelaDataContext";
+import { AuthProvider } from "./contexts/AuthProvider.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
 	<ThemeProvider theme={sentinelaTheme}>
 		<CssBaseline />
-
-		<SentinelaDataProvider>
+		<AuthProvider>
 			<Root />
-		</SentinelaDataProvider>
-	</ThemeProvider>
+		</AuthProvider>
+	</ThemeProvider>,
 );

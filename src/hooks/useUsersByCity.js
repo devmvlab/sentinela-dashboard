@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../services/firebase";
-import { useSentinelaData } from "../utils/SentinelaDataContext";
+import { useAuth } from "./useAuth";
 
 export function useUsersByCity() {
 	const [users, setUsers] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
-	const { user } = useSentinelaData();
-	const cityId = user?.cityId;
+	const { cityId } = useAuth();
 
 	useEffect(() => {
 		if (!cityId) {

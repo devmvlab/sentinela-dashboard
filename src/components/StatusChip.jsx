@@ -1,18 +1,12 @@
 import Chip from "@mui/material/Chip";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, alpha } from "@mui/material/styles";
 import {
 	CheckCircle as CheckCircleIcon,
 	QueryBuilder as QueryBuilderIcon,
 	Close as CloseIcon,
 } from "@mui/icons-material";
 
-export const statusLabels = {
-	accepted: "Aceita",
-	pending_review: "Em análise",
-	in_progress: "Em andamento",
-	resolved: "Resolvida",
-	cancelled: "Cancelada",
-};
+import { statusList } from "../utils/statusList";
 
 export default function StatusChip({ status, sx }) {
 	const theme = useTheme();
@@ -43,7 +37,7 @@ export default function StatusChip({ status, sx }) {
 	return (
 		<Chip
 			icon={getStatusIcon(normalizedStatus)}
-			label={statusLabels[normalizedStatus] || normalizedStatus}
+			label={statusList[normalizedStatus]?.label || normalizedStatus}
 			size="small"
 			variant="outlined"
 			sx={{
@@ -53,6 +47,7 @@ export default function StatusChip({ status, sx }) {
 				borderWidth: 2,
 				borderColor: statusColors[normalizedStatus],
 				color: statusColors[normalizedStatus],
+				backgroundColor: alpha(statusColors[normalizedStatus], 0.2),
 				"& .MuiChip-icon": {
 					color: "inherit",
 				},

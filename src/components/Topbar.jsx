@@ -12,37 +12,29 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
-import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
-import { auth } from "../services/firebase";
+
 import { useTheme } from "@mui/material/styles";
-import { onAuthStateChanged } from "firebase/auth";
 
 import logo from "../assets/logo1.png";
 
 /* Firebase imports */
 import { db } from "../services/firebase";
-import { collection, onSnapshot, query, where, doc } from "firebase/firestore";
-import { useSentinelaData } from "../utils/SentinelaDataContext";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Topbar({ handleDrawerOpen }) {
 	const theme = useTheme();
 	const navigate = useNavigate();
 
-	const [incidentTypes, setIncidentTypes] = useState(null);
-
-	// AJUSTE 1 — trava temporária após salvar config
-	const [configSyncing, setConfigSyncing] = useState(false);
-	const [authUser, setAuthUser] = useState(null);
-
 	// AJUSTE 2 — marco temporal para não notificar histórico
 	const notificationsStartAt = useRef(Date.now());
 
-	const { userCity, loading } = useSentinelaData();
+	const { cityId, loading, name, photoURL, incidentTypes, logout } =
+		useAuth();
 
 	// profile menu
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -50,7 +42,7 @@ export default function Topbar({ handleDrawerOpen }) {
 	const closeProfileMenu = () => setAnchorEl(null);
 
 	const handleLogout = async () => {
-		await signOut(auth);
+		await logout();
 		navigate("/");
 	};
 
@@ -60,30 +52,6 @@ export default function Topbar({ handleDrawerOpen }) {
 	const [toasts, setToasts] = useState([]);
 	const [menuAberto, setMenuAberto] = useState(false);
 	const [historicoNotificacoes, setHistoricoNotificacoes] = useState([]);
-
-	useEffect(() => {
-		const updateAvatar = async () => {
-			const user = auth.currentUser;
-			if (!user) return;
-
-			await user.reload();
-			setAuthUser({ ...user });
-		};
-
-		window.addEventListener("avatar-updated", updateAvatar);
-
-		return () => {
-			window.removeEventListener("avatar-updated", updateAvatar);
-		};
-	}, []);
-
-	useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (user) => {
-			setAuthUser(user);
-		});
-
-		return unsubscribe;
-	}, []);
 
 	// ref para o container do dropdown (fechar ao clicar fora)
 	const dropdownRef = useRef(null);
@@ -126,59 +94,14 @@ export default function Topbar({ handleDrawerOpen }) {
 		return () => window.removeEventListener("click", unlockAudio);
 	}, []);
 
-	// AJUSTE 3 — se acabou de salvar config, bloqueia temporariamente
-	useEffect(() => {
-		if (localStorage.getItem("incidentTypesSyncing") === "true") {
-			setConfigSyncing(true);
-		}
-	}, []);
-
-	// listener realtime das configs
-	useEffect(() => {
-		let unsubscribeSettings = null;
-
-		const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-			if (!user) {
-				setIncidentTypes(null);
-				if (unsubscribeSettings) unsubscribeSettings();
-				return;
-			}
-
-			const ref = doc(db, "users", user.uid, "settings", "default");
-
-			unsubscribeSettings = onSnapshot(ref, (snap) => {
-				if (!snap.exists()) {
-					setIncidentTypes([]);
-				} else {
-					const data = snap.data();
-					setIncidentTypes(
-						Array.isArray(data.incidentTypes)
-							? data.incidentTypes
-							: [],
-					);
-				}
-
-				// 🔧 AJUSTE — config confirmada
-				setConfigSyncing(false);
-				localStorage.removeItem("incidentTypesSyncing");
-				notificationsStartAt.current = Date.now();
-			});
-		});
-
-		return () => {
-			if (unsubscribeSettings) unsubscribeSettings();
-			unsubscribeAuth();
-		};
-	}, []);
-
 	// listener realtime das ocorrências
 	useEffect(() => {
 		if (loading) return;
-		if (!userCity) return;
+		if (!cityId) return;
 
 		const q = query(
 			collection(db, "incidents"),
-			where("geoloc.cityId", "==", userCity),
+			where("geoloc.cityId", "==", cityId),
 		);
 
 		const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -192,18 +115,10 @@ export default function Topbar({ handleDrawerOpen }) {
 
 				const tipoOcorrencia = nova.ocorrencia?.tipo;
 
-				// AJUSTE — bloqueios corretos
-
-				// config acabou de salvar
-				if (configSyncing) return;
-
-				// config ainda não carregou
-				if (incidentTypes === null) return;
-
 				// tipo não permitido
 				if (!incidentTypes.includes(tipoOcorrencia)) return;
 
-				// ocorrência antiga (já existia antes)
+				// ocorrência antiga
 				const createdAt =
 					nova.createdAt?.toMillis?.() ??
 					nova.createdAt ??
@@ -218,7 +133,13 @@ export default function Topbar({ handleDrawerOpen }) {
 		});
 
 		return () => unsubscribe();
-	}, [userCity, loading, incidentTypes, configSyncing]);
+	}, [cityId, loading, incidentTypes]);
+
+	useEffect(() => {
+		if (!loading && incidentTypes) {
+			notificationsStartAt.current = Date.now();
+		}
+	}, [loading, incidentTypes]);
 
 	// fechar dropdown ao clicar fora
 	useEffect(() => {
@@ -330,71 +251,6 @@ export default function Topbar({ handleDrawerOpen }) {
 		</Box>
 	);
 
-	// Toasts UI (fixed)
-	const ToastContainer = (
-		<Box
-			sx={{
-				position: "fixed",
-				top: 20,
-				right: 20,
-				zIndex: 9999,
-				display: "flex",
-				flexDirection: "column",
-				gap: 2,
-			}}
-		>
-			{toasts.map((t) => (
-				<Box
-					key={t.id}
-					sx={{
-						width: 340,
-						backgroundColor: theme.palette.background.paper,
-						borderRadius: 3,
-						padding: 2,
-						boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
-						animation: "slideIn 0.35s ease, fadeOut 0.5s ease 5.5s",
-						borderLeft: `6px solid ${theme.palette.primary.main}`,
-					}}
-				>
-					<Typography variant="subtitle1" fontWeight={700}>
-						{t.ocorrencia?.categoria || "Nova ocorrência"}
-					</Typography>
-
-					<Typography variant="body2" sx={{ opacity: 0.9 }}>
-						{t.ocorrencia?.tipo}
-					</Typography>
-
-					{t.geoloc?.address && (
-						<Typography variant="body2">
-							<b>Endereço:</b> {t.geoloc.address}
-						</Typography>
-					)}
-
-					<Typography variant="body2">
-						<b>Hora:</b> {t.hora} - {t.geoloc.city}
-					</Typography>
-
-					<Box
-						onClick={() =>
-							setToasts((prev) =>
-								prev.filter((p) => p.id !== t.id),
-							)
-						}
-						sx={{
-							cursor: "pointer",
-							mt: 1,
-							textAlign: "right",
-							fontWeight: "bold",
-							color: theme.palette.primary.main,
-						}}
-					>
-						Fechar
-					</Box>
-				</Box>
-			))}
-		</Box>
-	);
-
 	return (
 		<AppBar
 			position="fixed"
@@ -433,7 +289,7 @@ export default function Topbar({ handleDrawerOpen }) {
 						flex: 1,
 					}}
 				>
-					{auth.currentUser?.displayName}
+					{name}
 
 					{/* SINO (badge) */}
 					<Box
@@ -472,11 +328,8 @@ export default function Topbar({ handleDrawerOpen }) {
 					</Box>
 					{/* AVATAR / MENU PERFIL */}
 					<IconButton onClick={openProfileMenu}>
-						<Avatar
-							src={authUser?.photoURL}
-							sx={{ bgcolor: "primary.main" }}
-						>
-							{authUser?.displayName?.charAt(0)}
+						<Avatar src={photoURL} sx={{ bgcolor: "primary.main" }}>
+							{name?.charAt(0)}
 						</Avatar>
 					</IconButton>
 					<Menu

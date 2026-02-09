@@ -7,7 +7,7 @@ import {
 } from "@react-google-maps/api";
 import { useState, useCallback, useEffect } from "react";
 import { Box, Typography } from "@mui/material";
-import { statusLabels } from "../components/StatusChip";
+import { statusList } from "../utils/statusList";
 
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import PlaceIcon from "@mui/icons-material/Place";
@@ -208,7 +208,8 @@ export default function SentinelaMap({
 										paddingTop: 4,
 									}}
 								>
-									Status: {statusLabels[status] || status}
+									Status:{" "}
+									{statusList[status]?.label || status}
 								</Typography>
 
 								<Typography

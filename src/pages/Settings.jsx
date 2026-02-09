@@ -15,6 +15,7 @@ import ProfileSettingsCard from "../components/settings/ProfileSettingsCard";
 import ProfileIncidentsTypeCard from "../components/settings/ProfileIncidentsTypeCard";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
+import { useNavigate } from "react-router-dom";
 
 import { auth, storage } from "../services/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -26,7 +27,7 @@ import {
 
 import { useEffect, useState } from "react";
 import { MailLock } from "@mui/icons-material";
-import { useSentinelaData } from "../utils/SentinelaDataContext";
+import { useAuth } from "../hooks/useAuth";
 
 export default function SettingsPage() {
 	// =============================
@@ -47,7 +48,8 @@ export default function SettingsPage() {
 		message: "",
 		severity: "success",
 	});
-	const { setIncidentTypes: setGlobalIncidentTypes } = useSentinelaData();
+	const { updateIncidentTypes } = useAuth();
+	const navigate = useNavigate();
 
 	// =============================
 	// AUTH REATIVO
@@ -125,10 +127,7 @@ export default function SettingsPage() {
 			);
 
 			//  atualiza o app inteiro na mesma aba
-			setGlobalIncidentTypes(incidentTypes);
-
-			// trava temporária da topbar
-			localStorage.setItem("incidentTypesSyncing", "true");
+			updateIncidentTypes(incidentTypes);
 
 			setFeedback({
 				open: true,
@@ -141,6 +140,8 @@ export default function SettingsPage() {
 				message: "Erro ao salvar configurações.",
 				severity: "error",
 			});
+		} finally {
+			navigate("/dashboard");
 		}
 	};
 
@@ -242,7 +243,6 @@ export default function SettingsPage() {
 					</Button>
 					<Button
 						variant="contained"
-						size="large"
 						sx={{ ml: 1 }}
 						onClick={saveUserSettings}
 					>

@@ -21,6 +21,7 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../services/firebase";
+import { statusList } from "../utils/statusList";
 
 /* =============================
    ICONES POR STATUS
@@ -43,15 +44,7 @@ function getStatusIcon(status) {
    LABELS DE STATUS
 ============================= */
 function formatStatus(status) {
-	const map = {
-		pending_review: "Em análise",
-		accepted: "Aceita",
-		in_progress: "Em andamento",
-		resolved: "Resolvida",
-		cancelled: "Cancelada",
-	};
-
-	return map[status] || status;
+	return statusList[status]?.label || status;
 }
 
 /* =============================
@@ -107,6 +100,8 @@ export default function IncidentTimeline({ incidentId }) {
 					flex: 0,
 					padding: 0,
 				},
+				background: theme.palette.background.default,
+				borderRadius: "8px",
 			}}
 		>
 			{history.map((item, index) => (

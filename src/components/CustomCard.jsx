@@ -9,7 +9,7 @@ export default function CustomCard({ card, lastUpdate }) {
 				backgroundColor: theme.palette.background.paper,
 				borderRadius: 2,
 				p: 2.5,
-				minHeight: 170,
+				height: 170,
 				display: "flex",
 				alignItems: "center",
 				gap: 2,

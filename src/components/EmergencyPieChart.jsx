@@ -8,6 +8,7 @@ import {
 	Legend,
 } from "recharts";
 import { useTheme } from "@mui/material/styles";
+import ChartEmptyState from "./ChartEmptyState";
 
 export default function EmergencyPieChart({ data }) {
 	const theme = useTheme();
@@ -17,7 +18,7 @@ export default function EmergencyPieChart({ data }) {
 		theme.palette.primary.main, // 🔵 Ocorrências
 	];
 
-	const total = data.reduce((acc, item) => acc + item.value, 0);
+	const hasData = data.length > 0;
 
 	return (
 		<Card sx={{ borderRadius: "8px" }}>
@@ -26,54 +27,58 @@ export default function EmergencyPieChart({ data }) {
 					Emergências x Ocorrências
 				</Typography>
 
-				<Box sx={{ width: "100%", height: 300 }}>
-					<ResponsiveContainer>
-						<PieChart>
-							<Pie
-								data={data}
-								dataKey="value"
-								nameKey="name"
-								cx="50%"
-								cy="50%"
-								outerRadius={90}
-								innerRadius={55} // 🔥 donut (mais moderno)
-								paddingAngle={3}
-								isAnimationActive={true}
-							>
-								{data.map((_, index) => (
-									<Cell
-										key={`cell-${index}`}
-										fill={COLORS[index]}
-									/>
-								))}
-							</Pie>
+				{!hasData ? (
+					<ChartEmptyState />
+				) : (
+					<Box sx={{ width: "100%", height: 300 }}>
+						<ResponsiveContainer>
+							<PieChart>
+								<Pie
+									data={data}
+									dataKey="value"
+									nameKey="name"
+									cx="50%"
+									cy="50%"
+									outerRadius={90}
+									innerRadius={55} // 🔥 donut (mais moderno)
+									paddingAngle={3}
+									isAnimationActive={true}
+								>
+									{data.map((_, index) => (
+										<Cell
+											key={`cell-${index}`}
+											fill={COLORS[index]}
+										/>
+									))}
+								</Pie>
 
-							{/* Tooltip customizado */}
-							<Tooltip
-								cursor={false}
-								contentStyle={{
-									backgroundColor:
-										theme.palette.background.paper,
-									border: "none",
-									borderRadius: 8,
-								}}
-								itemStyle={{
-									color: theme.palette.text.primary, // valores
-								}}
-							/>
+								{/* Tooltip customizado */}
+								<Tooltip
+									cursor={false}
+									contentStyle={{
+										backgroundColor:
+											theme.palette.background.paper,
+										border: "none",
+										borderRadius: 8,
+									}}
+									itemStyle={{
+										color: theme.palette.text.primary, // valores
+									}}
+								/>
 
-							<Legend
-								verticalAlign="bottom"
-								align="center"
-								iconType="circle"
-								wrapperStyle={{
-									fontSize: 14,
-									color: theme.palette.text.secondary,
-								}}
-							/>
-						</PieChart>
-					</ResponsiveContainer>
-				</Box>
+								<Legend
+									verticalAlign="bottom"
+									align="center"
+									iconType="circle"
+									wrapperStyle={{
+										fontSize: 14,
+										color: theme.palette.text.secondary,
+									}}
+								/>
+							</PieChart>
+						</ResponsiveContainer>
+					</Box>
+				)}
 			</CardContent>
 		</Card>
 	);
