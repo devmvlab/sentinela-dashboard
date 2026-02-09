@@ -45,12 +45,22 @@ const buildAverageResponseTimeData = (incidentHistory) => {
 		return acc;
 	}, {});
 
-	return Object.entries(groupedByDay).map(([date, times]) => ({
-		period: date,
-		avgTime: Math.round(
-			times.reduce((sum, t) => sum + t, 0) / times.length,
-		),
-	}));
+	return Object.entries(groupedByDay)
+		.map(([date, times]) => ({
+			period: date,
+			avgTime: Math.round(
+				times.reduce((sum, t) => sum + t, 0) / times.length,
+			),
+		}))
+		.sort((a, b) => {
+			const [da, ma, ya] = a.period.split("/");
+			const [db, mb, yb] = b.period.split("/");
+
+			const dateA = new Date(`${ya}-${ma}-${da}`);
+			const dateB = new Date(`${yb}-${mb}-${db}`);
+
+			return dateA - dateB;
+		});
 };
 
 export { buildAverageResponseTimeData };

@@ -21,6 +21,11 @@ import { updateIncidentWithHistory } from "../services/incidentStatus";
 import { useIncidents } from "../hooks/useIncidents";
 import { useAuth } from "../hooks/useAuth";
 
+const today = new Date();
+today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+
+const formattedToday = today.toISOString().slice(0, 10);
+
 /* ======================================================
    COMPONENT
 ====================================================== */
@@ -45,8 +50,8 @@ export default function Incidents() {
 		category: "",
 		type: "",
 		isEmergency: "",
-		startDate: new Date().toISOString().slice(0, 10),
-		endDate: new Date().toISOString().slice(0, 10),
+		startDate: formattedToday,
+		endDate: formattedToday,
 	});
 
 	const [openFilters, setOpenFilters] = useState(false);
@@ -154,6 +159,7 @@ export default function Incidents() {
 				id: uid,
 				name,
 			},
+			cityId,
 		});
 
 		updateIncidentStatus(currentIncident.id, "accepted");
@@ -336,6 +342,7 @@ export default function Incidents() {
 								id: uid,
 								name,
 							},
+							cityId,
 						});
 
 						updateIncidentStatus(currentIncident.id, "cancelled");

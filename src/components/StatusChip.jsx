@@ -1,5 +1,5 @@
 import Chip from "@mui/material/Chip";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, alpha } from "@mui/material/styles";
 import {
 	CheckCircle as CheckCircleIcon,
 	QueryBuilder as QueryBuilderIcon,
@@ -47,6 +47,7 @@ export default function StatusChip({ status, sx }) {
 				borderWidth: 2,
 				borderColor: statusColors[normalizedStatus],
 				color: statusColors[normalizedStatus],
+				backgroundColor: alpha(statusColors[normalizedStatus], 0.2),
 				"& .MuiChip-icon": {
 					color: "inherit",
 				},

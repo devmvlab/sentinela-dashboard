@@ -33,10 +33,10 @@ export const sentinelaTheme = createTheme({
 
 		other: {
 			// OUTRAS CORES
-			error:  "#d32f2f" ,
-			warning:  "#FFC107" ,
+			error: "#d32f2f",
+			warning: "#FFC107",
 			divider: "#ffffff33",
-			tableHover:"#47595c",
+			tableHover: "#47595c",
 			pending_review: "#FFC107",
 			cancelled: "#d32f2f",
 			accepted: "#9e9e9e",

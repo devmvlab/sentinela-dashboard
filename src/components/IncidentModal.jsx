@@ -54,6 +54,10 @@ function CustomStepIcon({ ownerState }) {
 		return <CloseIcon color="error" />;
 	}
 
+	if (stepKey === "resolved" && currentStatus === "resolved") {
+		return <CheckCircleIcon color="primary" />;
+	}
+
 	if (currentStatus === stepKey) {
 		return <QueryBuilderIcon color="primary" />;
 	}

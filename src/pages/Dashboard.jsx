@@ -66,6 +66,11 @@ const buildPeakHourData = (incidents) => {
 	return data;
 };
 
+const today = new Date();
+today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+
+const formattedToday = today.toISOString().slice(0, 10);
+
 export default function Dashboard() {
 	const [viewMode, setViewMode] = useState("dashboard");
 	const [mapState, setMapState] = useState(null);
@@ -74,8 +79,8 @@ export default function Dashboard() {
 		category: "",
 		type: "",
 		isEmergency: "",
-		startDate: new Date().toISOString().slice(0, 10),
-		endDate: new Date().toISOString().slice(0, 10),
+		startDate: formattedToday,
+		endDate: formattedToday,
 	});
 	const [openFilters, setOpenFilters] = useState(false);
 
