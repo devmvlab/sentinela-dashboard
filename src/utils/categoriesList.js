@@ -7,7 +7,7 @@ export const categories = [
 			{
 				title: "Assalto",
 				icon: "robber",
-				isEmergency: true,
+				type: "emergency",
 				windowHours: 24,
 				push: {
 					title: "🚨 Alerta de Assalto",
@@ -18,6 +18,7 @@ export const categories = [
 			{
 				title: "Furto",
 				icon: "wallet-outline",
+				type: "incident",
 				windowHours: 72,
 				push: {
 					title: "⚠️ Aviso de Furto",
@@ -28,6 +29,7 @@ export const categories = [
 			{
 				title: "Vandalismo",
 				icon: "spray",
+				type: "incident",
 				windowHours: 168, // 7 dias
 				push: {
 					title: "🚧 Ocorrências de Vandalismo",
@@ -38,7 +40,7 @@ export const categories = [
 			{
 				title: "Violência",
 				icon: "arm-flex-outline",
-				isEmergency: true,
+				type: "emergency",
 				windowHours: 48,
 				push: {
 					title: "🚨 Alerta de Violência",
@@ -56,7 +58,7 @@ export const categories = [
 			{
 				title: "Acidente",
 				icon: "car-traction-control",
-				isEmergency: true,
+				type: "emergency",
 				windowHours: 12,
 				push: {
 					title: "🚧 Alerta de Acidente",
@@ -67,16 +69,19 @@ export const categories = [
 			{
 				title: "Buraco na rua",
 				icon: "road-variant",
+				type: "incident",
 				windowHours: 720, // 30 dias
 			},
 			{
 				title: "Semáforo quebrado",
 				icon: "traffic-light",
+				type: "incident",
 				windowHours: 48,
 			},
 			{
 				title: "Veículo abandonado",
 				icon: "car-off",
+				type: "incident",
 				windowHours: 168,
 			},
 		],
@@ -86,14 +91,30 @@ export const categories = [
 		icon: "city-variant-outline",
 		color: "#1E88E5",
 		items: [
-			{ title: "Calçada danificada", icon: "walk", windowHours: 720 },
-			{ title: "Esgoto", icon: "pipe", windowHours: 168 },
+			{
+				title: "Calçada danificada",
+				icon: "walk",
+				type: "incident",
+				windowHours: 720,
+			},
+			{
+				title: "Esgoto",
+				icon: "pipe",
+				type: "incident",
+				windowHours: 168,
+			},
 			{
 				title: "Iluminação pública",
 				icon: "lightbulb-outline",
+				type: "incident",
 				windowHours: 168,
 			},
-			{ title: "Poste caído", icon: "sign-pole", windowHours: 48 },
+			{
+				title: "Poste caído",
+				icon: "sign-pole",
+				type: "incident",
+				windowHours: 48,
+			},
 		],
 	},
 	{
@@ -101,11 +122,16 @@ export const categories = [
 		icon: "leaf",
 		color: "#43A047",
 		items: [
-			{ title: "Árvore caída", icon: "tree", windowHours: 72 },
+			{
+				title: "Árvore caída",
+				icon: "tree",
+				type: "incident",
+				windowHours: 72,
+			},
 			{
 				title: "Enchente",
 				icon: "home-flood",
-				isEmergency: true,
+				type: "emergency",
 				windowHours: 12,
 				push: {
 					title: "🌊 Alerta de Enchente",
@@ -116,7 +142,7 @@ export const categories = [
 			{
 				title: "Incêndio",
 				icon: "fire",
-				isEmergency: true,
+				type: "emergency",
 				windowHours: 6,
 				push: {
 					title: "🔥 Alerta de Incêndio",
@@ -124,12 +150,22 @@ export const categories = [
 						"Incêndio reportado na sua região. Mantenha distância e acione os bombeiros se necessário.",
 				},
 			},
-			{ title: "Lixo", icon: "trash-can-outline", windowHours: 720 },
-			{ title: "Mato alto", icon: "grass", windowHours: 720 },
+			{
+				title: "Lixo",
+				icon: "trash-can-outline",
+				type: "incident",
+				windowHours: 720,
+			},
+			{
+				title: "Mato alto",
+				icon: "grass",
+				type: "incident",
+				windowHours: 720,
+			},
 			{
 				title: "Queimada",
 				icon: "pine-tree-fire",
-				isEmergency: true,
+				type: "emergency",
 				windowHours: 12,
 				push: {
 					title: "🔥 Risco de Queimada",
@@ -137,7 +173,12 @@ export const categories = [
 						"Aumento de focos de queimada na região. Evite áreas com fumaça.",
 				},
 			},
-			{ title: "Poluição", icon: "factory", windowHours: 168 },
+			{
+				title: "Poluição",
+				icon: "factory",
+				type: "incident",
+				windowHours: 168,
+			},
 		],
 	},
 	{
@@ -145,11 +186,22 @@ export const categories = [
 		icon: "heart-pulse",
 		color: "#d32f2f",
 		items: [
-			{ title: "Animal abandonado", icon: "dog", windowHours: 72 },
-			{ title: "Foco de dengue", icon: "tire", windowHours: 336 }, // 14 dias
+			{
+				title: "Animal abandonado",
+				icon: "dog",
+				type: "incident",
+				windowHours: 72,
+			},
+			{
+				title: "Foco de dengue",
+				icon: "tire",
+				type: "incident",
+				windowHours: 336,
+			}, // 14 dias
 			{
 				title: "Más condições sanitárias",
 				icon: "hospital-building",
+				type: "incident",
 				windowHours: 168,
 			},
 		],
@@ -160,8 +212,9 @@ export const categories = [
 		color: "#757575",
 		items: [
 			{
-				title: "Qualquer caso não listado acima",
+				title: "Outro tipo de ocorrência",
 				icon: "dots-horizontal",
+				type: "incident",
 				windowHours: 72,
 			},
 		],

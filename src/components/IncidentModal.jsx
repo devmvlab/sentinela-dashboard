@@ -249,7 +249,7 @@ const IncidentModal = memo(function IncidentModal({
 											gap={1}
 										>
 											{incident.ocorrencia?.tipo}
-											{incident.isEmergency && (
+											{incident.type !== "incident" && (
 												<ReportGmailerrorred
 													color="error"
 													fontSize="small"
