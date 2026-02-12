@@ -78,7 +78,7 @@ export default function Dashboard() {
 		status: "",
 		category: "",
 		type: "",
-		isEmergency: "",
+		ocorrenciaTipo: "",
 		startDate: formattedToday,
 		endDate: formattedToday,
 	});
@@ -91,7 +91,7 @@ export default function Dashboard() {
 		status: filters.status,
 		category: filters.category,
 		type: filters.type,
-		isEmergency: filters.isEmergency,
+		ocorrenciaTipo: filters.ocorrenciaTipo,
 		startDate: filters.startDate,
 		endDate: filters.endDate,
 		realtime: true,
@@ -156,7 +156,7 @@ export default function Dashboard() {
 		let emergencias = 0;
 
 		incidents.forEach((item) => {
-			if (item.isEmergency) emergencias++;
+			if (item.type !== "incident") emergencias++;
 			types[item.ocorrencia?.tipo || "Sem tipo"] =
 				(types[item.ocorrencia?.tipo || "Sem tipo"] || 0) + 1;
 			status[item.status || "unknown"] =

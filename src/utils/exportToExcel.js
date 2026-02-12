@@ -69,7 +69,7 @@ export async function exportIncidentsToExcel(rows) {
 			item.data || "",
 			item.geoloc?.address || "",
 			item.geoloc?.postalCode || "",
-			item.isEmergency ? "Sim" : "Não",
+			item.type || "",
 		];
 		rowIndex++;
 	});

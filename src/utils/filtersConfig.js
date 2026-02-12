@@ -32,15 +32,17 @@ export const filtersConfig = {
 		formatValue: (v) => typeMap[v],
 	},
 
-	isEmergency: {
+	type: {
 		label: "Tipo de registro",
 		isActive: (v) => v !== "",
 		formatValue: (v) =>
-			v === "true"
+			v === "emergency"
 				? "Emergências"
-				: v === "false"
+				: v === "incident"
 					? "Ocorrências"
-					: "Todas",
+					: v === "panic"
+						? "Pedido de socorro"
+						: "Todos",
 	},
 
 	startDate: {

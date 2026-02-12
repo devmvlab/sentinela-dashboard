@@ -44,7 +44,7 @@ export async function exportIncidentsToPdf(rows) {
 		item.data || "",
 		item.geoloc?.address || "",
 		item.geoloc?.postalCode || "",
-		item.isEmergency ? "Sim" : "Não",
+		item.type || "",
 	]);
 
 	/* ================= TABELA ================= */

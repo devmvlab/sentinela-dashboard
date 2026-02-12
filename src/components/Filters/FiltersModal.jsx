@@ -108,15 +108,20 @@ export default function FiltersModal({
 							<InputLabel>Tipo de registro</InputLabel>
 							<Select
 								label="Tipo de registro"
-								value={localFilters.isEmergency}
-								onChange={(e) =>
-									update("isEmergency", e.target.value)
-								}
+								value={localFilters.type}
+								onChange={(e) => update("type", e.target.value)}
 								sx={{ width: "100%" }}
 							>
 								<MenuItem value={""}>Todas</MenuItem>
-								<MenuItem value={"true"}>Emergências</MenuItem>
-								<MenuItem value={"false"}>Ocorrências</MenuItem>
+								<MenuItem value={"emergency"}>
+									Emergências
+								</MenuItem>
+								<MenuItem value={"incident"}>
+									Ocorrências
+								</MenuItem>
+								<MenuItem value={"panic"}>
+									Pedido de socorro
+								</MenuItem>
 							</Select>
 						</FormControl>
 					</Box>

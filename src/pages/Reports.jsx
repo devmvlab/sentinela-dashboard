@@ -22,7 +22,7 @@ export default function Reports() {
 		status: "",
 		category: "",
 		type: "",
-		isEmergency: "",
+		ocorrenciaTipo: "",
 		startDate: "",
 		endDate: "",
 	});
@@ -40,7 +40,7 @@ export default function Reports() {
 		status: filters.status,
 		category: filters.category,
 		type: filters.type,
-		isEmergency: filters.isEmergency,
+		ocorrenciaTipo: filters.ocorrenciaTipo,
 		startDate: filters.startDate,
 		endDate: filters.endDate,
 	});

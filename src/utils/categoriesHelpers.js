@@ -10,7 +10,7 @@ export const typesOptions = categories.flatMap((c) =>
 		value: item.title,
 		label: item.title,
 		category: c.title,
-		isEmergency: Boolean(item.isEmergency),
+		type: item.type,
 	})),
 );
 

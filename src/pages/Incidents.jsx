@@ -49,7 +49,7 @@ export default function Incidents() {
 		status: "",
 		category: "",
 		type: "",
-		isEmergency: "",
+		ocorrenciaTipo: "",
 		startDate: formattedToday,
 		endDate: formattedToday,
 	});
@@ -68,7 +68,7 @@ export default function Incidents() {
 			status: filters.status,
 			category: filters.category,
 			type: filters.type,
-			isEmergency: filters.isEmergency,
+			ocorrenciaTipo: filters.ocorrenciaTipo,
 			startDate: filters.startDate,
 			endDate: filters.endDate,
 			page: paginationModel.page,
@@ -221,7 +221,7 @@ export default function Incidents() {
 					<Typography variant="body2">
 						{row.ocorrencia?.tipo ?? "-"}
 					</Typography>
-					{row.isEmergency && (
+					{row.type !== "incident" && (
 						<ReportGmailerrorredIcon
 							color="error"
 							fontSize="small"

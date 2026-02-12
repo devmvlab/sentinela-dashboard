@@ -34,7 +34,7 @@ export function useSafetyLevel({ incidents, userCenter }) {
 				return;
 			}
 
-			if (item.isEmergency) {
+			if (item.type !== "incident") {
 				emergencyOpen++;
 			}
 		});

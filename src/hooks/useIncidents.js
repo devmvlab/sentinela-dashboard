@@ -35,8 +35,8 @@ function buildCommonConstraints({
 	cityId,
 	status,
 	category,
+	ocorrenciaTipo,
 	type,
-	isEmergency,
 	dateRange,
 }) {
 	const constraints = [
@@ -52,16 +52,12 @@ function buildCommonConstraints({
 		constraints.push(where("ocorrencia.categoria", "==", category));
 	}
 
+	if (ocorrenciaTipo) {
+		constraints.push(where("ocorrencia.tipo", "==", ocorrenciaTipo));
+	}
+
 	if (type) {
-		constraints.push(where("ocorrencia.tipo", "==", type));
-	}
-
-	if (isEmergency === "true") {
-		constraints.push(where("isEmergency", "==", true));
-	}
-
-	if (isEmergency === "false") {
-		constraints.push(where("isEmergency", "==", false));
+		constraints.push(where("type", "==", type));
 	}
 
 	if (dateRange?.start) {
@@ -101,8 +97,8 @@ function buildHistoryConstraints({ cityId, dateRange }) {
 export function useIncidents({
 	status = "all",
 	category = "",
+	ocorrenciaTipo = "",
 	type = "",
-	isEmergency = "",
 	startDate = null,
 	endDate = null,
 	page = 0,
@@ -143,8 +139,8 @@ export function useIncidents({
 			cityId: resolvedCityId,
 			status,
 			category,
+			ocorrenciaTipo,
 			type,
-			isEmergency,
 			dateRange,
 		});
 
@@ -167,8 +163,8 @@ export function useIncidents({
 	}, [
 		status,
 		category,
+		ocorrenciaTipo,
 		type,
-		isEmergency,
 		startDate,
 		endDate,
 		resolvedCityId,
@@ -231,8 +227,8 @@ export function useIncidents({
 	}, [
 		status,
 		category,
+		ocorrenciaTipo,
 		type,
-		isEmergency,
 		startDate,
 		endDate,
 		page,
@@ -249,8 +245,8 @@ export function useIncidents({
 	}, [
 		status,
 		category,
+		ocorrenciaTipo,
 		type,
-		isEmergency,
 		startDate,
 		endDate,
 		resolvedCityId,
