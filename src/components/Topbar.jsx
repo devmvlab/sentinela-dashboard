@@ -9,15 +9,25 @@ import {
 	MenuItem,
 	Divider,
 	Badge,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+	Button,
 } from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import InfoIcon from "@mui/icons-material/Info";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import TimerIcon from "@mui/icons-material/Timer";
+import SosIcon from "@mui/icons-material/Sos";
 
-import { useTheme } from "@mui/material/styles";
+import { useTheme, darken } from "@mui/material/styles";
 
 import logo from "../assets/logo1.png";
 
@@ -52,6 +62,9 @@ export default function Topbar({ handleDrawerOpen }) {
 	const [toasts, setToasts] = useState([]);
 	const [menuAberto, setMenuAberto] = useState(false);
 	const [historicoNotificacoes, setHistoricoNotificacoes] = useState([]);
+	const [panicOpen, setPanicOpen] = useState(false);
+	const [panicData, setPanicData] = useState(null);
+	const [elapsedTime, setElapsedTime] = useState("00:00:00");
 
 	// ref para o container do dropdown (fechar ao clicar fora)
 	const dropdownRef = useRef(null);
@@ -115,6 +128,20 @@ export default function Topbar({ handleDrawerOpen }) {
 
 				const tipoOcorrencia = nova.ocorrencia?.tipo;
 
+				// SE FOR PÂNICO
+				if (nova.type === "panic") {
+					setPanicData(nova);
+					setPanicOpen(true);
+
+					try {
+						const audio = new Audio("/warning.mp3");
+						audio.volume = 0.4;
+						audio.play().catch(() => {});
+					} catch {}
+
+					return; // não continua fluxo normal
+				}
+
 				// tipo não permitido
 				if (!incidentTypes.includes(tipoOcorrencia)) return;
 
@@ -161,6 +188,32 @@ export default function Topbar({ handleDrawerOpen }) {
 		return () =>
 			document.removeEventListener("mousedown", handleClickOutside);
 	}, [menuAberto]);
+
+	//Cronômetro para o modal de pânico
+	useEffect(() => {
+		if (!panicOpen || !panicData?.createdAt) return;
+
+		const created =
+			panicData.createdAt?.toMillis?.() ??
+			new Date(panicData.createdAt).getTime();
+
+		const interval = setInterval(() => {
+			const now = Date.now();
+			const diff = now - created;
+
+			const hours = Math.floor(diff / 3600000);
+			const minutes = Math.floor((diff % 3600000) / 60000);
+			const seconds = Math.floor((diff % 60000) / 1000);
+
+			const format = (n) => String(n).padStart(2, "0");
+
+			setElapsedTime(
+				`${format(hours)}:${format(minutes)}:${format(seconds)}`,
+			);
+		}, 1000);
+
+		return () => clearInterval(interval);
+	}, [panicOpen, panicData]);
 
 	// render do dropdown (últimas 10)
 	const NotificacoesDropdown = menuAberto && (
@@ -385,6 +438,167 @@ export default function Topbar({ handleDrawerOpen }) {
 					/>
 				</Box>
 			</Toolbar>
+
+			<Dialog
+				open={panicOpen}
+				onClose={() => setPanicOpen(false)}
+				maxWidth="sm"
+				fullWidth
+			>
+				{/* HEADER VERMELHO */}
+				<DialogTitle
+					sx={{
+						background: theme.palette.background.paper,
+						color: "#fff",
+						py: 2,
+					}}
+				>
+					<Box
+						display="flex"
+						justifyContent="space-between"
+						alignItems="center"
+					>
+						<Box>
+							<Typography
+								variant="caption"
+								sx={{ opacity: 0.8, letterSpacing: 1 }}
+							>
+								ALERTA DE EMERGÊNCIA
+							</Typography>
+
+							<Typography variant="h6" sx={{ fontWeight: 700 }}>
+								BOTÃO DE PÂNICO ACIONADO
+							</Typography>
+						</Box>
+
+						<IconButton
+							onClick={() => setPanicOpen(false)}
+							sx={{ color: "#fff" }}
+						>
+							<CloseIcon />
+						</IconButton>
+					</Box>
+				</DialogTitle>
+
+				<Divider />
+
+				{/* CONTEÚDO */}
+				<DialogContent sx={{ py: 3 }}>
+					<Box
+						sx={{
+							backgroundColor: theme.palette.background.default,
+							borderRadius: 2,
+							mt: 2,
+							padding: 2,
+							display: "flex",
+							flexDirection: "column",
+							gap: 2,
+						}}
+					>
+						{/* Categoria */}
+						<Box
+							sx={{
+								display: "flex",
+								alignItems: "center",
+								gap: 1,
+							}}
+						>
+							<Typography variant="subtitle1" fontWeight={600}>
+								<b>Categoria: </b>
+								{panicData?.ocorrencia?.categoria ||
+									"Emergência"}
+							</Typography>
+						</Box>
+
+						{/* Tipo */}
+						<Typography variant="body1">
+							<b>Tipo:</b> {panicData?.ocorrencia?.tipo}
+						</Typography>
+
+						{/* Endereço */}
+						{panicData?.geoloc?.address && (
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									gap: 1,
+								}}
+							>
+								<Typography variant="body1">
+									<b>Endereço: </b>
+									{panicData.geoloc.address}
+								</Typography>
+							</Box>
+						)}
+
+						{/* Descrição */}
+						{panicData?.desc && (
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									gap: 1,
+								}}
+							>
+								<Typography variant="body1">
+									<b>Descrição:</b> {panicData.desc}
+								</Typography>
+							</Box>
+						)}
+
+						{/* Cronômetro */}
+						<Box
+							sx={{
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+								backgroundColor: theme.palette.other.error,
+								padding: 1.5,
+								borderRadius: 2,
+								mb: 2,
+							}}
+						>
+							<b>Tempo decorrido: </b>
+							<Typography
+								variant="h6"
+								sx={{
+									ml: 1,
+									fontWeight: 700,
+									color: theme.palette.text.primary,
+									letterSpacing: 1,
+								}}
+							>
+								{elapsedTime}
+							</Typography>
+						</Box>
+					</Box>
+				</DialogContent>
+
+				{/* AÇÕES */}
+				<DialogActions
+					sx={{
+						justifyContent: "center",
+						pb: 3,
+						gap: 2,
+					}}
+				>
+					<Button
+						onClick={() => {
+							setPanicOpen(false);
+							navigate("/ocorrencias", {
+								state: { openIncidentId: panicData?.id },
+							});
+						}}
+						variant="contained"
+						color="error"
+						sx={{
+							fontWeight: 700,
+						}}
+					>
+						VER OCORRÊNCIA
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</AppBar>
 	);
 }

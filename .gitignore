@@ -13,6 +13,8 @@ dist-ssr
 *.local
 scripts/.env
 scripts/serviceAccountKey.json
+scripts/serviceAccountKeyDev.json
+.env
 
 
 # Editor directories and files

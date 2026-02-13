@@ -219,4 +219,17 @@ export const categories = [
 			},
 		],
 	},
+	{
+		title: "Pânico",
+		icon: "dots-horizontal-circle-outline",
+		color: "#757575",
+		items: [
+			{
+				title: "Pedido de socorro",
+				icon: "dots-horizontal",
+				type: "incident",
+				windowHours: 72,
+			},
+		],
+	},
 ];

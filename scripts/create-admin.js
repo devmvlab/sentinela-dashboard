@@ -7,6 +7,7 @@
 require("dotenv").config();
 const admin = require("firebase-admin");
 const readline = require("readline-sync");
+const fs = require("fs");
 
 // ----------------------------
 // Validação da senha do script
@@ -28,7 +29,15 @@ if (inputPassword !== process.env.ADMIN_SCRIPT_PASSWORD) {
 // ----------------------------
 // Inicialização Firebase Admin
 // ----------------------------
-const serviceAccount = require("./serviceAccountKey.json");
+
+const path =
+  process.env.ENV === "DEV"
+    ? "./serviceAccountKeyDev.json"
+    : "./serviceAccountKey.json";
+
+const serviceAccount = JSON.parse(
+  fs.readFileSync(path, "utf8")
+);
 
 admin.initializeApp({
 	credential: admin.credential.cert(serviceAccount),
