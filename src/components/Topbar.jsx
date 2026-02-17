@@ -130,6 +130,13 @@ export default function Topbar({ handleDrawerOpen }) {
 
 				// SE FOR PÂNICO
 				if (nova.type === "panic") {
+					const createdAt =
+						nova.createdAt?.toMillis?.() ??
+						nova.createdAt ??
+						Date.now();
+
+					if (createdAt < notificationsStartAt.current) return;
+
 					setPanicData(nova);
 					setPanicOpen(true);
 
