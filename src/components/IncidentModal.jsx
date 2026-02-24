@@ -141,7 +141,7 @@ const IncidentModal = memo(function IncidentModal({
 						justifyContent="flex-start"
 						alignItems="center"
 					>
-						<Typography fontWeight={700}>Ocorrência:</Typography>
+						<Typography fontWeight={700}>Protocolo:</Typography>
 						<Typography sx={{ ml: 1 }}>{incident.id}</Typography>
 					</Box>
 					<IconButton onClick={handleClose}>

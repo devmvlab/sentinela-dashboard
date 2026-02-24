@@ -29,7 +29,7 @@ export async function exportIncidentsToExcel(rows) {
 	const headerRow = worksheet.getRow(headerRowIndex);
 
 	headerRow.values = [
-		"ID",
+		"Protocolo",
 		"Status",
 		"Categoria",
 		"Tipo",

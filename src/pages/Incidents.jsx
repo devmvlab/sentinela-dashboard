@@ -198,7 +198,7 @@ export default function Incidents() {
 	const columns = [
 		{
 			field: "id",
-			headerName: "Identificador",
+			headerName: "Protocolo",
 			valueGetter: (_, row) => row.id?.slice(0, 5),
 		},
 		{
