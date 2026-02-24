@@ -52,7 +52,7 @@ export async function exportIncidentsToPdf(rows) {
 		startY: tableStartY,
 		head: [
 			[
-				"ID",
+				"Protocolo",
 				"Status",
 				"Categoria",
 				"Tipo",
