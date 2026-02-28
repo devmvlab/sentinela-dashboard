@@ -25,11 +25,14 @@ import {
 } from "@mui/icons-material";
 import StepConnector from "@mui/material/StepConnector";
 import { styled, useTheme, darken } from "@mui/material/styles";
-import { memo, useState, useRef } from "react";
+import { memo, useState, useRef, useEffect } from "react";
 
 import IncidentTimeline from "../components/ModalTimeLine";
 import { statusList } from "../utils/statusList";
 import { statusTransitions } from "../utils/statusList";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../services/firebase";
 
 /* =============================
    STEPPER (READ ONLY)
@@ -91,6 +94,9 @@ const IncidentModal = memo(function IncidentModal({
 	onStepClick,
 	onConfirmCancel,
 }) {
+	const { isLoaded } = useJsApiLoader({
+		googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+	});
 	const theme = useTheme();
 
 	const [tab, setTab] = useState(0);
@@ -111,6 +117,39 @@ const IncidentModal = memo(function IncidentModal({
 		reasonRef.current = "";
 		onClose();
 	};
+
+	const [position, setPosition] = useState(null);
+
+	useEffect(() => {
+		if (incident?.geoloc?.latitude && incident?.geoloc?.longitude) {
+			setPosition({
+				lat: incident.geoloc.latitude,
+				lng: incident.geoloc.longitude,
+			});
+		}
+	}, [incident]);
+
+	useEffect(() => {
+		if (!incident?.id || incident.type === "incident") return;
+
+		const unsubscribe = onSnapshot(
+			doc(db, "incidents", incident.id),
+			(snapshot) => {
+				if (snapshot.exists()) {
+					const data = snapshot.data();
+
+					if (data?.geoloc?.latitude && data?.geoloc?.longitude) {
+						setPosition({
+							lat: data.geoloc.latitude,
+							lng: data.geoloc.longitude,
+						});
+					}
+				}
+			},
+		);
+
+		return () => unsubscribe();
+	}, [incident]);
 
 	if (!incident) return null;
 
@@ -196,7 +235,41 @@ const IncidentModal = memo(function IncidentModal({
 				{tab === 0 && (
 					<>
 						<Box display="flex" gap={3} alignItems={"center"}>
-							{incident.imageUrl ? (
+							{incident?.type !== "incident" ? (
+								<Box
+									sx={{
+										width: 300,
+										height: 300,
+										borderRadius: 2,
+										overflow: "hidden",
+										flexShrink: 0,
+									}}
+								>
+									{isLoaded && position && (
+										<GoogleMap
+											mapContainerStyle={{
+												width: "100%",
+												height: "100%",
+											}}
+											zoom={17}
+											center={position}
+											options={{
+												disableDefaultUI: true,
+												zoomControl: true,
+												streetViewControl: false,
+												mapTypeControl: false,
+											}}
+										>
+											<Marker
+												position={position}
+												icon={{
+													url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+												}}
+											/>
+										</GoogleMap>
+									)}
+								</Box>
+							) : incident.imageUrl ? (
 								<Box
 									component="img"
 									src={incident.imageUrl}
