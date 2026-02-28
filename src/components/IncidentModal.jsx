@@ -30,7 +30,7 @@ import { memo, useState, useRef, useEffect } from "react";
 import IncidentTimeline from "../components/ModalTimeLine";
 import { statusList } from "../utils/statusList";
 import { statusTransitions } from "../utils/statusList";
-import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../services/firebase";
 
@@ -94,9 +94,6 @@ const IncidentModal = memo(function IncidentModal({
 	onStepClick,
 	onConfirmCancel,
 }) {
-	const { isLoaded } = useJsApiLoader({
-		googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-	});
 	const theme = useTheme();
 
 	const [tab, setTab] = useState(0);
@@ -235,7 +232,7 @@ const IncidentModal = memo(function IncidentModal({
 				{tab === 0 && (
 					<>
 						<Box display="flex" gap={3} alignItems={"center"}>
-							{incident?.type !== "incident" ? (
+							{incident?.type == "panic" ? (
 								<Box
 									sx={{
 										width: 300,
@@ -245,7 +242,7 @@ const IncidentModal = memo(function IncidentModal({
 										flexShrink: 0,
 									}}
 								>
-									{isLoaded && position && (
+									{position && (
 										<GoogleMap
 											mapContainerStyle={{
 												width: "100%",
@@ -263,7 +260,7 @@ const IncidentModal = memo(function IncidentModal({
 											<Marker
 												position={position}
 												icon={{
-													url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+													url: "/src/assets/markers/panic.png",
 												}}
 											/>
 										</GoogleMap>
