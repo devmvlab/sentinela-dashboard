@@ -260,7 +260,7 @@ const IncidentModal = memo(function IncidentModal({
 											<Marker
 												position={position}
 												icon={{
-													url: "/src/assets/markers/panic.png",
+													url: "/panic.png",
 												}}
 											/>
 										</GoogleMap>
