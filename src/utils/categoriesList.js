@@ -221,12 +221,12 @@ export const categories = [
 	},
 	{
 		title: "Pânico",
-		icon: "dots-horizontal-circle-outline",
-		color: "#757575",
+		icon: "shield-alert-outline",
+		color: "#d32f2f",
 		items: [
 			{
 				title: "Pedido de socorro",
-				icon: "dots-horizontal",
+				icon: "shield-alert-outline",
 				type: "incident",
 				windowHours: 72,
 			},

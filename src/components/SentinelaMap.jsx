@@ -2,7 +2,6 @@ import {
 	GoogleMap,
 	Marker,
 	InfoWindow,
-	useJsApiLoader,
 	HeatmapLayer,
 } from "@react-google-maps/api";
 import { useState, useCallback, useEffect } from "react";
@@ -33,11 +32,6 @@ export default function SentinelaMap({
 	const [viewMode, setViewMode] = useState("markers"); // 🔹 ADICIONADO
 	const status = selected?.status?.toLowerCase();
 
-	const { isLoaded } = useJsApiLoader({
-		googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-		libraries: ["visualization"], // 🔹 ADICIONADO
-	});
-
 	// salva center + zoom quando o mapa “para”
 	const handleIdle = useCallback(
 		(map) => {
@@ -55,8 +49,6 @@ export default function SentinelaMap({
 	useEffect(() => {
 		if (viewMode === "heatmap") setSelected(null);
 	}, [viewMode]);
-
-	if (!isLoaded) return null;
 
 	return (
 		<Box sx={{ height: "100%", position: "relative" }}>
