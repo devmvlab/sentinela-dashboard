@@ -159,10 +159,12 @@ export default function Dashboard() {
 			if (item.type !== "incident") emergencias++;
 			types[item.ocorrencia?.tipo || "Sem tipo"] =
 				(types[item.ocorrencia?.tipo || "Sem tipo"] || 0) + 1;
-			status[item.status || "unknown"] =
-				(status[item.status || "unknown"] || 0) + 1;
-			district[item.geoloc?.district || "unknown"] =
-				(district[item.geoloc?.district || "unknown"] || 0) + 1;
+			status[item.status || "Sem status"] =
+				(status[item.status || "Sem status"] || 0) + 1;
+			district[item.geoloc?.district || "Localização não identificada"] =
+				(district[
+					item.geoloc?.district || "Localização não identificada"
+				] || 0) + 1;
 		});
 
 		return {
