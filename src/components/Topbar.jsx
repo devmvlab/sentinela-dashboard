@@ -200,15 +200,17 @@ export default function Topbar({ handleDrawerOpen }) {
 	useEffect(() => {
 		if (!panicOpen || !panicData?.createdAt) return;
 
-		const created =
+		const rawCreated =
 			panicData.createdAt?.toMillis?.() ??
 			new Date(panicData.createdAt).getTime();
+
+		// Se o servidor estiver alguns ms à frente,
+		// usamos o menor valor entre created e agora
+		const created = Math.min(rawCreated, Date.now());
 
 		const interval = setInterval(() => {
 			const now = Date.now();
 			const diff = now - created;
-
-			if (diff < 0) diff = 0;
 
 			const hours = Math.floor(diff / 3600000);
 			const minutes = Math.floor((diff % 3600000) / 60000);
