@@ -15,6 +15,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import WarningIcon from "@mui/icons-material/Warning";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { useNavigate, useLocation } from "react-router-dom";
+import CampaignIcon from "@mui/icons-material/Campaign";
 
 const drawerWidth = 240;
 const drawerWidthClosed = 70;
@@ -30,6 +31,11 @@ export default function Sidebar({ open, handleDrawerClose, theme }) {
 			text: "Relatórios",
 			icon: <DescriptionIcon />,
 			path: "/relatorios",
+		},
+		{
+			text: "Comunicação",
+			icon: <CampaignIcon />,
+			path: "/comunicacao",
 		},
 	];
 

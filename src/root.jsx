@@ -7,6 +7,7 @@ import Incidents from "./pages/Incidents";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import Communication from "./pages/Communication";
 
 const router = createBrowserRouter([
 	// 🔹 Tela de login (sem Layout)
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
 			{
 				path: "/relatorios",
 				element: <Reports />,
+			},
+			{
+				path: "/comunicacao",
+				element: <Communication />,
 			},
 			{
 				path: "usuarios",
