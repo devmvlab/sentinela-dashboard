@@ -1,3 +1,3 @@
 # React + Vite
 
-ENV=DEV node createAdmin.js
+ENV=DEV node create-admin.js
