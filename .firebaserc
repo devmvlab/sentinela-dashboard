@@ -1,0 +1,9 @@
+{
+  "projects": {
+    "default": "sentinela-app-dev",
+    "dev": "sentinela-app-dev",
+    "prod": "sentinela-app-a6056"
+  },
+  "targets": {},
+  "etags": {}
+}
