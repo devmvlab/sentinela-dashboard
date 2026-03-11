@@ -28,14 +28,14 @@ export default function Sidebar({ open, handleDrawerClose, theme }) {
 		{ text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
 		{ text: "Ocorrências", icon: <WarningIcon />, path: "/ocorrencias" },
 		{
-			text: "Relatórios",
-			icon: <DescriptionIcon />,
-			path: "/relatorios",
-		},
-		{
 			text: "Comunicação",
 			icon: <CampaignIcon />,
 			path: "/comunicacao",
+		},
+		{
+			text: "Relatórios",
+			icon: <DescriptionIcon />,
+			path: "/relatorios",
 		},
 	];
 
