@@ -27,7 +27,7 @@ exports.sendPushNotification = onCall(async (request) => {
   const topic = `sentinela_${cityId}`;
 
   const payload = {
-    notification: {
+    data: {
       title: title,
       body: message
     },
