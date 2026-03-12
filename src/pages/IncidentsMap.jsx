@@ -3,6 +3,7 @@ import SentinelaMap from "../components/SentinelaMap";
 
 import { categories } from "../utils/categoriesList";
 import { getMarkerIconByCategory } from "../utils/markerIcons";
+import { statusList } from "../utils/statusList";
 
 export default function IncidentsMap({
 	mapState,
@@ -14,6 +15,7 @@ export default function IncidentsMap({
 
 	// 🔹 transforma incidents em ocorrências do mapa
 	const ocorrencias = (incidents || [])
+		.filter((d) => d.status !== statusList.cancelled.id)
 		.map((d) => {
 			const category = categories.find(
 				(c) =>

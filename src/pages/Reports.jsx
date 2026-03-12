@@ -61,26 +61,14 @@ export default function Reports() {
 		loading || visibleIncidents.length === 0 || activeCount === 0;
 
 	return (
-		<Box
-			sx={{
-				height: "100%",
-				padding: 3,
-				display: "flex",
-				flexDirection: "column",
-				gap: 2,
-			}}
-		>
-			<Typography variant="h4" fontWeight={700}>
+		<Box>
+			<Typography variant="h4" py={2} fontWeight={700}>
 				Relatórios
 			</Typography>
 
 			<Paper
 				sx={{
-					width: "100%",
 					p: 2,
-					display: "flex",
-					flexDirection: "column",
-					gap: 2,
 				}}
 			>
 				{/* HEADER DE FILTROS */}

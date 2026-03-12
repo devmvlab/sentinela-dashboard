@@ -33,6 +33,7 @@ import { statusTransitions } from "../utils/statusList";
 import { GoogleMap, Marker } from "@react-google-maps/api";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../services/firebase";
+import panicMarker from "../assets/markers/panic.png";
 
 /* =============================
    STEPPER (READ ONLY)
@@ -260,7 +261,7 @@ const IncidentModal = memo(function IncidentModal({
 											<Marker
 												position={position}
 												icon={{
-													url: "/panic.png",
+													url: panicMarker,
 												}}
 											/>
 										</GoogleMap>
