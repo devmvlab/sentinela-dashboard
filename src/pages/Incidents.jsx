@@ -4,6 +4,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import { ptBR } from "@mui/x-data-grid/locales";
 
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -308,6 +309,9 @@ export default function Incidents() {
 					paginationModel={paginationModel}
 					onPaginationModelChange={setPaginationModel}
 					pageSizeOptions={[5, 10, 15, 20]}
+					localeText={
+						ptBR.components.MuiDataGrid.defaultProps.localeText
+					}
 					sx={{
 						border: 0,
 						cursor: "pointer",
@@ -318,9 +322,6 @@ export default function Incidents() {
 					onRowClick={(params) => {
 						setCurrentIncident(params.row);
 						setOpenModal(true);
-					}}
-					localeText={{
-						noRowsLabel: "Nenhum registro encontrado",
 					}}
 				/>
 

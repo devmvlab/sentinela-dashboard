@@ -56,122 +56,114 @@ export default function CommunicationPage() {
 	};
 
 	return (
-		<Box p={3} maxWidth={900}>
+		<Box>
 			{/* HEADER */}
-			<Box mb={4}>
-				<Typography variant="h4" fontWeight={700}>
-					Central de Comunicação
-				</Typography>
 
-				<Typography color="text.secondary">
-					Envie comunicados e alertas oficiais para os cidadãos
-					através do aplicativo Sentinela.
-				</Typography>
-			</Box>
+			<Typography variant="h4" py={2} fontWeight={700}>
+				Central de Comunicação
+			</Typography>
 
-			<Box display="flex" gap={3} alignItems="flex-start" flexWrap="wrap">
-				{/* FORMULÁRIO */}
-				<Card sx={{ flex: 1, minWidth: 500 }}>
-					<CardContent sx={{ p: 4 }}>
-						<Typography variant="h6" fontWeight={600} mb={3}>
-							Criar novo alerta
-						</Typography>
+			<Typography color="text.secondary" pb={2}>
+				Envie comunicados e alertas oficiais para os cidadãos através do
+				aplicativo Sentinela.
+			</Typography>
 
-						<Typography variant="subtitle2">
-							Título da notificação
-						</Typography>
+			{/* FORMULÁRIO */}
+			<Card sx={{ flex: 1 }}>
+				<CardContent sx={{ p: 4 }}>
+					<Typography variant="h6" fontWeight={600} mb={3}>
+						Criar novo alerta
+					</Typography>
 
-						<TextField
-							fullWidth
-							value={title}
-							onChange={(e) => {
-								if (e.target.value.length <= titleMaxChars) {
-									setTitle(e.target.value);
-								}
-							}}
-							sx={{ mb: 3 }}
-						/>
+					<Typography variant="subtitle2">
+						Título da notificação
+					</Typography>
 
-						<Typography variant="subtitle2">Mensagem</Typography>
+					<TextField
+						fullWidth
+						value={title}
+						onChange={(e) => {
+							if (e.target.value.length <= titleMaxChars) {
+								setTitle(e.target.value);
+							}
+						}}
+						sx={{ mb: 3 }}
+					/>
 
-						<TextField
-							fullWidth
-							multiline
-							rows={4}
-							value={message}
-							onChange={(e) => {
-								if (e.target.value.length <= maxChars) {
-									setMessage(e.target.value);
-								}
-							}}
-						/>
+					<Typography variant="subtitle2">Mensagem</Typography>
 
+					<TextField
+						fullWidth
+						multiline
+						rows={4}
+						value={message}
+						onChange={(e) => {
+							if (e.target.value.length <= maxChars) {
+								setMessage(e.target.value);
+							}
+						}}
+					/>
+
+					<Typography
+						variant="caption"
+						display="block"
+						textAlign="right"
+						mt={1}
+					>
+						{message.length} / {maxChars} caracteres
+					</Typography>
+
+					<Typography variant="h6" fontWeight={600} mb={3}>
+						Pré-visualização da notificação
+					</Typography>
+
+					<Paper
+						elevation={2}
+						sx={{
+							p: 2,
+							borderLeft: "5px solid #d32f2f",
+							backgroundColor: theme.palette.background.default,
+						}}
+					>
 						<Typography
-							variant="caption"
-							display="block"
-							textAlign="right"
-							mt={1}
+							fontWeight="bold"
+							fontSize={14}
+							color="text.secondary"
 						>
-							{message.length} / {maxChars} caracteres
+							Sentinela
 						</Typography>
 
-						<Divider sx={{ my: 3 }} />
+						<Typography fontWeight={600}>{title}</Typography>
 
-						<Box display="flex" justifyContent="flex-end">
-							<Button
-								variant="contained"
-								color="error"
-								size="large"
-								onClick={handleSend}
-								disabled={loading || !message.trim()}
-								startIcon={
-									loading ? (
-										<CircularProgress
-											size={18}
-											color="inherit"
-										/>
-									) : null
-								}
-							>
-								{loading ? "Enviando..." : "Enviar alerta"}
-							</Button>
-						</Box>
-					</CardContent>
-				</Card>
-
-				{/* PREVIEW */}
-				<Card sx={{ flex: 1, minWidth: 325 }}>
-					<CardContent sx={{ p: 4 }}>
-						<Typography variant="h6" fontWeight={600} mb={3}>
-							Pré-visualização da notificação
+						<Typography variant="body2">
+							{message || "Sua mensagem aparecerá aqui"}
 						</Typography>
+					</Paper>
 
-						<Paper
-							elevation={2}
-							sx={{
-								p: 2,
-								borderLeft: "5px solid #d32f2f",
-								backgroundColor:
-									theme.palette.background.default,
-							}}
+					<Divider sx={{ my: 3 }} />
+
+					<Box display="flex" justifyContent="flex-end">
+						<Button
+							variant="contained"
+							color="error"
+							size="large"
+							onClick={handleSend}
+							disabled={loading || !message.trim()}
+							startIcon={
+								loading ? (
+									<CircularProgress
+										size={18}
+										color="inherit"
+									/>
+								) : null
+							}
 						>
-							<Typography
-								fontWeight="bold"
-								fontSize={14}
-								color="text.secondary"
-							>
-								Sentinela
-							</Typography>
+							{loading ? "Enviando..." : "Enviar alerta"}
+						</Button>
+					</Box>
+				</CardContent>
+			</Card>
 
-							<Typography fontWeight={600}>{title}</Typography>
-
-							<Typography variant="body2">
-								{message || "Sua mensagem aparecerá aqui"}
-							</Typography>
-						</Paper>
-					</CardContent>
-				</Card>
-			</Box>
 			<Snackbar
 				open={toastOpen}
 				autoHideDuration={4000}

@@ -95,6 +95,7 @@ export default function Dashboard() {
 		startDate: filters.startDate,
 		endDate: filters.endDate,
 		realtime: true,
+		pageSize: 30,
 	});
 
 	const activeCount = Object.values(filters).filter(

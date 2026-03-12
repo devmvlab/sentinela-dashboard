@@ -226,7 +226,7 @@ export const categories = [
 		items: [
 			{
 				title: "Pedido de socorro",
-				icon: "shield-alert-outline",
+				icon: "dots-horizontal",
 				type: "incident",
 				windowHours: 72,
 			},
