@@ -8,12 +8,22 @@ import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Communication from "./pages/Communication";
+import SendEmailToReset from "./pages/SendEmailToReset";
+import ResetPassword from "./pages/ResetPassword";
 
 const router = createBrowserRouter([
 	// 🔹 Tela de login (sem Layout)
 	{
 		path: "/",
 		element: <Login />,
+	},
+	{
+		path: "/enviar-email-redefinicao",
+		element: <SendEmailToReset />,
+	},
+	{
+		path: "/redefinir-senha",
+		element: <ResetPassword />,
 	},
 
 	// 🔒 Rotas protegidas

@@ -9,13 +9,14 @@ import {
 	IconButton,
 	InputAdornment,
 	CircularProgress,
+	Link,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../services/firebase";
 import logo from "../assets/logo1.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 export default function Login() {
 	const [email, setEmail] = useState("");
@@ -195,6 +196,20 @@ export default function Login() {
 								"Entrar"
 							)}
 						</Button>
+
+						<Typography
+							variant="body2"
+							align="center"
+							sx={{ mt: 2 }}
+						>
+							<Link
+								component={RouterLink}
+								to="/enviar-email-redefinicao"
+								underline="hover"
+							>
+								Esqueceu sua senha?
+							</Link>
+						</Typography>
 					</Box>
 				</CardContent>
 
