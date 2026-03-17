@@ -14,6 +14,7 @@ import {
 	Alert,
 	CircularProgress,
 } from "@mui/material";
+import { useAuth } from "../hooks/useAuth";
 
 export default function CommunicationPage() {
 	const [title, setTitle] = useState("Alerta Sentinela");
@@ -27,6 +28,7 @@ export default function CommunicationPage() {
 	const [toastMessage, setToastMessage] = useState("");
 	const [toastType, setToastType] = useState("success");
 	const [loading, setLoading] = useState(false);
+	const { cityId } = useAuth();
 
 	const functions = getFunctions();
 	const sendNotification = httpsCallable(functions, "sendPushNotification");
@@ -37,7 +39,7 @@ export default function CommunicationPage() {
 		setLoading(true);
 
 		try {
-			await sendNotification({ title, message });
+			await sendNotification({ title, message, cityId });
 
 			setToastType("success");
 			setToastMessage("Alerta enviado com sucesso");
@@ -45,8 +47,6 @@ export default function CommunicationPage() {
 
 			setMessage("");
 		} catch (error) {
-			console.error(error);
-
 			setToastType("error");
 			setToastMessage("Erro ao enviar alerta");
 			setToastOpen(true);
