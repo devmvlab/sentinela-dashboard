@@ -21,11 +21,11 @@ exports.sendPushNotification = onCall(async (request) => {
   const topic = `sentinela_${cityId}`;
 
   const payload = {
-    data: {
+    notification: {
       title: title,
       body: message
     },
-    topic
+    topic: topic
   };
 
   await admin.messaging().send(payload);
