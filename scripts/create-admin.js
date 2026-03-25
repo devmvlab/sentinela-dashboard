@@ -58,6 +58,10 @@ const password = readline.question("Senha do admin: ", {
 
 const cityId = readline.question("City ID (ex: curitiba_pr): ");
 
+const role = readline.question("Role (ex: ADMIN, SANEAMENTO): ", {
+	defaultInput: "ADMIN",
+});
+
 const latitude = parseFloat(readline.question("Latitude (ex: -25.44123): "));
 
 const longitude = parseFloat(readline.question("Longitude (ex: -49.28231): "));
@@ -85,7 +89,7 @@ async function createAdmin() {
 			displayName,
 			email,
 			isAdmin: true,
-			role: "ADMIN",
+			role: role,
 			createdAt: admin.firestore.FieldValue.serverTimestamp(),
 		});
 
