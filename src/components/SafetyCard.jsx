@@ -1,6 +1,7 @@
 import { Card, Typography, Box, LinearProgress } from "@mui/material";
 import ShieldIcon from "@mui/icons-material/Shield";
 import { useSafetyLevel } from "../hooks/useSafetyLevel";
+import BarChartIcon from "@mui/icons-material/BarChart";
 
 export default function SafetyCard({ incidents, userCenter }) {
 	const { data, loading } = useSafetyLevel({
@@ -8,7 +9,9 @@ export default function SafetyCard({ incidents, userCenter }) {
 		userCenter,
 	});
 
-	if (loading || !data) {
+	console.log(loading, data);
+
+	if (loading) {
 		return (
 			<Card
 				sx={{
@@ -24,6 +27,44 @@ export default function SafetyCard({ incidents, userCenter }) {
 			>
 				<Typography color="text.secondary" variant="body2">
 					Calculando nível de segurança...
+				</Typography>
+			</Card>
+		);
+	}
+
+	if (!data) {
+		return (
+			<Card
+				sx={{
+					backgroundColor: "background.paper",
+					borderRadius: 2,
+					p: 2.5,
+					minHeight: 170,
+					display: "flex",
+					alignItems: "center",
+					gap: 2.5,
+					boxShadow: "0 4px 12px rgba(0,0,0,0.35)",
+					justifyContent: "space-between",
+				}}
+			>
+				<Box
+					sx={{
+						width: 100,
+						height: 100,
+						borderRadius: "12px",
+						backgroundColor: "#7BE26A" + "25",
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						color: "#7BE26A",
+						fontSize: "1.9rem",
+						flexShrink: 0,
+					}}
+				>
+					<ShieldIcon sx={{ fontSize: 48 }} />
+				</Box>
+				<Typography fontWeight={600}>
+					{"Nenhum dado disponível"}
 				</Typography>
 			</Card>
 		);

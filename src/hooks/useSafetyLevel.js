@@ -8,7 +8,7 @@ const RESOLVED_STATUS = ["resolved"];
 
 export function useSafetyLevel({ incidents, userCenter }) {
 	const [data, setData] = useState(null);
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
 		if (!incidents || !userCenter) return;
