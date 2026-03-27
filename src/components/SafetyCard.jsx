@@ -9,8 +9,6 @@ export default function SafetyCard({ incidents, userCenter }) {
 		userCenter,
 	});
 
-	console.log(loading, data);
-
 	if (loading) {
 		return (
 			<Card
